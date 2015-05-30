@@ -1,0 +1,27 @@
+{
+	"ImportPath": "github.com/stormcat24/ecs-formation",
+	"GoVersion": "go1.4.2",
+	"Deps": [
+		{
+			"ImportPath": "github.com/awslabs/aws-sdk-go",
+			"Rev": "75d65bc91a02d9f67cf4a5297c46d4d2c4c09c6c"
+		},
+		{
+			"ImportPath": "github.com/k0kubun/pp",
+			"Comment": "v2.1.0-3-gd41d644",
+			"Rev": "d41d6445d773ca20b8685f84734ec1924136c7f9"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-colorable",
+			"Rev": "d67e0b7d1797975196499f79bcc322c08b9f218b"
+		},
+		{
+			"ImportPath": "github.com/naoina/go-stringutil",
+			"Rev": "360db0db4b01d34e12a2ec042c09e7d37fece761"
+		},
+		{
+			"ImportPath": "github.com/naoina/toml",
+			"Rev": "5667c316ee9576e9d5bca793ce4ec813a88ce7d3"
+		}
+	]
+}
