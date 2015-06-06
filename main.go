@@ -11,7 +11,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "ecs-formation"
 	app.Version = operation.Version
-	app.Usage = "hoge"
+	app.Usage = "Manage EC2 Container Service(ECS)"
 	app.Author = "Akinori Yamada(@stormcat24)"
 	app.Email = "a.yamada24@gmail.com"
 	app.Commands = operation.Commands

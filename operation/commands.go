@@ -21,7 +21,7 @@ var Commands = []cli.Command{
 
 var commandCluster = cli.Command{
 	Name: "cluster",
-	Usage: "",
+	Usage: "Manage ECS services on cluster",
 	Description: `
 	Manage ECS Clusters.
 `,
@@ -30,7 +30,7 @@ var commandCluster = cli.Command{
 
 var commandTask = cli.Command{
 	Name: "task",
-	Usage: "",
+	Usage: "Manage ECS Task Definitions",
 	Description: `
 	Manage ECS Task Definitions.
 `,
