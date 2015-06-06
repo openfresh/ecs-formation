@@ -128,4 +128,4 @@ License
 ===
 See [LICENSE](LICENSE).
 
-Copyright © Akinori Yamada([@stormat24](https://twitter.com/stormcat24)). All Rights Reserved.
+Copyright © Akinori Yamada([@stormcat24](https://twitter.com/stormcat24)). All Rights Reserved.
