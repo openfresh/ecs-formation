@@ -23,5 +23,9 @@ _testmain.go
 *.test
 *.prof
 
+# IDEA
+.idea/
+*.iml
+
 Godeps/_workspace/
 bin/*

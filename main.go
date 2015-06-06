@@ -1,10 +1,21 @@
 package main
 
 import (
-	"fmt"
+	"github.com/stormcat24/ecs-formation/operation"
+	"github.com/codegangsta/cli"
+	"os"
 )
 
 func main() {
 
-	fmt.Print("WIP")
+	app := cli.NewApp()
+	app.Name = "ecs-formation"
+	app.Version = operation.Version
+	app.Usage = ""
+	app.Author = "stormcat24"
+	app.Email = "a.yamada24@gmail.com"
+	app.Commands = operation.Commands
+
+	app.Run(os.Args)
+
 }
