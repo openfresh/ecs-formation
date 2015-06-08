@@ -12,7 +12,7 @@ import (
 )
 
 type TaskDefinitionController struct {
-	Ecs *aws.ECSManager
+	Ecs            *aws.ECSManager
 	TargetResource string
 }
 
@@ -59,74 +59,42 @@ func (self *TaskDefinitionController) CreateTaskUpdatePlans(tasks map[string]*sc
 
 func (self *TaskDefinitionController) CreateTaskUpdatePlan(task *schema.TaskDefinition) *plan.TaskUpdatePlan {
 
-	result, _ := self.Ecs.DescribeTaskDefinition(task.Name)
-
 	newContainers := map[string]*schema.ContainerDefinition{}
-	currentContainers := map[string]*ecs.ContainerDefinition{}
-	updateContainers := map[string]*plan.UpdateContainer{}
-	deleteContainers := map[string]*ecs.ContainerDefinition{}
 
-	if result.TaskDefinition != nil {
-
-		for _, currentContainer := range result.TaskDefinition.ContainerDefinitions {
-			currentContainers[*currentContainer.Name] = currentContainer
-		}
-
-		for name, currentContainer := range currentContainers {
-
-			if newContainer, ok := task.ContainerDefinitions[name]; ok {
-				// update
-				updateContainers[name] = &plan.UpdateContainer{
-					Before: currentContainer,
-					After: newContainer,
-				}
-			} else {
-				// delete
-				deleteContainers[name] = currentContainer
-			}
-		}
-
-		for name, con := range task.ContainerDefinitions {
-
-			if _, ok := currentContainers[name]; !ok {
-				newContainers[con.Name] = con
-			}
-		}
-
-	} else {
-		for _, con := range task.ContainerDefinitions {
-			newContainers[con.Name] = con
-		}
+	for _, con := range task.ContainerDefinitions {
+		newContainers[con.Name] = con
 	}
 
 	return &plan.TaskUpdatePlan{
 		Name: task.Name,
-		CurrentContainers: currentContainers,
-		DeleteContainers: deleteContainers,
 		NewContainers: newContainers,
-		UpdateContainers: updateContainers,
 	}
 }
 
-func (self *TaskDefinitionController) ApplyTaskDefinitionPlans(plans []*plan.TaskUpdatePlan) {
+func (self *TaskDefinitionController) ApplyTaskDefinitionPlans(plans []*plan.TaskUpdatePlan) []*ecs.RegisterTaskDefinitionOutput {
 
 	fmt.Println("Start apply Task definitions...")
 
+	outputs := []*ecs.RegisterTaskDefinitionOutput{}
 	for _, plan := range plans {
-		self.ApplyTaskDefinitionPlan(plan)
+		outputs = append(outputs, self.ApplyTaskDefinitionPlan(plan))
 	}
+
+	return outputs
 }
 
-func (self *TaskDefinitionController) ApplyTaskDefinitionPlan(task *plan.TaskUpdatePlan) {
+func (self *TaskDefinitionController) ApplyTaskDefinitionPlan(task *plan.TaskUpdatePlan) *ecs.RegisterTaskDefinitionOutput {
 
 	containers := []*schema.ContainerDefinition{}
 	for _, con := range task.NewContainers {
 		containers = append(containers, con)
 	}
-	_, err := self.Ecs.RegisterTaskDefinition(task.Name, containers)
+
+	result, err := self.Ecs.RegisterTaskDefinition(task.Name, containers)
 
 	if err != nil {
 		panic(err)
 	}
 
+	return result
 }

@@ -34,9 +34,10 @@ func StringValueWithIndent(value interface{}, indent int) string {
 		}
 
 		for i := 0; i < indent; i++ {
-			buffer.WriteString("\t")
+			buffer.WriteString("  ")
 		}
 		buffer.Write(line)
+		buffer.WriteString("\n")
 	}
 
 	return buffer.String()

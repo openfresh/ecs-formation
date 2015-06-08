@@ -112,7 +112,12 @@ func doTask(c *cli.Context) {
 	plans := createTaskPlans(taskController, projectDir)
 
 	if (operation.SubCommand == "apply") {
-		taskController.ApplyTaskDefinitionPlans(plans)
+		results := taskController.ApplyTaskDefinitionPlans(plans)
+
+		for _, output := range results {
+			fmt.Printf("Registered Task Definition '%s'", *output.TaskDefinition.Family)
+			fmt.Print(color.Cyan(util.StringValueWithIndent(output.TaskDefinition, 1)))
+		}
 	}
 }
 
@@ -152,25 +157,15 @@ func createTaskPlans(controller *task.TaskDefinitionController, projectDir strin
 	for _, plan := range plans {
 		fmt.Printf("Task Definition '%s'\n", plan.Name)
 
-		fmt.Println(color.Cyan(fmt.Sprintf("\t[Add] num = %d", len(plan.NewContainers))))
+		fmt.Println(color.Cyan(fmt.Sprintf("  [Add] num = %d", len(plan.NewContainers))))
 		for _, add := range plan.NewContainers {
-			fmt.Println(color.Cyan(fmt.Sprintf("\t\t (+) %s", add.Name)))
+			fmt.Println(color.Cyan(fmt.Sprintf("    (+) %s", add.Name)))
 
-			fmt.Println(color.Cyan(fmt.Sprintf("\t\t\timage: %s", add.Image)))
-			fmt.Println(color.Cyan(fmt.Sprintf("\t\t\tports: %s", add.Ports)))
-			fmt.Println(color.Cyan(fmt.Sprintf("\t\t\tenvironment:\n%s", util.StringValueWithIndent(add.Environment, 4))))
-			fmt.Println(color.Cyan(fmt.Sprintf("\t\t\tlinks: %s", add.Links)))
-			fmt.Println(color.Cyan(fmt.Sprintf("\t\t\tvolumes: %s", add.Volumes)))
-		}
-
-		fmt.Println(color.Green(fmt.Sprintf("\t[Update] num = %d", len(plan.UpdateContainers))))
-		for _, update := range plan.UpdateContainers {
-			fmt.Println(color.Green(fmt.Sprintf("\t\t (+) %s(%s)", *update.Before.Name, *update.Before.Name)))
-		}
-
-		fmt.Println(color.Red(fmt.Sprintf("\t[Remove] num = %d", len(plan.DeleteContainers))))
-		for _, delete := range plan.DeleteContainers {
-			fmt.Println(color.Red(fmt.Sprintf("\t\t (-) %s(%s)", *delete.Name, *delete.Name)))
+			fmt.Println(color.Cyan(fmt.Sprintf("      image: %s", add.Image)))
+			fmt.Println(color.Cyan(fmt.Sprintf("      ports: %s", add.Ports)))
+			fmt.Println(color.Cyan(fmt.Sprintf("      environment:\n%s", util.StringValueWithIndent(add.Environment, 4))))
+			fmt.Println(color.Cyan(fmt.Sprintf("      links: %s", add.Links)))
+			fmt.Println(color.Cyan(fmt.Sprintf("      volumes: %s", add.Volumes)))
 		}
 
 		fmt.Println()

@@ -20,10 +20,7 @@ type UpdateService struct {
 
 type TaskUpdatePlan struct {
 	Name              string
-	CurrentContainers map[string]*ecs.ContainerDefinition
-	DeleteContainers  map[string]*ecs.ContainerDefinition
 	NewContainers     map[string]*schema.ContainerDefinition
-	UpdateContainers  map[string]*UpdateContainer
 }
 
 type UpdateContainer struct {
