@@ -1,3 +1,9 @@
 dependencies:
   pre:
     - make deps
+
+test:
+  override:
+    - go build
+  post:
+    - cp -R ecs-formation $CIRCLE_ARTIFACTS
