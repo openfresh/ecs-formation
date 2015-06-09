@@ -8,7 +8,6 @@ import (
 	"strings"
 	"github.com/stormcat24/ecs-formation/util"
 	"time"
-	"fmt"
 	"errors"
 )
 
