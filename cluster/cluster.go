@@ -14,7 +14,7 @@ import (
 )
 
 type ClusterControler struct {
-	Ecs *aws.ECSManager
+	Ecs            *aws.ECSManager
 	TargetResource string
 }
 
@@ -182,20 +182,20 @@ func (self *ClusterControler) ApplyClusterPlan(plan *plan.ClusterUpdatePlan) {
 			panic(err1)
 		}
 
-		_, err2 := self.Ecs.DeleteService(plan.Name, *update.Before.ServiceARN)
-
-		if err2 != nil {
-			panic(err2)
+		fmt.Printf("[INFO] Waiting to stop '%s' service on '%s' ...\n", *update.Before.ServiceName, plan.Name)
+		if err := self.Ecs.WaitStoppingService(plan.Name, *update.Before.ServiceName); err != nil {
+			panic(err)
 		}
+		fmt.Printf("[INFO] Stoped '%s' service on '%s'.\n", *update.Before.ServiceName, plan.Name)
 
-		result, err3 := self.Ecs.CreateService(plan.Name, schema.Service{
+		result, err2 := self.Ecs.UpdateService(plan.Name, schema.Service{
 			Name: update.After.Name,
 			DesiredCount: update.After.DesiredCount,
 			TaskDefinition: update.After.TaskDefinition,
 		})
 
-		if err3 != nil {
-			panic(err3)
+		if err2 != nil {
+			panic(err2)
 		}
 
 		fmt.Printf("[INFO] Updated service '%s'\n", *result.Service.ServiceARN)
