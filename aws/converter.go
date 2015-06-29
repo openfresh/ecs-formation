@@ -1,10 +1,10 @@
 package aws
 
 import (
-	"github.com/awslabs/aws-sdk-go/service/ecs"
+	"github.com/aws/aws-sdk-go/service/ecs"
 	"strings"
 	"strconv"
-	"github.com/awslabs/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws"
 )
 
 func toKeyValuePairs(values map[string]string) []*ecs.KeyValuePair {
