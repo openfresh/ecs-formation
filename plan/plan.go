@@ -1,7 +1,7 @@
 package plan
 
 import (
-	"github.com/awslabs/aws-sdk-go/service/ecs"
+	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/stormcat24/ecs-formation/schema"
 )
 

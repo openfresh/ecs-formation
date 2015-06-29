@@ -1,7 +1,7 @@
 package util
 
 import (
-	"github.com/awslabs/aws-sdk-go/aws/awsutil"
+	"github.com/aws/aws-sdk-go/aws/awsutil"
 	"strings"
 	"bufio"
 	"io"

@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"github.com/stormcat24/ecs-formation/aws"
 	"github.com/stormcat24/ecs-formation/plan"
-	"github.com/awslabs/aws-sdk-go/service/ecs"
+	"github.com/aws/aws-sdk-go/service/ecs"
 )
 
 type TaskDefinitionController struct {

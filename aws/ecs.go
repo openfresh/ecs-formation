@@ -1,9 +1,9 @@
 package aws
 
 import (
-	"github.com/awslabs/aws-sdk-go/aws"
-	"github.com/awslabs/aws-sdk-go/service/ecs"
-	"github.com/awslabs/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/stormcat24/ecs-formation/schema"
 	"strings"
 	"github.com/stormcat24/ecs-formation/util"
