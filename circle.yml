@@ -1,9 +1,11 @@
 dependencies:
-  override:
-    - make deps
+  pre:
+    - make deps-test
 
 test:
   override:
+    - mkdir -p ./Godeps/stormcat24/ecs-formation
+    - rsync -avz --exclude=.git/ --exclude=Godeps/ . ./Godeps/stormcat24/ecs-formation
     - make test
 
 deployment:
@@ -11,4 +13,4 @@ deployment:
     branch: /^.+$/
     commands:
       - make build
-      - cp -R bun/ecs-formation $CIRCLE_ARTIFACTS/
+      - cp -R bin/ecs-formation $CIRCLE_ARTIFACTS/

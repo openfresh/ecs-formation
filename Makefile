@@ -30,8 +30,6 @@ $(TEST_TARGETS): test-%:
 		@echo "**********************************************************"
 		@echo " testing package: $*"
 		@echo "**********************************************************"
-		cd $* && godep go test -v -covermode=atomic -coverprofile=coverage.out $(GOTEST_FLAGS) | tee test.out && test $${PIPESTATUS[0]} -eq 0
-		cd $* && cat test.out | go-junit-report > test.xml
-		cd $* && godep go tool cover -html=coverage.out -o coverage.html
-
+		godep go test -v -covermode=atomic -coverprofile=coverage.out $(GOTEST_FLAGS) $(BASE_PACKAGE)/$(*)
+		godep go test -v -run=nonthing -benchmem -bench=".*" $(GOTEST_FLAGS) $(BASE_PACKAGE)/$(*)
 
