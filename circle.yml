@@ -1,5 +1,5 @@
 dependencies:
-  pre:
+  override:
     - make deps
 
 deployment:
@@ -7,3 +7,4 @@ deployment:
     branch: /^.+$/
     commands:
       - make build
+      - cp -R bun/ecs-formation $CIRCLE_ARTIFACTS/
