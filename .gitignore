@@ -29,3 +29,7 @@ _testmain.go
 
 Godeps/_workspace/
 bin/*
+coverage.out
+coverage.html
+test.out
+test.xml
