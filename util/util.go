@@ -11,9 +11,10 @@ import (
 
 func ConvertPointerString(values []string) []*string {
 
-	merged := []*string{}
-	for _, value := range values {
-		merged = append(merged, &value)
+	merged := make([]*string, len(values))
+
+	for i := 0; i < len(values); i++ {
+		merged[i] = &values[i]
 	}
 
 	return merged
