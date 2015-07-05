@@ -2,6 +2,8 @@ dependencies:
   pre:
     - make deps
 
-test:
-  post:
-    - cp -R ecs-formation $CIRCLE_ARTIFACTS
+deployment:
+  build:
+    branch: /^.+$/
+    commands:
+      - make build
