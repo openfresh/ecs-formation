@@ -108,3 +108,90 @@ func TestToPortMappings(t *testing.T) {
 		t.Errorf("Unexpected value. Actual = %s", awsutil.StringValue(actual[3]))
 	}
 }
+
+func TestToMountPointSingle(t *testing.T) {
+
+	input := "/var/log/container/nginx"
+
+	actual, err := toMountPoint(&input)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if *actual.SourceVolume != "/var/log/container/nginx" ||
+		*actual.ContainerPath != "/var/log/container/nginx" ||
+		*actual.ReadOnly != false {
+		t.Errorf("Unexpected value. Actual = %s", awsutil.StringValue(actual))
+	}
+
+}
+
+func TestToMountPointPair(t *testing.T) {
+
+	input := "/var/log/container/nginx:/var/log/nginx"
+
+	actual, err := toMountPoint(&input)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if *actual.SourceVolume != "/var/log/container/nginx" ||
+	*actual.ContainerPath != "/var/log/nginx" ||
+	*actual.ReadOnly != false {
+		t.Errorf("Unexpected value. Actual = %s", awsutil.StringValue(actual))
+	}
+
+}
+
+func TestToMountPointWithReadOnly(t *testing.T) {
+
+	input := "/var/log/container/nginx:/var/log/nginx:ro"
+
+	actual, err := toMountPoint(&input)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if *actual.SourceVolume != "/var/log/container/nginx" ||
+		*actual.ContainerPath != "/var/log/nginx" ||
+		*actual.ReadOnly != true {
+		t.Errorf("Unexpected value. Actual = %s", awsutil.StringValue(actual))
+	}
+
+}
+
+func TestToMountPoints(t *testing.T) {
+
+	input := []string{
+		"/var/log/container/nginx",
+		"/var/log/container/nginx:/var/log/nginx",
+		"/var/log/container/nginx:/var/log/nginx:ro",
+	}
+
+	actual, err := toMountPoints(input)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(input) != len(actual) {
+		t.Errorf("expect length = %d, but actual length = %d", len(input), len(actual))
+	}
+
+	if *actual[0].SourceVolume != "/var/log/container/nginx" ||
+		*actual[0].ContainerPath != "/var/log/container/nginx" ||
+		*actual[0].ReadOnly != false {
+		t.Errorf("Unexpected value. Actual = %s", awsutil.StringValue(actual[0]))
+	}
+
+	if *actual[1].SourceVolume != "/var/log/container/nginx" ||
+		*actual[1].ContainerPath != "/var/log/nginx" ||
+		*actual[1].ReadOnly != false {
+		t.Errorf("Unexpected value. Actual = %s", awsutil.StringValue(actual[1]))
+	}
+
+	if *actual[2].SourceVolume != "/var/log/container/nginx" ||
+		*actual[2].ContainerPath != "/var/log/nginx" ||
+		*actual[2].ReadOnly != true {
+		t.Errorf("Unexpected value. Actual = %s", awsutil.StringValue(actual[2]))
+	}
+}
