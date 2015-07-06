@@ -7,38 +7,38 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/aws",
-			"Comment": "v0.6.3-2-g8bdb252",
-			"Rev": "8bdb2521482f442bbab55cc9f716231d69565581"
+			"Comment": "v0.6.4-22-g469e9fb",
+			"Rev": "469e9fb72a9c4fd6b645f7994b278e2290fa0231"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/internal/endpoints",
-			"Comment": "v0.6.3-2-g8bdb252",
-			"Rev": "8bdb2521482f442bbab55cc9f716231d69565581"
+			"Comment": "v0.6.4-22-g469e9fb",
+			"Rev": "469e9fb72a9c4fd6b645f7994b278e2290fa0231"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/json/jsonutil",
-			"Comment": "v0.6.3-2-g8bdb252",
-			"Rev": "8bdb2521482f442bbab55cc9f716231d69565581"
+			"Comment": "v0.6.4-22-g469e9fb",
+			"Rev": "469e9fb72a9c4fd6b645f7994b278e2290fa0231"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/jsonrpc",
-			"Comment": "v0.6.3-2-g8bdb252",
-			"Rev": "8bdb2521482f442bbab55cc9f716231d69565581"
+			"Comment": "v0.6.4-22-g469e9fb",
+			"Rev": "469e9fb72a9c4fd6b645f7994b278e2290fa0231"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/rest",
-			"Comment": "v0.6.3-2-g8bdb252",
-			"Rev": "8bdb2521482f442bbab55cc9f716231d69565581"
+			"Comment": "v0.6.4-22-g469e9fb",
+			"Rev": "469e9fb72a9c4fd6b645f7994b278e2290fa0231"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/internal/signer/v4",
-			"Comment": "v0.6.3-2-g8bdb252",
-			"Rev": "8bdb2521482f442bbab55cc9f716231d69565581"
+			"Comment": "v0.6.4-22-g469e9fb",
+			"Rev": "469e9fb72a9c4fd6b645f7994b278e2290fa0231"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/service/ecs",
-			"Comment": "v0.6.3-2-g8bdb252",
-			"Rev": "8bdb2521482f442bbab55cc9f716231d69565581"
+			"Comment": "v0.6.4-22-g469e9fb",
+			"Rev": "469e9fb72a9c4fd6b645f7994b278e2290fa0231"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
