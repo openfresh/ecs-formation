@@ -3,7 +3,8 @@ GOTEST_FLAGS=-cpu=1,2,4
 default: deps
 
 BASE_PACKAGE=github.com/stormcat24/ecs-formation
-PACKAGES=util
+PACKAGES=util \
+		aws
 
 TEST_TARGETS=$(addprefix test-,$(PACKAGES))
 
