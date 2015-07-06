@@ -86,6 +86,12 @@ func (self *ECSManager) RegisterTaskDefinition(taskName string, containers []*sc
 			entryPoints = nil
 		}
 
+		portMappings, err := toPortMappings(con.Ports)
+
+		if err != nil {
+			return &ecs.RegisterTaskDefinitionOutput{}, err
+		}
+
 		conDef := &ecs.ContainerDefinition{
 			CPU: aws.Long(con.CpuUnits),
 			Command: commands,
@@ -97,7 +103,7 @@ func (self *ECSManager) RegisterTaskDefinition(taskName string, containers []*sc
 			Memory: aws.Long(con.Memory),
 			// MountPoints
 			Name: aws.String(con.Name),
-			PortMappings: toPortMappings(con.Ports),
+			PortMappings: portMappings,
 			// VolumesFrom
 		}
 
