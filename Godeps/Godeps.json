@@ -1,6 +1,9 @@
 {
 	"ImportPath": "github.com/stormcat24/ecs-formation",
 	"GoVersion": "go1.4.2",
+	"Packages": [
+		"github.com/stormcat24/ecs-formation/..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/aws",
@@ -41,6 +44,10 @@
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-74-g50c77ec",
 			"Rev": "50c77ecec0068c9aef9d90ae0fd0fdf410041da3"
+		},
+		{
+			"ImportPath": "github.com/naoina/go-stringutil",
+			"Rev": "360db0db4b01d34e12a2ec042c09e7d37fece761"
 		},
 		{
 			"ImportPath": "github.com/str1ngs/ansi/color",

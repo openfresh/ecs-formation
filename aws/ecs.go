@@ -65,6 +65,7 @@ func (self *ECSManager) RegisterTaskDefinition(taskName string, containers []*sc
 	})
 
 	conDefs := []*ecs.ContainerDefinition{}
+	volumes := []*ecs.Volume{}
 
 	for _, con := range containers {
 
@@ -91,9 +92,16 @@ func (self *ECSManager) RegisterTaskDefinition(taskName string, containers []*sc
 			return &ecs.RegisterTaskDefinitionOutput{}, err
 		}
 
-		mountPoints, err := toMountPoints(con.Volumes)
+		volumeItems, err := CreateVolumeInfoItems(con.Volumes)
 		if err != nil {
 			return &ecs.RegisterTaskDefinitionOutput{}, err
+		}
+
+		mountPoints := []*ecs.MountPoint{}
+		for _, vp := range volumeItems {
+			volumes = append(volumes, vp.Volume)
+
+			mountPoints = append(mountPoints, vp.MountPoint)
 		}
 
 		conDef := &ecs.ContainerDefinition{
@@ -117,8 +125,7 @@ func (self *ECSManager) RegisterTaskDefinition(taskName string, containers []*sc
 	params := &ecs.RegisterTaskDefinitionInput{
 		ContainerDefinitions: conDefs,
 		Family: aws.String(taskName),
-		Volumes: []*ecs.Volume{
-		},
+		Volumes: volumes,
 	}
 
 	return svc.RegisterTaskDefinition(params)

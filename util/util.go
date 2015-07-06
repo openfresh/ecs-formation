@@ -6,6 +6,7 @@ import (
 	"bufio"
 	"io"
 	"bytes"
+	"fmt"
 )
 
 
@@ -42,4 +43,16 @@ func StringValueWithIndent(value interface{}, indent int) string {
 	}
 
 	return buffer.String()
+}
+
+
+func ToUpperCamel(s string) string {
+
+	if len(s) == 0 {
+		return ""
+	}
+
+	prefix := s[0:1]
+	suffix := s[1:len(s)]
+	return fmt.Sprintf("%s%s", strings.ToUpper(prefix), suffix)
 }
