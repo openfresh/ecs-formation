@@ -63,7 +63,8 @@ func (self *ClusterControler) CreateClusterUpdatePlans(clusters []schema.Cluster
 }
 
 func (self *ClusterControler) CreateClusterUpdatePlan(cluster schema.Cluster) *plan.ClusterUpdatePlan {
-	output, err := self.Ecs.DescribeClusters([]*string{&cluster.Name})
+
+	output, err := self.Ecs.ClusterApi().DescribeClusters([]*string{&cluster.Name})
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, color.Red("[ERROR] discribe_cluster"))

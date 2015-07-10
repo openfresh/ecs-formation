@@ -29,18 +29,25 @@ func NewECSManager(accessKey string, secretKey string, region string) *ECSManage
 	return manager
 }
 
-func (self *ECSManager) CreateCluster(clusterName string) (*ecs.CreateClusterOutput, error) {
-
-	svc := ecs.New(&aws.Config{
-		Region: self.Region,
+func (self *ECSManager) ClusterApi() *EcsClusterApi {
+	return &EcsClusterApi{
 		Credentials: self.Credentials,
-	})
-
-	params := &ecs.CreateClusterInput{
-		ClusterName: aws.String(clusterName),
+		Region: self.Region,
 	}
+}
 
-	return svc.CreateCluster(params)
+func (self *EcsServiceApi) ServiceApi() *EcsServiceApi {
+	return &EcsServiceApi{
+		Credentials: self.Credentials,
+		Region: self.Region,
+	}
+}
+
+func (self *EcsServiceApi) TaskApi() *EcsTaskApi {
+	return &EcsTaskApi{
+		Credentials: self.Credentials,
+		Region: self.Region,
+	}
 }
 
 func (self *ECSManager) DescribeTaskDefinition(defName string) (*ecs.DescribeTaskDefinitionOutput, error) {
@@ -143,20 +150,6 @@ func (self *ECSManager) DeregisterTaskDefinition(taskName string) (*ecs.Deregist
 	}
 
 	return svc.DeregisterTaskDefinition(params)
-}
-
-func (self *ECSManager) DescribeClusters(clusterNames []*string) (*ecs.DescribeClustersOutput, error) {
-
-	svc := ecs.New(&aws.Config{
-		Region: self.Region,
-		Credentials: self.Credentials,
-	})
-
-	params := &ecs.DescribeClustersInput{
-		Clusters: clusterNames,
-	}
-
-	return svc.DescribeClusters(params)
 }
 
 func (self *ECSManager) CreateService(cluster string, service schema.Service) (*ecs.CreateServiceOutput, error) {
