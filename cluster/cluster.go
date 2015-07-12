@@ -11,6 +11,8 @@ import (
 	"github.com/str1ngs/ansi/color"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/stormcat24/ecs-formation/plan"
+	"time"
+	"errors"
 )
 
 type ClusterControler struct {
@@ -83,9 +85,10 @@ func (self *ClusterControler) CreateClusterUpdatePlan(cluster schema.Cluster) *p
 		os.Exit(1)
 	}
 
-	resListServices, _ := self.Ecs.ListServices(cluster.Name)
+	api := self.Ecs.ServiceApi()
+	resListServices, _ := api.ListServices(cluster.Name)
 
-	resDescribeService, _ := self.Ecs.DescribeService(cluster.Name, resListServices.ServiceARNs)
+	resDescribeService, _ := api.DescribeService(cluster.Name, resListServices.ServiceARNs)
 
 	currentServices := map[string]*ecs.Service{}
 	for _, service := range resDescribeService.Services {
@@ -137,10 +140,12 @@ func (self *ClusterControler) ApplyClusterPlans(plans []*plan.ClusterUpdatePlan)
 
 func (self *ClusterControler) ApplyClusterPlan(plan *plan.ClusterUpdatePlan) {
 
+	api := self.Ecs.ServiceApi()
+
 	for _, delete := range plan.DeleteServices {
 
 		// DesiredCount must be 0 to remove service.
-		_, err := self.Ecs.UpdateService(plan.Name, schema.Service{
+		_, err := api.UpdateService(plan.Name, schema.Service{
 			Name: *delete.ServiceName,
 			DesiredCount: 0,
 		})
@@ -149,7 +154,7 @@ func (self *ClusterControler) ApplyClusterPlan(plan *plan.ClusterUpdatePlan) {
 			panic(err)
 		}
 
-		result, err := self.Ecs.DeleteService(plan.Name, *delete.ServiceARN)
+		result, err := api.DeleteService(plan.Name, *delete.ServiceARN)
 		if err != nil {
 			panic(err)
 		}
@@ -159,7 +164,7 @@ func (self *ClusterControler) ApplyClusterPlan(plan *plan.ClusterUpdatePlan) {
 
 	for _, add := range plan.NewServices {
 
-		result, err := self.Ecs.CreateService(plan.Name, schema.Service{
+		result, err := api.CreateService(plan.Name, schema.Service{
 			Name: add.Name,
 			DesiredCount: add.DesiredCount,
 			TaskDefinition: add.TaskDefinition,
@@ -174,7 +179,7 @@ func (self *ClusterControler) ApplyClusterPlan(plan *plan.ClusterUpdatePlan) {
 
 	for _, update := range plan.UpdateServices {
 
-		_, err1 := self.Ecs.UpdateService(plan.Name, schema.Service{
+		_, err1 := api.UpdateService(plan.Name, schema.Service{
 			Name: *update.Before.ServiceName,
 			DesiredCount: 0,
 		})
@@ -184,12 +189,12 @@ func (self *ClusterControler) ApplyClusterPlan(plan *plan.ClusterUpdatePlan) {
 		}
 
 		fmt.Printf("[INFO] Waiting to stop '%s' service on '%s' ...\n", *update.Before.ServiceName, plan.Name)
-		if err := self.Ecs.WaitStoppingService(plan.Name, *update.Before.ServiceName); err != nil {
+		if err := self.waitStoppingService(plan.Name, *update.Before.ServiceName); err != nil {
 			panic(err)
 		}
 		fmt.Printf("[INFO] Stoped '%s' service on '%s'.\n", *update.Before.ServiceName, plan.Name)
 
-		result, err2 := self.Ecs.UpdateService(plan.Name, schema.Service{
+		result, err2 := api.UpdateService(plan.Name, schema.Service{
 			Name: update.After.Name,
 			DesiredCount: update.After.DesiredCount,
 			TaskDefinition: update.After.TaskDefinition,
@@ -202,4 +207,31 @@ func (self *ClusterControler) ApplyClusterPlan(plan *plan.ClusterUpdatePlan) {
 		fmt.Printf("[INFO] Updated service '%s'\n", *result.Service.ServiceARN)
 	}
 
+}
+
+func (self *ClusterControler) waitStoppingService(cluster string, service string) error {
+
+	api := self.Ecs.ServiceApi()
+
+	for {
+		time.Sleep(5 * time.Second)
+
+		result, err := api.DescribeService(cluster, []*string{&service})
+
+		if err != nil {
+			return err
+		}
+
+		if len(result.Services) == 0 {
+			return errors.New("service not found")
+		}
+
+		target := result.Services[0]
+
+		if *target.RunningCount == 0 {
+			return nil
+		}
+
+		// TODO retry count restriction
+	}
 }

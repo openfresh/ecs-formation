@@ -90,7 +90,7 @@ func (self *TaskDefinitionController) ApplyTaskDefinitionPlan(task *plan.TaskUpd
 		containers = append(containers, con)
 	}
 
-	result, err := self.Ecs.RegisterTaskDefinition(task.Name, containers)
+	result, err := self.Ecs.TaskApi().RegisterTaskDefinition(task.Name, containers)
 
 	if err != nil {
 		panic(err)
