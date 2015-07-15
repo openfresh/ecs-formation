@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"errors"
 	"fmt"
+	"github.com/stormcat24/ecs-formation/schema"
 )
 
 var portPattern = regexp.MustCompile(`^(\d+)\/(tcp|udp)$`)
@@ -95,4 +96,18 @@ func toPortMapping(value *string) (*ecs.PortMapping, error) {
 	} else {
 		return &ecs.PortMapping{}, errors.New(fmt.Sprintf("Port mapping '%s' is invalid pattern.", *value))
 	}
+}
+
+func toLoadBalancers(values *[]schema.LoadBalancer) []*ecs.LoadBalancer {
+
+	loadBalancers := []*ecs.LoadBalancer{}
+	for _, lb := range *values {
+		loadBalancers = append(loadBalancers, &ecs.LoadBalancer{
+			LoadBalancerName: &lb.Name,
+			ContainerName: &lb.ContainerName,
+			ContainerPort: &lb.ContainerPort,
+		})
+	}
+
+	return loadBalancers
 }

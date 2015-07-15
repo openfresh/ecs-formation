@@ -23,9 +23,8 @@ func (self *EcsServiceApi) CreateService(cluster string, service schema.Service)
 		ServiceName: aws.String(service.Name),
 		Cluster: aws.String(cluster),
 		DesiredCount: aws.Long(service.DesiredCount),
-		LoadBalancers: []*ecs.LoadBalancer{
-			// TODO
-		},
+		LoadBalancers: toLoadBalancers(&service.LoadBalancers),
+		Role: aws.String(service.Role),
 		TaskDefinition: aws.String(service.TaskDefinition),
 	}
 

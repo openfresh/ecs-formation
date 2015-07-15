@@ -132,11 +132,19 @@ func createClusterPlans(controller *cluster.ClusterControler, projectDir string)
 		fmt.Println(color.Cyan(fmt.Sprintf("\t[Add] num = %d", len(plan.NewServices))))
 		for _, add := range plan.NewServices {
 			fmt.Println(color.Cyan(fmt.Sprintf("\t\t (+) %s", add.Name)))
+
+			for _, lb := range add.LoadBalancers {
+				fmt.Println(color.Cyan(fmt.Sprintf("\t\t\t ELB:%s", lb.Name)))
+			}
 		}
 
 		fmt.Println(color.Green(fmt.Sprintf("\t[Update] num = %d", len(plan.UpdateServices))))
 		for _, update := range plan.UpdateServices {
 			fmt.Println(color.Green(fmt.Sprintf("\t\t (+) %s(%s)", *update.Before.ServiceName, *update.Before.ClusterARN)))
+
+			for _, lb := range update.After.LoadBalancers {
+				fmt.Println(color.Green(fmt.Sprintf("\t\t\t ELB:%s", lb.Name)))
+			}
 		}
 
 		fmt.Println(color.Red(fmt.Sprintf("\t[Remove] num = %d", len(plan.DeleteServices))))
