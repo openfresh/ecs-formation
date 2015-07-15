@@ -167,7 +167,10 @@ func (self *ClusterControler) ApplyClusterPlan(plan *plan.ClusterUpdatePlan) {
 		result, err := api.CreateService(plan.Name, schema.Service{
 			Name: add.Name,
 			DesiredCount: add.DesiredCount,
+			LoadBalancers: add.LoadBalancers,
 			TaskDefinition: add.TaskDefinition,
+			Role: add.Role,
+			ForceRemake: add.ForceRemake,
 		})
 
 		if err != nil {

@@ -17,6 +17,16 @@ type Service struct {
 	Name	string
 	TaskDefinition	string	`yaml:"task_definition"`
 	DesiredCount	int64	`yaml:"desired_count"`
+	LoadBalancers	[]LoadBalancer	`yaml:"load_balancers"`
+	Role	string	`yaml:"role"`
+	ForceRemake	bool `yaml:"force_remake"`
+}
+
+type LoadBalancer struct {
+
+	Name	string	`yaml:"name"`
+	ContainerName	string	`yaml:"container_name"`
+	ContainerPort	int64	`yaml:"container_port"`
 }
 
 func CreateServiceMap(data []byte) (map[string]Service, error) {

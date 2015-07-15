@@ -10,7 +10,7 @@ ecs-formation is a tool for defining several Docker continers and clusters on [A
 
 * Define services on ECS cluster, and Task Definitions.
 * Supports YAML definition like docker-compose. Be able to run ecs-formation if copy docker-compose.yml(formerly fig.yml).
-* Manage ECS Services and Task Definitions by AWS API. 
+* Manage ECS Services and Task Definitions by AWS API.
 
 # Usage
 
@@ -47,7 +47,7 @@ You need to create ECS cluster in advance. And also, ECS instance must be join i
 ### Define Task Definitions
 
 Make Task Definitions file in task directory. This file name is used as ECS Task Definition name.
- 
+
 ```bash
 (path-to-path/test-ecs-formation/task) $ vim test-definition.yml
 nginx:
@@ -84,7 +84,7 @@ redis:
 
 ### Define Services on Cluster
 
-Make Service Definition file in cluster directory. This file name must be equal ECS cluster name. 
+Make Service Definition file in cluster directory. This file name must be equal ECS cluster name.
 
 For example, if target cluster name is `test-cluster`, you need to make `test-cluster.yml`.
 
@@ -93,6 +93,12 @@ For example, if target cluster name is `test-cluster`, you need to make `test-cl
 test-service:
   task_definition: test-definition
   desired_count: 1
+  role: your-ecs-elb-role
+  load_balancers:
+    -
+      name: test-elb
+      container_name: nginx
+      container_port: 80
 ```
 
 ### Manage Task Definitions
@@ -104,7 +110,7 @@ Show update plan.
 ```
 
 Apply definition.
- 
+
 ```bash
 (path-to-path/test-ecs-formation $ ecs-formation task apply
 ```
