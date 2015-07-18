@@ -71,30 +71,31 @@ func (self *TaskDefinitionController) CreateTaskUpdatePlan(task *schema.TaskDefi
 	}
 }
 
-func (self *TaskDefinitionController) ApplyTaskDefinitionPlans(plans []*plan.TaskUpdatePlan) []*ecs.RegisterTaskDefinitionOutput {
+func (self *TaskDefinitionController) ApplyTaskDefinitionPlans(plans []*plan.TaskUpdatePlan) ([]*ecs.RegisterTaskDefinitionOutput, error) {
 
 	fmt.Println("Start apply Task definitions...")
 
 	outputs := []*ecs.RegisterTaskDefinitionOutput{}
 	for _, plan := range plans {
-		outputs = append(outputs, self.ApplyTaskDefinitionPlan(plan))
+
+		result, err := self.ApplyTaskDefinitionPlan(plan)
+
+		if err != nil {
+			return []*ecs.RegisterTaskDefinitionOutput{}, err
+		}
+
+		outputs = append(outputs, result)
 	}
 
-	return outputs
+	return outputs, nil
 }
 
-func (self *TaskDefinitionController) ApplyTaskDefinitionPlan(task *plan.TaskUpdatePlan) *ecs.RegisterTaskDefinitionOutput {
+func (self *TaskDefinitionController) ApplyTaskDefinitionPlan(task *plan.TaskUpdatePlan) (*ecs.RegisterTaskDefinitionOutput, error) {
 
 	containers := []*schema.ContainerDefinition{}
 	for _, con := range task.NewContainers {
 		containers = append(containers, con)
 	}
 
-	result, err := self.Ecs.TaskApi().RegisterTaskDefinition(task.Name, containers)
-
-	if err != nil {
-		panic(err)
-	}
-
-	return result
+	return self.Ecs.TaskApi().RegisterTaskDefinition(task.Name, containers)
 }

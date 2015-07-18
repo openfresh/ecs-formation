@@ -3,19 +3,15 @@ package plan
 import (
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/stormcat24/ecs-formation/schema"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"fmt"
+	"github.com/aws/aws-sdk-go/aws/awsutil"
 )
 
 type ClusterUpdatePlan struct {
 	Name            string
 	CurrentServices map[string]*ecs.Service
-	DeleteServices  map[string]*ecs.Service
-	UpdateServices  map[string]*UpdateService
 	NewServices     map[string]*schema.Service
-}
-
-type UpdateService struct {
-	Before *ecs.Service
-	After  *schema.Service
 }
 
 type TaskUpdatePlan struct {
@@ -26,4 +22,31 @@ type TaskUpdatePlan struct {
 type UpdateContainer struct {
 	Before *ecs.ContainerDefinition
 	After  *schema.ContainerDefinition
+}
+
+type BlueGreenPlan struct {
+	Blue *ServiceSet
+	Green *ServiceSet
+}
+
+type ServiceSet struct {
+	CurrentService *ecs.Service
+	NewService *schema.BlueGreenTarget
+	AutoScalingGroup *autoscaling.Group
+	ClusterUpdatePlan *ClusterUpdatePlan
+	LoadBalancer string
+}
+
+
+func (self *ServiceSet) HasOwnElb() bool {
+
+	fmt.Println(awsutil.StringValue(self.AutoScalingGroup.LoadBalancerNames))
+
+	for _, lb := range self.AutoScalingGroup.LoadBalancerNames {
+		if *lb == self.LoadBalancer {
+			return true
+		}
+	}
+
+	return false
 }

@@ -19,7 +19,28 @@ type Service struct {
 	DesiredCount	int64	`yaml:"desired_count"`
 	LoadBalancers	[]LoadBalancer	`yaml:"load_balancers"`
 	Role	string	`yaml:"role"`
-	ForceRemake	bool `yaml:"force_remake"`
+}
+
+func (self *Service) FindLoadBalancerByContainer(conname string, port int64) *LoadBalancer {
+
+	for _, lb := range self.LoadBalancers {
+		if lb.ContainerName == conname &&
+			lb.ContainerPort == port {
+			return &lb
+		}
+	}
+	return nil
+}
+
+func (self *Service) FindLoadBalancerByName(name string) *LoadBalancer {
+
+	for _, lb := range self.LoadBalancers {
+		if lb.Name == name {
+			return &lb
+		}
+	}
+
+	return nil
 }
 
 type LoadBalancer struct {
@@ -40,4 +61,11 @@ func CreateServiceMap(data []byte) (map[string]Service, error) {
 	}
 
 	return servicesMap, err
+}
+
+func CreateBlueGreenMap(data []byte) (map[string]BlueGreen, error) {
+
+	bgMap := map[string]BlueGreen{}
+	err := yaml.Unmarshal(data, &bgMap)
+	return bgMap, err
 }

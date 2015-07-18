@@ -26,7 +26,17 @@
 			"Rev": "ab3fca49fe03f5228c3ea7e711a49f8940d570fc"
 		},
 		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/query",
+			"Comment": "v0.6.7-2-gab3fca4",
+			"Rev": "ab3fca49fe03f5228c3ea7e711a49f8940d570fc"
+		},
+		{
 			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/rest",
+			"Comment": "v0.6.7-2-gab3fca4",
+			"Rev": "ab3fca49fe03f5228c3ea7e711a49f8940d570fc"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/internal/protocol/xml/xmlutil",
 			"Comment": "v0.6.7-2-gab3fca4",
 			"Rev": "ab3fca49fe03f5228c3ea7e711a49f8940d570fc"
 		},
@@ -36,7 +46,17 @@
 			"Rev": "ab3fca49fe03f5228c3ea7e711a49f8940d570fc"
 		},
 		{
+			"ImportPath": "github.com/aws/aws-sdk-go/service/autoscaling",
+			"Comment": "v0.6.7-2-gab3fca4",
+			"Rev": "ab3fca49fe03f5228c3ea7e711a49f8940d570fc"
+		},
+		{
 			"ImportPath": "github.com/aws/aws-sdk-go/service/ecs",
+			"Comment": "v0.6.7-2-gab3fca4",
+			"Rev": "ab3fca49fe03f5228c3ea7e711a49f8940d570fc"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/service/elb",
 			"Comment": "v0.6.7-2-gab3fca4",
 			"Rev": "ab3fca49fe03f5228c3ea7e711a49f8940d570fc"
 		},
