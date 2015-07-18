@@ -152,6 +152,8 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 	var nextLabel *color.Escape
 	var current *plan.ServiceSet
 	var next *plan.ServiceSet
+	primaryLb := bgplan.Blue.LoadBalancer
+	standbyLb := bgplan.Green.LoadBalancer
 	if targetGreen {
 		current = bgplan.Blue
 		next = bgplan.Green
@@ -179,12 +181,12 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 
 	// attach next group to primary lb
 	_, erratt := apias.AttachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, []string{
-		current.LoadBalancer,
+		primaryLb,
 	})
 	if erratt != nil {
 		return erratt
 	}
-	fmt.Printf("[INFO] Attached to attach %s group to %s(primary).\n", nextLabel, current.LoadBalancer)
+	fmt.Printf("[INFO] Attached to attach %s group to %s(primary).\n", nextLabel, primaryLb)
 
 	errwlb := self.waitLoadBalancer(*next.AutoScalingGroup.AutoScalingGroupName, current.LoadBalancer)
 	if errwlb != nil {
@@ -194,32 +196,30 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 
 	// detach current group from primary lb
 	_, errelbb := apias.DetachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, []string{
-		current.LoadBalancer,
+		primaryLb,
 	})
-
 	if errelbb != nil {
 		return errelbb
 	}
-	fmt.Printf("[INFO] Detached %s group from %s(primary).\n", currentLabel, current.LoadBalancer)
+	fmt.Printf("[INFO] Detached %s group from %s(primary).\n", currentLabel, primaryLb)
 
 	// detach next group from standby lb
 	_, errelbg := apias.DetachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, []string{
-		next.LoadBalancer,
+		standbyLb,
 	})
-
 	if errelbg != nil {
 		return errelbg
 	}
-	fmt.Printf("[INFO] Detached %s group from %s(standby).\n", nextLabel, next.LoadBalancer)
+	fmt.Printf("[INFO] Detached %s group from %s(standby).\n", nextLabel, standbyLb)
 
 	// attach current group to standby lb
 	_, errelba := apias.AttachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, []string{
-		next.LoadBalancer,
+		standbyLb,
 	})
 	if errelba != nil {
 		return errelba
 	}
-	fmt.Printf("[INFO] Attached %s group to %s(standby).\n", currentLabel, next.LoadBalancer)
+	fmt.Printf("[INFO] Attached %s group to %s(standby).\n", currentLabel, standbyLb)
 
 	return nil
 }

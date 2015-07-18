@@ -4,8 +4,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/stormcat24/ecs-formation/schema"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"fmt"
-	"github.com/aws/aws-sdk-go/aws/awsutil"
 )
 
 type ClusterUpdatePlan struct {
@@ -39,8 +37,6 @@ type ServiceSet struct {
 
 
 func (self *ServiceSet) HasOwnElb() bool {
-
-	fmt.Println(awsutil.StringValue(self.AutoScalingGroup.LoadBalancerNames))
 
 	for _, lb := range self.AutoScalingGroup.LoadBalancerNames {
 		if *lb == self.LoadBalancer {
