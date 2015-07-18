@@ -14,20 +14,44 @@ import (
 type TaskDefinitionController struct {
 	Ecs            *aws.ECSManager
 	TargetResource string
+	defmap         map[string]*schema.TaskDefinition
 }
 
-func (self *TaskDefinitionController) SearchTaskDefinitions(projectDir string) map[string]*schema.TaskDefinition {
+func NewTaskDefinitionController(ecs *aws.ECSManager, projectDir string, targetResource string) (*TaskDefinitionController, error) {
+
+	con := &TaskDefinitionController{
+		Ecs: ecs,
+	}
+
+	defmap, err := con.searchTaskDefinitions(projectDir)
+	if err != nil {
+		return con, err
+	}
+	con.defmap = defmap
+
+	if targetResource != "" {
+		con.TargetResource = targetResource
+	}
+
+	return con, nil
+}
+
+func (self *TaskDefinitionController) GetTaskDefinitionMap() map[string]*schema.TaskDefinition {
+	return self.defmap
+}
+
+func (self *TaskDefinitionController) searchTaskDefinitions(projectDir string) (map[string]*schema.TaskDefinition, error) {
 
 	taskDir := projectDir + "/task"
 	files, err := ioutil.ReadDir(taskDir)
 
+	taskDefMap := map[string]*schema.TaskDefinition{}
+
 	if err != nil {
-		panic(err)
+		return taskDefMap, err
 	}
 
 	filePattern := regexp.MustCompile("^(.+)\\.yml$")
-
-	taskDefMap := map[string]*schema.TaskDefinition{}
 
 	for _, file := range files {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".yml") {
@@ -42,7 +66,7 @@ func (self *TaskDefinitionController) SearchTaskDefinitions(projectDir string) m
 		}
 	}
 
-	return taskDefMap
+	return taskDefMap, nil
 }
 
 func (self *TaskDefinitionController) CreateTaskUpdatePlans(tasks map[string]*schema.TaskDefinition) []*plan.TaskUpdatePlan {

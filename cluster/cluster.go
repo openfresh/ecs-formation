@@ -105,13 +105,13 @@ func (self *ClusterController) CreateClusterUpdatePlan(cluster schema.Cluster) (
 	}
 
 	if len(output.Failures) > 0 {
-		return &plan.ClusterUpdatePlan{}, errors.New(fmt.Sprintf("[ERROR] Cluster '%s' not found", cluster.Name))
+		return &plan.ClusterUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' not found", cluster.Name))
 	}
 
 	target := output.Clusters[0]
 
 	if *target.Status != "ACTIVE" {
-		return &plan.ClusterUpdatePlan{}, errors.New(fmt.Sprintf("[ERROR] Cluster '%s' is not ACTIVE.", cluster.Name))
+		return &plan.ClusterUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' is not ACTIVE.", cluster.Name))
 	}
 
 	api := self.Ecs.ServiceApi()

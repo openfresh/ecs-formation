@@ -120,10 +120,10 @@ func doTask(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	// plan
-	taskController := &task.TaskDefinitionController{
-		Ecs: ecsManager,
-		TargetResource: operation.TargetResource,
+	taskController, err := task.NewTaskDefinitionController(ecsManager, projectDir, operation.TargetResource)
+	if err != nil {
+		logger.Main.Error(color.Red(err.Error()))
+		os.Exit(1)
 	}
 
 	plans := createTaskPlans(taskController, projectDir)
@@ -193,6 +193,7 @@ func doDeploy(c *cli.Context) {
 
 func createClusterPlans(controller *cluster.ClusterController, projectDir string) ([]*plan.ClusterUpdatePlan, error) {
 
+	logger.Main.Infoln("Checking services on clusters...")
 	plans, err := controller.CreateClusterUpdatePlans()
 
 	if err != nil {
@@ -200,12 +201,31 @@ func createClusterPlans(controller *cluster.ClusterController, projectDir string
 	}
 
 	for _, plan := range plans {
-		logger.Main.Infof("Cluster '%s'\n", plan.Name)
 
-		logger.Main.Info(color.Cyan(fmt.Sprintf("\t[Add] num = %d", len(plan.NewServices))))
+		fmt.Println(color.Yellow(fmt.Sprintf("Current status of ECS Cluster '%s':", plan.Name)))
+
+		if len(plan.CurrentServices) > 0 {
+			fmt.Println(color.Yellow("\tServices as follows:"))
+		} else {
+			fmt.Println(color.Yellow("\tNo services are deployed."))
+		}
+
+		for _, cs := range plan.CurrentServices {
+			fmt.Println(color.Yellow(fmt.Sprintf("\t\tServiceName = %s", *cs.ServiceName)))
+			fmt.Println(color.Yellow(fmt.Sprintf("\t\tServiceARN = %s", *cs.ServiceARN)))
+			fmt.Println(color.Yellow(fmt.Sprintf("\t\tTaskDefinition = %s", *cs.TaskDefinition)))
+			fmt.Println(color.Yellow(fmt.Sprintf("\t\tDesiredCount = %d", *cs.DesiredCount)))
+			fmt.Println(color.Yellow(fmt.Sprintf("\t\tPendingCount = %d", *cs.PendingCount)))
+			fmt.Println(color.Yellow(fmt.Sprintf("\t\tRunningCount = %d", *cs.RunningCount)))
+			for _, lb := range cs.LoadBalancers {
+				fmt.Println(color.Yellow(fmt.Sprintf("\t\tELB = %s:", *lb.LoadBalancerName)))
+				fmt.Println(color.Yellow(fmt.Sprintf("\t\t\tContainerName = %s", *lb.ContainerName)))
+				fmt.Println(color.Yellow(fmt.Sprintf("\t\t\tContainerName = %d", *lb.ContainerPort)))
+			}
+			fmt.Println(color.Yellow(fmt.Sprintf("\t\tSTATUS = %s", *cs.Status)))
+		}
+
 		for _, add := range plan.NewServices {
-			logger.Main.Info(color.Cyan(fmt.Sprintf("\t\t (+) %s", add.Name)))
-
 			for _, lb := range add.LoadBalancers {
 				logger.Main.Info(color.Cyan(fmt.Sprintf("\t\t\t ELB:%s", lb.Name)))
 			}
@@ -219,20 +239,20 @@ func createClusterPlans(controller *cluster.ClusterController, projectDir string
 
 func createTaskPlans(controller *task.TaskDefinitionController, projectDir string) []*plan.TaskUpdatePlan {
 
-	taskDefs := controller.SearchTaskDefinitions(projectDir)
+	taskDefs := controller.GetTaskDefinitionMap()
 	plans := controller.CreateTaskUpdatePlans(taskDefs)
 
 	for _, plan := range plans {
-		logger.Main.Infof("Task Definition '%s'\n", plan.Name)
+		logger.Main.Infof("Task Definition '%s'", plan.Name)
 
 		logger.Main.Info(color.Cyan(fmt.Sprintf("  [Add] num = %d", len(plan.NewContainers))))
 		for _, add := range plan.NewContainers {
-			logger.Main.Info(color.Cyan(fmt.Sprintf("    (+) %s", add.Name)))
-			logger.Main.Info(color.Cyan(fmt.Sprintf("      image: %s", add.Image)))
-			logger.Main.Info(color.Cyan(fmt.Sprintf("      ports: %s", add.Ports)))
-			logger.Main.Info(color.Cyan(fmt.Sprintf("      environment:\n%s", util.StringValueWithIndent(add.Environment, 4))))
-			logger.Main.Info(color.Cyan(fmt.Sprintf("      links: %s", add.Links)))
-			logger.Main.Info(color.Cyan(fmt.Sprintf("      volumes: %s", add.Volumes)))
+			fmt.Println(color.Cyan(fmt.Sprintf("    (+) %s", add.Name)))
+			fmt.Println(color.Cyan(fmt.Sprintf("      image: %s", add.Image)))
+			fmt.Println(color.Cyan(fmt.Sprintf("      ports: %s", add.Ports)))
+			fmt.Println(color.Cyan(fmt.Sprintf("      environment:\n%s", util.StringValueWithIndent(add.Environment, 4))))
+			fmt.Println(color.Cyan(fmt.Sprintf("      links: %s", add.Links)))
+			fmt.Println(color.Cyan(fmt.Sprintf("      volumes: %s", add.Volumes)))
 		}
 
 		fmt.Println()
