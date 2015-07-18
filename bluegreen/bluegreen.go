@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"errors"
 	"github.com/stormcat24/ecs-formation/cluster"
+	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/str1ngs/ansi/color"
 )
 
@@ -166,18 +167,18 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 		nextLabel = color.Cyan("blue")
 	}
 
-	fmt.Printf("[INFO] Current status is '%s'\n", currentLabel)
-	fmt.Printf("[INFO] Start Blue-Green Deployment: %s to %s ...\n", currentLabel, nextLabel)
+	logger.Main.Infof("Current status is '%s'", currentLabel)
+	logger.Main.Infof("Start Blue-Green Deployment: %s to %s ...", currentLabel, nextLabel)
 
 	// deploy service
-	fmt.Printf("[INFO] Updating %s@%s service at %s ...\n", next.NewService.Service, next.NewService.Cluster, nextLabel)
+	logger.Main.Infof("Updating %s@%s service at %s ...", next.NewService.Service, next.NewService.Cluster, nextLabel)
 	if err := self.ClusterController.ApplyClusterPlan(next.ClusterUpdatePlan); err != nil {
 		return err
 	}
 
-	fmt.Println("[INFO] Start to check whether service is running ...")
+	logger.Main.Info("Start to check whether service is running ...")
 	self.ClusterController.WaitActiveService(next.NewService.Cluster, next.NewService.Service)
-	fmt.Printf("[INFO] Service '%s' is running\n", next.NewService.Service)
+	logger.Main.Infof("Service '%s' is running\n", next.NewService.Service)
 
 	// attach next group to primary lb
 	_, erratt := apias.AttachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, []string{
@@ -186,13 +187,13 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 	if erratt != nil {
 		return erratt
 	}
-	fmt.Printf("[INFO] Attached to attach %s group to %s(primary).\n", nextLabel, primaryLb)
+	logger.Main.Infof("Attached to attach %s group to %s(primary).", nextLabel, primaryLb)
 
 	errwlb := self.waitLoadBalancer(*next.AutoScalingGroup.AutoScalingGroupName, current.LoadBalancer)
 	if errwlb != nil {
 		return errwlb
 	}
-	fmt.Printf("[INFO] Added %s group to primary\n", nextLabel)
+	logger.Main.Infof("Added %s group to primary", nextLabel)
 
 	// detach current group from primary lb
 	_, errelbb := apias.DetachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, []string{
@@ -201,7 +202,7 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 	if errelbb != nil {
 		return errelbb
 	}
-	fmt.Printf("[INFO] Detached %s group from %s(primary).\n", currentLabel, primaryLb)
+	logger.Main.Infof("Detached %s group from %s(primary).", currentLabel, primaryLb)
 
 	// detach next group from standby lb
 	_, errelbg := apias.DetachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, []string{
@@ -210,7 +211,7 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 	if errelbg != nil {
 		return errelbg
 	}
-	fmt.Printf("[INFO] Detached %s group from %s(standby).\n", nextLabel, standbyLb)
+	logger.Main.Infof("Detached %s group from %s(standby).", nextLabel, standbyLb)
 
 	// attach current group to standby lb
 	_, errelba := apias.AttachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, []string{
@@ -219,7 +220,7 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 	if errelba != nil {
 		return errelba
 	}
-	fmt.Printf("[INFO] Attached %s group to %s(standby).\n", currentLabel, standbyLb)
+	logger.Main.Infof("Attached %s group to %s(standby).", currentLabel, standbyLb)
 
 	return nil
 }

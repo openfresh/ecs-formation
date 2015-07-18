@@ -11,6 +11,7 @@ import (
 	"github.com/str1ngs/ansi/color"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/stormcat24/ecs-formation/plan"
+	"github.com/stormcat24/ecs-formation/logger"
 	"time"
 	"errors"
 )
@@ -144,7 +145,7 @@ func (self *ClusterController) CreateClusterUpdatePlan(cluster schema.Cluster) (
 
 func (self *ClusterController) ApplyClusterPlans(plans []*plan.ClusterUpdatePlan) {
 
-	fmt.Println("Start apply serivces...")
+	logger.Main.Info("Start apply serivces...")
 
 	for _, plan := range plans {
 		if err := self.ApplyClusterPlan(plan); err != nil {
@@ -169,11 +170,11 @@ func (self *ClusterController) ApplyClusterPlan(plan *plan.ClusterUpdatePlan) er
 		}
 
 		// wait to stop service
-		fmt.Printf("[INFO] Waiting to stop '%s' service on '%s' ...\n", *current.ServiceName, plan.Name)
+		logger.Main.Infof("Waiting to stop '%s' service on '%s' ...", *current.ServiceName, plan.Name)
 		if err := self.waitStoppingService(plan.Name, *current.ServiceName); err != nil {
 			return err
 		}
-		fmt.Printf("[INFO] Stoped '%s' service on '%s'.\n", *current.ServiceName, plan.Name)
+		logger.Main.Infof("Stoped '%s' service on '%s'.", *current.ServiceName, plan.Name)
 
 
 		// delete service
@@ -182,12 +183,12 @@ func (self *ClusterController) ApplyClusterPlan(plan *plan.ClusterUpdatePlan) er
 			return err
 		}
 
-		fmt.Printf("[INFO] Waiting to delete '%s' service on '%s' ...\n", *current.ServiceName, plan.Name)
+		logger.Main.Infof("Waiting to delete '%s' service on '%s' ...", *current.ServiceName, plan.Name)
 		if err := self.waitStoppingService(plan.Name, *current.ServiceName); err != nil {
 			return err
 		}
 
-		fmt.Printf("[INFO] Deleted service '%s'\n", *result.Service.ServiceARN)
+		logger.Main.Infof("Deleted service '%s'", *result.Service.ServiceARN)
 	}
 
 	for _, add := range plan.NewServices {
@@ -204,7 +205,7 @@ func (self *ClusterController) ApplyClusterPlan(plan *plan.ClusterUpdatePlan) er
 			return err
 		}
 
-		fmt.Printf("[INFO] Created service '%s'\n", *result.Service.ServiceARN)
+		logger.Main.Infof("Created service '%s'", *result.Service.ServiceARN)
 	}
 
 	return nil
@@ -229,7 +230,7 @@ func (self *ClusterController) waitStoppingService(cluster string, service strin
 
 		target := result.Services[0]
 
-		fmt.Printf("[INFO] service '%s@%s' current status = %s \n", service, cluster, *target.Status)
+		logger.Main.Infof("service '%s@%s' current status = %s", service, cluster, *target.Status)
 		if *target.RunningCount == 0 && *target.Status != "DRAINING" {
 			return nil
 		}
@@ -263,7 +264,7 @@ func (self *ClusterController) WaitActiveService(cluster string, service string)
 				return nil
 			}
 		} else {
-			fmt.Printf("[INFO] service '%s@%s' status = %s ...\n", service, cluster, *target.Status)
+			logger.Main.Infof("service '%s@%s' status = %s ...", service, cluster, *target.Status)
 		}
 	}
 }

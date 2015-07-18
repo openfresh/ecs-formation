@@ -13,6 +13,7 @@ import (
 	"github.com/stormcat24/ecs-formation/plan"
 	"github.com/stormcat24/ecs-formation/util"
 	"github.com/stormcat24/ecs-formation/bluegreen"
+	"github.com/stormcat24/ecs-formation/logger"
 	"errors"
 )
 
@@ -66,20 +67,21 @@ func doCluster(c *cli.Context) {
 	ecsManager, err := buildECSManager()
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[ERROR]%s\n", color.Red(err.Error()))
+		logger.Main.Error(color.Red(err.Error()))
 		os.Exit(1)
 	}
 
 	operation, errSubCommand := createOperation(c.Args())
 
 	if errSubCommand != nil {
-		fmt.Fprintf(os.Stderr, "[ERROR]%s\n", color.Red(errSubCommand.Error()))
+		logger.Main.Error(color.Red(errSubCommand.Error()))
 		os.Exit(1)
 	}
 
 	projectDir, err := os.Getwd()
 	if err != nil {
-		panic(err)
+		logger.Main.Error(color.Red(err.Error()))
+		os.Exit(1)
 	}
 
 	clusterController, err := cluster.NewClusterController(ecsManager, projectDir, operation.TargetResource)
@@ -87,7 +89,7 @@ func doCluster(c *cli.Context) {
 	plans, err := createClusterPlans(clusterController, projectDir)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[ERROR]%s\n", color.Red(err.Error()))
+		logger.Main.Error(color.Red(err.Error()))
 		os.Exit(1)
 	}
 
@@ -101,20 +103,21 @@ func doTask(c *cli.Context) {
 	ecsManager, err := buildECSManager()
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[ERROR]%s\n", color.Red(err.Error()))
+		logger.Main.Error(color.Red(err.Error()))
 		os.Exit(1)
 	}
 
 	operation, errSubCommand := createOperation(c.Args())
 
 	if errSubCommand != nil {
-		fmt.Fprintf(os.Stderr, "[ERROR]%s\n", color.Red(errSubCommand.Error()))
+		logger.Main.Error(color.Red(errSubCommand.Error()))
 		os.Exit(1)
 	}
 
 	projectDir, err := os.Getwd()
 	if err != nil {
-		panic(err)
+		logger.Main.Error(color.Red(err.Error()))
+		os.Exit(1)
 	}
 
 	// plan
@@ -129,13 +132,13 @@ func doTask(c *cli.Context) {
 		results, errapp := taskController.ApplyTaskDefinitionPlans(plans)
 
 		if errapp != nil {
-			fmt.Fprintf(os.Stderr, "[ERROR]%s\n", color.Red(errapp.Error()))
+			logger.Main.Error(color.Red(errapp.Error()))
 			os.Exit(1)
 		}
 
 		for _, output := range results {
-			fmt.Printf("Registered Task Definition '%s'", *output.TaskDefinition.Family)
-			fmt.Print(color.Cyan(util.StringValueWithIndent(output.TaskDefinition, 1)))
+			logger.Main.Infof("Registered Task Definition '%s'", *output.TaskDefinition.Family)
+			logger.Main.Info(color.Cyan(util.StringValueWithIndent(output.TaskDefinition, 1)))
 		}
 	}
 }
@@ -145,33 +148,33 @@ func doDeploy(c *cli.Context) {
 	ecsManager, err := buildECSManager()
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[ERROR]%s\n", color.Red(err.Error()))
+		logger.Main.Error(color.Red(err.Error()))
 		os.Exit(1)
 	}
 
 	operation, errSubCommand := createOperation(c.Args())
 
 	if errSubCommand != nil {
-		fmt.Fprintf(os.Stderr, "[ERROR]%s\n", color.Red(errSubCommand.Error()))
+		logger.Main.Error(color.Red(errSubCommand.Error()))
 		os.Exit(1)
 	}
 
 	projectDir, err := os.Getwd()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[ERROR]%s\n", color.Red(err.Error()))
+		logger.Main.Error(color.Red(err.Error()))
 		os.Exit(1)
 	}
 
 	bgController, errbgc := bluegreen.NewBlueGreenController(ecsManager, projectDir)
 	if errbgc != nil {
-		fmt.Fprintf(os.Stderr, "[ERROR]%s\n", color.Red(err.Error()))
+		logger.Main.Error(color.Red(errbgc.Error()))
 		os.Exit(1)
 	}
 
 	bgPlans, err := createBlueGreenPlans(bgController)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "[ERROR]%s\n", color.Red(err.Error()))
+		logger.Main.Error(color.Red(err.Error()))
 		os.Exit(1)
 	}
 
@@ -181,7 +184,7 @@ func doDeploy(c *cli.Context) {
 
 		errbg := bgController.ApplyBlueGreenDeploys(bgPlans)
 		if errbg != nil {
-			fmt.Fprintf(os.Stderr, "[ERROR]%s\n", color.Red(errbg.Error()))
+			logger.Main.Error(color.Red(errbg.Error()))
 			os.Exit(1)
 		}
 
@@ -197,14 +200,14 @@ func createClusterPlans(controller *cluster.ClusterController, projectDir string
 	}
 
 	for _, plan := range plans {
-		fmt.Printf("Cluster '%s'\n", plan.Name)
+		logger.Main.Infof("Cluster '%s'\n", plan.Name)
 
-		fmt.Println(color.Cyan(fmt.Sprintf("\t[Add] num = %d", len(plan.NewServices))))
+		logger.Main.Info(color.Cyan(fmt.Sprintf("\t[Add] num = %d", len(plan.NewServices))))
 		for _, add := range plan.NewServices {
-			fmt.Println(color.Cyan(fmt.Sprintf("\t\t (+) %s", add.Name)))
+			logger.Main.Info(color.Cyan(fmt.Sprintf("\t\t (+) %s", add.Name)))
 
 			for _, lb := range add.LoadBalancers {
-				fmt.Println(color.Cyan(fmt.Sprintf("\t\t\t ELB:%s", lb.Name)))
+				logger.Main.Info(color.Cyan(fmt.Sprintf("\t\t\t ELB:%s", lb.Name)))
 			}
 		}
 
@@ -220,16 +223,16 @@ func createTaskPlans(controller *task.TaskDefinitionController, projectDir strin
 	plans := controller.CreateTaskUpdatePlans(taskDefs)
 
 	for _, plan := range plans {
-		fmt.Printf("Task Definition '%s'\n", plan.Name)
+		logger.Main.Infof("Task Definition '%s'\n", plan.Name)
 
-		fmt.Println(color.Cyan(fmt.Sprintf("  [Add] num = %d", len(plan.NewContainers))))
+		logger.Main.Info(color.Cyan(fmt.Sprintf("  [Add] num = %d", len(plan.NewContainers))))
 		for _, add := range plan.NewContainers {
-			fmt.Println(color.Cyan(fmt.Sprintf("    (+) %s", add.Name)))
-			fmt.Println(color.Cyan(fmt.Sprintf("      image: %s", add.Image)))
-			fmt.Println(color.Cyan(fmt.Sprintf("      ports: %s", add.Ports)))
-			fmt.Println(color.Cyan(fmt.Sprintf("      environment:\n%s", util.StringValueWithIndent(add.Environment, 4))))
-			fmt.Println(color.Cyan(fmt.Sprintf("      links: %s", add.Links)))
-			fmt.Println(color.Cyan(fmt.Sprintf("      volumes: %s", add.Volumes)))
+			logger.Main.Info(color.Cyan(fmt.Sprintf("    (+) %s", add.Name)))
+			logger.Main.Info(color.Cyan(fmt.Sprintf("      image: %s", add.Image)))
+			logger.Main.Info(color.Cyan(fmt.Sprintf("      ports: %s", add.Ports)))
+			logger.Main.Info(color.Cyan(fmt.Sprintf("      environment:\n%s", util.StringValueWithIndent(add.Environment, 4))))
+			logger.Main.Info(color.Cyan(fmt.Sprintf("      links: %s", add.Links)))
+			logger.Main.Info(color.Cyan(fmt.Sprintf("      volumes: %s", add.Volumes)))
 		}
 
 		fmt.Println()

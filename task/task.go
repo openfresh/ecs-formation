@@ -3,11 +3,11 @@ package task
 import (
 	"io/ioutil"
 	"github.com/stormcat24/ecs-formation/schema"
-	"fmt"
 	"strings"
 	"regexp"
 	"github.com/stormcat24/ecs-formation/aws"
 	"github.com/stormcat24/ecs-formation/plan"
+	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/aws/aws-sdk-go/service/ecs"
 )
 
@@ -73,7 +73,7 @@ func (self *TaskDefinitionController) CreateTaskUpdatePlan(task *schema.TaskDefi
 
 func (self *TaskDefinitionController) ApplyTaskDefinitionPlans(plans []*plan.TaskUpdatePlan) ([]*ecs.RegisterTaskDefinitionOutput, error) {
 
-	fmt.Println("Start apply Task definitions...")
+	logger.Main.Info("Start apply Task definitions...")
 
 	outputs := []*ecs.RegisterTaskDefinitionOutput{}
 	for _, plan := range plans {
