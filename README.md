@@ -178,7 +178,7 @@ Apply blue green deployment.
 if with `--nodeploy` option, not update services. Only swap ELB on blue and green groups.  
 
 ```bash
-(path-to-path/test-ecs-formation $ ecs-formation bluegreen apply
+(path-to-path/test-ecs-formation $ ecs-formation bluegreen apply --nodeploy
 ```
 
 License
