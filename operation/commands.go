@@ -47,6 +47,12 @@ var commandBluegreen = cli.Command{
 	Description: `
 	Manage bluegreen deployment on ECS.
 `,
+	Flags: []cli.Flag{
+		cli.BoolFlag{
+			Name: "nodeploy, nd",
+			Usage: "bbb",
+		},
+	},
 	Action: doBluegreen,
 }
 
@@ -182,7 +188,9 @@ func doBluegreen(c *cli.Context) {
 
 	if (operation.SubCommand == "apply") {
 
-		errbg := bgController.ApplyBlueGreenDeploys(bgPlans)
+		nodeploy := c.Bool("nodeploy")
+
+		errbg := bgController.ApplyBlueGreenDeploys(bgPlans, nodeploy)
 		if errbg != nil {
 			logger.Main.Error(color.Red(errbg.Error()))
 			os.Exit(1)

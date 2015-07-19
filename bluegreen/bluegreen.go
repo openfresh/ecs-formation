@@ -134,10 +134,10 @@ func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen schema.BlueGreen,
 }
 
 
-func (self *BlueGreenController) ApplyBlueGreenDeploys(plans []*plan.BlueGreenPlan) error {
+func (self *BlueGreenController) ApplyBlueGreenDeploys(plans []*plan.BlueGreenPlan, nodeploy bool) error {
 
 	for _, plan := range plans {
-		if err := self.ApplyBlueGreenDeploy(plan); err != nil {
+		if err := self.ApplyBlueGreenDeploy(plan, nodeploy); err != nil {
 			return err
 		}
 	}
@@ -145,7 +145,7 @@ func (self *BlueGreenController) ApplyBlueGreenDeploys(plans []*plan.BlueGreenPl
 	return nil
 }
 
-func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan) error {
+func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan, nodeploy bool) error {
 
 	apias := self.Ecs.AutoscalingApi()
 
@@ -171,11 +171,14 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 
 	logger.Main.Infof("Current status is '%s'", currentLabel)
 	logger.Main.Infof("Start Blue-Green Deployment: %s to %s ...", currentLabel, nextLabel)
-
-	// deploy service
-	logger.Main.Infof("Updating %s@%s service at %s ...", next.NewService.Service, next.NewService.Cluster, nextLabel)
-	if err := self.ClusterController.ApplyServicePlan(next.ClusterUpdatePlan); err != nil {
-		return err
+	if nodeploy {
+		logger.Main.Infof("Without deployment. It only replaces load balancers.")
+	} else {
+		// deploy service
+		logger.Main.Infof("Updating %s@%s service at %s ...", next.NewService.Service, next.NewService.Cluster, nextLabel)
+		if err := self.ClusterController.ApplyServicePlan(next.ClusterUpdatePlan); err != nil {
+			return err
+		}
 	}
 
 	logger.Main.Info("Start to check whether service is running ...")
