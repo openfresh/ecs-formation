@@ -189,12 +189,21 @@ func doBluegreen(c *cli.Context) {
 
 		nodeploy := c.Bool("nodeploy")
 
-		errbg := bgController.ApplyBlueGreenDeploys(bgPlans, nodeploy)
-		if errbg != nil {
-			logger.Main.Error(color.Red(errbg.Error()))
-			os.Exit(1)
-		}
+		if len(bgPlans) > 0 {
+			errbg := bgController.ApplyBlueGreenDeploys(bgPlans, nodeploy)
+			if errbg != nil {
+				logger.Main.Error(color.Red(errbg.Error()))
+				os.Exit(1)
+			}
+		} else {
+			logger.Main.Infof("Not found Blue Green Definition")
 
+			if len(operation.TargetResource) > 0 {
+				logger.Main.Infof("Try to update service '%s'", operation.TargetResource)
+				doService(c)
+			}
+
+		}
 	}
 }
 
