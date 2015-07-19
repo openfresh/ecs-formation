@@ -25,6 +25,19 @@ type UpdateContainer struct {
 type BlueGreenPlan struct {
 	Blue *ServiceSet
 	Green *ServiceSet
+	PrimaryElb string
+	StandbyElb string
+}
+
+func (self *BlueGreenPlan) IsBluwWithPrimaryElb() bool {
+
+	for _, lb := range self.Blue.AutoScalingGroup.LoadBalancerNames {
+		if *lb == self.PrimaryElb {
+			return true
+		}
+	}
+
+	return false
 }
 
 type ServiceSet struct {
@@ -32,17 +45,4 @@ type ServiceSet struct {
 	NewService *schema.BlueGreenTarget
 	AutoScalingGroup *autoscaling.Group
 	ClusterUpdatePlan *ServiceUpdatePlan
-	LoadBalancer string
-}
-
-
-func (self *ServiceSet) HasOwnElb() bool {
-
-	for _, lb := range self.AutoScalingGroup.LoadBalancerNames {
-		if *lb == self.LoadBalancer {
-			return true
-		}
-	}
-
-	return false
 }

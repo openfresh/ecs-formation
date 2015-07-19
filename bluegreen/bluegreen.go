@@ -72,8 +72,10 @@ func (self *BlueGreenController) GetBlueGreenDefs() []schema.BlueGreen {
 	return self.blueGreenDef
 }
 
-func (self *BlueGreenController) CreateBlueGreenPlan(blue schema.BlueGreenTarget, green schema.BlueGreenTarget,
-	cplans []*plan.ServiceUpdatePlan) (*plan.BlueGreenPlan, error) {
+func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen schema.BlueGreen, cplans []*plan.ServiceUpdatePlan) (*plan.BlueGreenPlan, error) {
+
+	blue := bluegreen.Blue
+	green := bluegreen.Green
 
 	clusterMap := make(map[string]*plan.ServiceUpdatePlan, len(cplans))
 	for _, cp := range cplans {
@@ -82,13 +84,13 @@ func (self *BlueGreenController) CreateBlueGreenPlan(blue schema.BlueGreenTarget
 
 	bgPlan := plan.BlueGreenPlan{
 		Blue: &plan.ServiceSet{
-			LoadBalancer: blue.ElbName,
 			ClusterUpdatePlan: clusterMap[blue.Cluster],
 		},
 		Green: &plan.ServiceSet{
-			LoadBalancer: green.ElbName,
 			ClusterUpdatePlan: clusterMap[green.Cluster],
 		},
+		PrimaryElb: bluegreen.PrimaryElb,
+		StandbyElb: bluegreen.StandbyElb,
 	}
 
 	// describe services
@@ -147,14 +149,14 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 
 	apias := self.Ecs.AutoscalingApi()
 
-	targetGreen := bgplan.Blue.HasOwnElb()
+	targetGreen := bgplan.IsBluwWithPrimaryElb()
 
 	var currentLabel *color.Escape
 	var nextLabel *color.Escape
 	var current *plan.ServiceSet
 	var next *plan.ServiceSet
-	primaryLb := bgplan.Blue.LoadBalancer
-	standbyLb := bgplan.Green.LoadBalancer
+	primaryLb := bgplan.PrimaryElb
+	standbyLb := bgplan.StandbyElb
 	if targetGreen {
 		current = bgplan.Blue
 		next = bgplan.Green
@@ -189,7 +191,7 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 	}
 	logger.Main.Infof("Attached to attach %s group to %s(primary).", nextLabel, primaryLb)
 
-	errwlb := self.waitLoadBalancer(*next.AutoScalingGroup.AutoScalingGroupName, current.LoadBalancer)
+	errwlb := self.waitLoadBalancer(*next.AutoScalingGroup.AutoScalingGroupName, primaryLb)
 	if errwlb != nil {
 		return errwlb
 	}

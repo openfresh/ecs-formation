@@ -20,7 +20,7 @@ import (
 var Commands = []cli.Command{
 	commandService,
 	commandTask,
-	commandDeploy,
+	commandBluegreen,
 }
 
 var commandService = cli.Command{
@@ -41,13 +41,13 @@ var commandTask = cli.Command{
 	Action: doTask,
 }
 
-var commandDeploy = cli.Command{
-	Name: "deploy",
+var commandBluegreen = cli.Command{
+	Name: "bluegreen",
 	Usage: "Manage bluegreen deployment on ECS",
 	Description: `
 	Manage bluegreen deployment on ECS.
 `,
-	Action: doDeploy,
+	Action: doBluegreen,
 }
 
 func debug(v ...interface{}) {
@@ -143,7 +143,7 @@ func doTask(c *cli.Context) {
 	}
 }
 
-func doDeploy(c *cli.Context) {
+func doBluegreen(c *cli.Context) {
 
 	ecsManager, err := buildECSManager()
 
@@ -272,7 +272,7 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.Bl
 
 	for _, bg := range bgDefs {
 
-		bgPlan, err := controller.CreateBlueGreenPlan(bg.Blue, bg.Green, cplans)
+		bgPlan, err := controller.CreateBlueGreenPlan(bg, cplans)
 		if err != nil {
 			return bgPlans, err
 		}
@@ -303,7 +303,6 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.Bl
 
 		fmt.Println(color.Cyan("    Blue:"))
 		fmt.Println(color.Cyan(fmt.Sprintf("        Cluster = %s", bg.Blue.Cluster)))
-		fmt.Println(color.Cyan(fmt.Sprintf("        LoadBalancer = %s", bgPlan.Blue.LoadBalancer)))
 		fmt.Println(color.Cyan(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgPlan.Blue.AutoScalingGroup.AutoScalingGroupARN)))
 		fmt.Println(color.Cyan("        Current services as follows:"))
 		for _, bcs := range bgPlan.Blue.ClusterUpdatePlan.CurrentServices {
@@ -317,7 +316,6 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.Bl
 
 		fmt.Println(color.Green("    Green:"))
 		fmt.Println(color.Green(fmt.Sprintf("        Cluster = %s", bg.Green.Cluster)))
-		fmt.Println(color.Green(fmt.Sprintf("        LoadBalancer = %s", bgPlan.Green.LoadBalancer)))
 		fmt.Println(color.Green(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgPlan.Green.AutoScalingGroup.AutoScalingGroupARN)))
 		fmt.Println(color.Green("        Current services as follows:"))
 		for _, gcs := range bgPlan.Green.ClusterUpdatePlan.CurrentServices {
