@@ -198,7 +198,7 @@ func doBluegreen(c *cli.Context) {
 		} else {
 			logger.Main.Infof("Not found Blue Green Definition")
 
-			if len(operation.TargetResource) > 0 {
+			if len(operation.TargetResource) > 0 && !nodeploy {
 				logger.Main.Infof("Try to update service '%s'", operation.TargetResource)
 				doService(c)
 			}
