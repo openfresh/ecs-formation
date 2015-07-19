@@ -301,6 +301,36 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.Bl
 			return bgPlans, errors.New(fmt.Sprintf("ECS Cluster '%s' is not found. ", bg.Green.Cluster))
 		}
 
+		fmt.Println(color.Cyan("    Blue:"))
+		fmt.Println(color.Cyan(fmt.Sprintf("        Cluster = %s", bg.Blue.Cluster)))
+		fmt.Println(color.Cyan(fmt.Sprintf("        LoadBalancer = %s", bgPlan.Blue.LoadBalancer)))
+		fmt.Println(color.Cyan(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgPlan.Blue.AutoScalingGroup.AutoScalingGroupARN)))
+		fmt.Println(color.Cyan("        Current services as follows:"))
+		for _, bcs := range bgPlan.Blue.ClusterUpdatePlan.CurrentServices {
+			fmt.Println(color.Cyan(fmt.Sprintf("            %s:", *bcs.ServiceName)))
+			fmt.Println(color.Cyan(fmt.Sprintf("                ServiceARN = %s", *bcs.ServiceARN)))
+			fmt.Println(color.Cyan(fmt.Sprintf("                TaskDefinition = %s", *bcs.TaskDefinition)))
+			fmt.Println(color.Cyan(fmt.Sprintf("                DesiredCount = %d", *bcs.DesiredCount)))
+			fmt.Println(color.Cyan(fmt.Sprintf("                PendingCount = %d", *bcs.PendingCount)))
+			fmt.Println(color.Cyan(fmt.Sprintf("                RunningCount = %d", *bcs.RunningCount)))
+		}
+
+		fmt.Println(color.Green("    Green:"))
+		fmt.Println(color.Green(fmt.Sprintf("        Cluster = %s", bg.Green.Cluster)))
+		fmt.Println(color.Green(fmt.Sprintf("        LoadBalancer = %s", bgPlan.Green.LoadBalancer)))
+		fmt.Println(color.Green(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgPlan.Green.AutoScalingGroup.AutoScalingGroupARN)))
+		fmt.Println(color.Green("        Current services as follows:"))
+		for _, gcs := range bgPlan.Green.ClusterUpdatePlan.CurrentServices {
+			fmt.Println(color.Green(fmt.Sprintf("            %s:", *gcs.ServiceName)))
+			fmt.Println(color.Green(fmt.Sprintf("                ServiceARN = %s", *gcs.ServiceARN)))
+			fmt.Println(color.Green(fmt.Sprintf("                TaskDefinition = %s", *gcs.TaskDefinition)))
+			fmt.Println(color.Green(fmt.Sprintf("                DesiredCount = %d", *gcs.DesiredCount)))
+			fmt.Println(color.Green(fmt.Sprintf("                PendingCount = %d", *gcs.PendingCount)))
+			fmt.Println(color.Green(fmt.Sprintf("                RunningCount = %d", *gcs.RunningCount)))
+		}
+
+		fmt.Println()
+
 		bgPlans = append(bgPlans, bgPlan)
 	}
 
