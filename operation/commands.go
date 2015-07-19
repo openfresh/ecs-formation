@@ -6,7 +6,7 @@ import (
 	"github.com/codegangsta/cli"
 	"fmt"
 	"github.com/stormcat24/ecs-formation/aws"
-	"github.com/stormcat24/ecs-formation/cluster"
+	"github.com/stormcat24/ecs-formation/service"
 	"github.com/stormcat24/ecs-formation/task"
 	"strings"
 	"github.com/str1ngs/ansi/color"
@@ -18,18 +18,18 @@ import (
 )
 
 var Commands = []cli.Command{
-	commandCluster,
+	commandService,
 	commandTask,
 	commandDeploy,
 }
 
-var commandCluster = cli.Command{
-	Name: "cluster",
+var commandService = cli.Command{
+	Name: "service",
 	Usage: "Manage ECS services on cluster",
 	Description: `
-	Manage ECS Clusters.
+	Manage services on ECS cluster.
 `,
-	Action: doCluster,
+	Action: doService,
 }
 
 var commandTask = cli.Command{
@@ -62,7 +62,7 @@ func assert(err error) {
 	}
 }
 
-func doCluster(c *cli.Context) {
+func doService(c *cli.Context) {
 
 	ecsManager, err := buildECSManager()
 
@@ -84,7 +84,7 @@ func doCluster(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	clusterController, err := cluster.NewClusterController(ecsManager, projectDir, operation.TargetResource)
+	clusterController, err := service.NewServiceController(ecsManager, projectDir, operation.TargetResource)
 
 	plans, err := createClusterPlans(clusterController, projectDir)
 
@@ -94,7 +94,7 @@ func doCluster(c *cli.Context) {
 	}
 
 	if (operation.SubCommand == "apply") {
-		clusterController.ApplyClusterPlans(plans)
+		clusterController.ApplyServicePlans(plans)
 	}
 }
 
@@ -191,13 +191,13 @@ func doDeploy(c *cli.Context) {
 	}
 }
 
-func createClusterPlans(controller *cluster.ClusterController, projectDir string) ([]*plan.ClusterUpdatePlan, error) {
+func createClusterPlans(controller *service.ServiceController, projectDir string) ([]*plan.ServiceUpdatePlan, error) {
 
 	logger.Main.Infoln("Checking services on clusters...")
-	plans, err := controller.CreateClusterUpdatePlans()
+	plans, err := controller.CreateServiceUpdatePlans()
 
 	if err != nil {
-		return []*plan.ClusterUpdatePlan{}, err
+		return []*plan.ServiceUpdatePlan{}, err
 	}
 
 	for _, plan := range plans {
@@ -266,7 +266,7 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.Bl
 	bgDefs := controller.GetBlueGreenDefs()
 	bgPlans := []*plan.BlueGreenPlan{}
 
-	cplans, errcp := controller.ClusterController.CreateClusterUpdatePlans()
+	cplans, errcp := controller.ClusterController.CreateServiceUpdatePlans()
 	if errcp != nil {
 		return bgPlans, errcp
 	}

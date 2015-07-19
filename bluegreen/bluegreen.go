@@ -9,20 +9,20 @@ import (
 	"time"
 	"fmt"
 	"errors"
-	"github.com/stormcat24/ecs-formation/cluster"
+	"github.com/stormcat24/ecs-formation/service"
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/str1ngs/ansi/color"
 )
 
 type BlueGreenController struct {
 	Ecs *aws.ECSManager
-	ClusterController *cluster.ClusterController
+	ClusterController *service.ServiceController
 	blueGreenDef []schema.BlueGreen
 }
 
 func NewBlueGreenController(ecs *aws.ECSManager, projectDir string) (*BlueGreenController, error) {
 
-	ccon, errcc := cluster.NewClusterController(ecs, projectDir, "")
+	ccon, errcc := service.NewServiceController(ecs, projectDir, "")
 
 	if errcc != nil {
 		return nil, errcc
@@ -73,9 +73,9 @@ func (self *BlueGreenController) GetBlueGreenDefs() []schema.BlueGreen {
 }
 
 func (self *BlueGreenController) CreateBlueGreenPlan(blue schema.BlueGreenTarget, green schema.BlueGreenTarget,
-	cplans []*plan.ClusterUpdatePlan) (*plan.BlueGreenPlan, error) {
+	cplans []*plan.ServiceUpdatePlan) (*plan.BlueGreenPlan, error) {
 
-	clusterMap := make(map[string]*plan.ClusterUpdatePlan, len(cplans))
+	clusterMap := make(map[string]*plan.ServiceUpdatePlan, len(cplans))
 	for _, cp := range cplans {
 		clusterMap[cp.Name] = cp
 	}
@@ -172,7 +172,7 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 
 	// deploy service
 	logger.Main.Infof("Updating %s@%s service at %s ...", next.NewService.Service, next.NewService.Cluster, nextLabel)
-	if err := self.ClusterController.ApplyClusterPlan(next.ClusterUpdatePlan); err != nil {
+	if err := self.ClusterController.ApplyServicePlan(next.ClusterUpdatePlan); err != nil {
 		return err
 	}
 

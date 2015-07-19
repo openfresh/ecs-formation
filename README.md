@@ -37,7 +37,8 @@ Make working directory for ecs-formation. This working directory should be manag
 ```bash
 $ mkdir -p path-to-path/test-ecs-formation
 $ mkdir -p path-to-path/test-ecs-formation/task
-$ mkdir -p path-to-path/test-ecs-formation/cluster
+$ mkdir -p path-to-path/test-ecs-formation/service
+$ mkdir -p path-to-path/test-ecs-formation/bluegreen
 ```
 
 ### Make ECS Cluster
@@ -89,7 +90,7 @@ Make Service Definition file in cluster directory. This file name must be equal 
 For example, if target cluster name is `test-cluster`, you need to make `test-cluster.yml`.
 
 ```bash
-(path-to-path/test-ecs-formation/cluster) $ vim test-cluster.yml
+(path-to-path/test-ecs-formation/service) $ vim test-cluster.yml
 test-service:
   task_definition: test-definition
   desired_count: 1
@@ -120,13 +121,13 @@ Apply definition.
 Show update plan.
 
 ```bash
-(path-to-path/test-ecs-formation $ ecs-formation cluster plan
+(path-to-path/test-ecs-formation $ ecs-formation service plan
 ```
 
 Apply definition.
 
 ```bash
-(path-to-path/test-ecs-formation $ ecs-formation cluster apply
+(path-to-path/test-ecs-formation $ ecs-formation service apply
 ```
 
 

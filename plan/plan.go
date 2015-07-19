@@ -6,7 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 )
 
-type ClusterUpdatePlan struct {
+type ServiceUpdatePlan struct {
 	Name            string
 	CurrentServices map[string]*ecs.Service
 	NewServices     map[string]*schema.Service
@@ -31,7 +31,7 @@ type ServiceSet struct {
 	CurrentService *ecs.Service
 	NewService *schema.BlueGreenTarget
 	AutoScalingGroup *autoscaling.Group
-	ClusterUpdatePlan *ClusterUpdatePlan
+	ClusterUpdatePlan *ServiceUpdatePlan
 	LoadBalancer string
 }
 

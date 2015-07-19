@@ -2,10 +2,6 @@ package schema
 
 import "gopkg.in/yaml.v2"
 
-
-type ClusterManager struct {
-}
-
 type Cluster struct {
 
 	Name	string

@@ -1,4 +1,4 @@
-package cluster
+package service
 
 import (
 	"io/ioutil"
@@ -16,19 +16,19 @@ import (
 	"errors"
 )
 
-type ClusterController struct {
+type ServiceController struct {
 	Ecs            *aws.ECSManager
 	TargetResource string
 	clusters       []schema.Cluster
 }
 
-func NewClusterController(ecs *aws.ECSManager, projectDir string, targetResource string) (*ClusterController, error) {
+func NewServiceController(ecs *aws.ECSManager, projectDir string, targetResource string) (*ServiceController, error) {
 
-	con := &ClusterController{
+	con := &ServiceController{
 		Ecs: ecs,
 	}
 
-	clusters, err := con.searchClusters(projectDir)
+	clusters, err := con.searchServices(projectDir)
 	if err != nil {
 		return nil, err
 	}
@@ -42,9 +42,9 @@ func NewClusterController(ecs *aws.ECSManager, projectDir string, targetResource
 	return con, nil
 }
 
-func (self *ClusterController) searchClusters(projectDir string) ([]schema.Cluster, error) {
+func (self *ServiceController) searchServices(projectDir string) ([]schema.Cluster, error) {
 
-	clusterDir := projectDir + "/cluster"
+	clusterDir := projectDir + "/service"
 	files, err := ioutil.ReadDir(clusterDir)
 
 	clusters := []schema.Cluster{}
@@ -75,17 +75,17 @@ func (self *ClusterController) searchClusters(projectDir string) ([]schema.Clust
 	return clusters, nil
 }
 
-func (self *ClusterController) GetClusters() []schema.Cluster {
+func (self *ServiceController) GetClusters() []schema.Cluster {
 	return self.clusters
 }
 
-func (self *ClusterController) CreateClusterUpdatePlans() ([]*plan.ClusterUpdatePlan, error) {
+func (self *ServiceController) CreateServiceUpdatePlans() ([]*plan.ServiceUpdatePlan, error) {
 
-	plans := []*plan.ClusterUpdatePlan{}
+	plans := []*plan.ServiceUpdatePlan{}
 	for _, cluster := range self.GetClusters() {
 		if len(self.TargetResource) == 0 || self.TargetResource == cluster.Name {
 
-			cp, err := self.CreateClusterUpdatePlan(cluster)
+			cp, err := self.CreateServiceUpdatePlan(cluster)
 			if err != nil {
 				return plans, err
 			}
@@ -96,34 +96,34 @@ func (self *ClusterController) CreateClusterUpdatePlans() ([]*plan.ClusterUpdate
 	return plans, nil
 }
 
-func (self *ClusterController) CreateClusterUpdatePlan(cluster schema.Cluster) (*plan.ClusterUpdatePlan, error) {
+func (self *ServiceController) CreateServiceUpdatePlan(cluster schema.Cluster) (*plan.ServiceUpdatePlan, error) {
 
 	output, errdc := self.Ecs.ClusterApi().DescribeClusters([]*string{&cluster.Name})
 
 	if errdc != nil {
-		return &plan.ClusterUpdatePlan{}, errdc
+		return &plan.ServiceUpdatePlan{}, errdc
 	}
 
 	if len(output.Failures) > 0 {
-		return &plan.ClusterUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' not found", cluster.Name))
+		return &plan.ServiceUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' not found", cluster.Name))
 	}
 
 	target := output.Clusters[0]
 
 	if *target.Status != "ACTIVE" {
-		return &plan.ClusterUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' is not ACTIVE.", cluster.Name))
+		return &plan.ServiceUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' is not ACTIVE.", cluster.Name))
 	}
 
 	api := self.Ecs.ServiceApi()
 
 	resListServices, errls := api.ListServices(cluster.Name)
 	if errls != nil {
-		return &plan.ClusterUpdatePlan{}, errls
+		return &plan.ServiceUpdatePlan{}, errls
 	}
 
 	resDescribeService, errds := api.DescribeService(cluster.Name, resListServices.ServiceARNs)
 	if errds != nil {
-		return &plan.ClusterUpdatePlan{}, errds
+		return &plan.ServiceUpdatePlan{}, errds
 	}
 
 	currentServices := map[string]*ecs.Service{}
@@ -136,26 +136,26 @@ func (self *ClusterController) CreateClusterUpdatePlan(cluster schema.Cluster) (
 		newServices[name] = &newService
 	}
 
-	return &plan.ClusterUpdatePlan{
+	return &plan.ServiceUpdatePlan{
 		Name: cluster.Name,
 		CurrentServices: currentServices,
 		NewServices: newServices,
 	}, nil
 }
 
-func (self *ClusterController) ApplyClusterPlans(plans []*plan.ClusterUpdatePlan) {
+func (self *ServiceController) ApplyServicePlans(plans []*plan.ServiceUpdatePlan) {
 
 	logger.Main.Info("Start apply serivces...")
 
 	for _, plan := range plans {
-		if err := self.ApplyClusterPlan(plan); err != nil {
+		if err := self.ApplyServicePlan(plan); err != nil {
 			fmt.Fprintln(os.Stderr, color.Red(err.Error()))
 			os.Exit(1)
 		}
 	}
 }
 
-func (self *ClusterController) ApplyClusterPlan(plan *plan.ClusterUpdatePlan) error {
+func (self *ServiceController) ApplyServicePlan(plan *plan.ServiceUpdatePlan) error {
 
 	api := self.Ecs.ServiceApi()
 
@@ -211,7 +211,7 @@ func (self *ClusterController) ApplyClusterPlan(plan *plan.ClusterUpdatePlan) er
 	return nil
 }
 
-func (self *ClusterController) waitStoppingService(cluster string, service string) error {
+func (self *ServiceController) waitStoppingService(cluster string, service string) error {
 
 	api := self.Ecs.ServiceApi()
 
@@ -238,7 +238,7 @@ func (self *ClusterController) waitStoppingService(cluster string, service strin
 	}
 }
 
-func (self *ClusterController) WaitActiveService(cluster string, service string) error {
+func (self *ServiceController) WaitActiveService(cluster string, service string) error {
 
 	api := self.Ecs.ServiceApi()
 
