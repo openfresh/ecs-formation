@@ -17,10 +17,11 @@ import (
 type BlueGreenController struct {
 	Ecs *aws.ECSManager
 	ClusterController *service.ServiceController
-	blueGreenDef []schema.BlueGreen
+	blueGreenMap map[string]*schema.BlueGreen
+	TargetResource string
 }
 
-func NewBlueGreenController(ecs *aws.ECSManager, projectDir string) (*BlueGreenController, error) {
+func NewBlueGreenController(ecs *aws.ECSManager, projectDir string, targetResource string) (*BlueGreenController, error) {
 
 	ccon, errcc := service.NewServiceController(ecs, projectDir, "")
 
@@ -31,6 +32,7 @@ func NewBlueGreenController(ecs *aws.ECSManager, projectDir string) (*BlueGreenC
 	con := &BlueGreenController{
 		Ecs: ecs,
 		ClusterController: ccon,
+		TargetResource: targetResource,
 	}
 
 	defs, errs := con.searchBlueGreen(projectDir)
@@ -38,41 +40,88 @@ func NewBlueGreenController(ecs *aws.ECSManager, projectDir string) (*BlueGreenC
 		return nil, errs
 	}
 
-	con.blueGreenDef = defs
+	con.blueGreenMap = defs
 	return con, nil
 }
 
-func (self *BlueGreenController) searchBlueGreen(projectDir string) ([]schema.BlueGreen, error) {
+func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]*schema.BlueGreen, error) {
 
 	clusterDir := projectDir + "/bluegreen"
 	files, err := ioutil.ReadDir(clusterDir)
 
-	bluegreenItems := []schema.BlueGreen{}
+	merged := map[string]*schema.BlueGreen{}
 
 	if err != nil {
-		return bluegreenItems, err
+		return merged, err
 	}
 
 	for _, file := range files {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".yml") {
 			content, _ := ioutil.ReadFile(clusterDir + "/" + file.Name())
 
-			bgMap, _ := schema.CreateBlueGreenMap(content)
+			bgmap, err := schema.CreateBlueGreenMap(content)
+			if err != nil {
+				return merged, err
+			}
 
-			for _, bg := range bgMap {
-				bluegreenItems = append(bluegreenItems, bg)
+			for name, bg := range bgmap {
+				merged[name] = &bg
 			}
 		}
 	}
 
-	return bluegreenItems, nil
+	return merged, nil
 }
 
-func (self *BlueGreenController) GetBlueGreenDefs() []schema.BlueGreen {
-	return self.blueGreenDef
+func (self *BlueGreenController) GetBlueGreenMap() map[string]*schema.BlueGreen {
+	return self.blueGreenMap
 }
 
-func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen schema.BlueGreen, cplans []*plan.ServiceUpdatePlan) (*plan.BlueGreenPlan, error) {
+func (self *BlueGreenController) CreateBlueGreenPlans(bgmap map[string]*schema.BlueGreen, cplans []*plan.ServiceUpdatePlan) ([]*plan.BlueGreenPlan, error) {
+
+	bgPlans := []*plan.BlueGreenPlan{}
+
+	for name, bg := range bgmap {
+
+		if len(self.TargetResource) == 0 || self.TargetResource == name {
+
+			bgplan, err := self.CreateBlueGreenPlan(bg, cplans)
+			if err != nil {
+				return bgPlans, err
+			}
+
+			if bgplan.Blue.CurrentService == nil {
+				return bgPlans, errors.New(fmt.Sprintf("Service '%s' is not found. ", bg.Blue.Service))
+			}
+
+			if bgplan.Green.CurrentService == nil {
+				return bgPlans, errors.New(fmt.Sprintf("Service '%s' is not found. ", bg.Green.Service))
+			}
+
+			if bgplan.Blue.AutoScalingGroup == nil {
+				return bgPlans, errors.New(fmt.Sprintf("AutoScaling Group '%s' is not found. ", bg.Blue.AutoscalingGroup))
+			}
+
+			if bgplan.Green.AutoScalingGroup == nil {
+				return bgPlans, errors.New(fmt.Sprintf("AutoScaling Group '%s' is not found. ", bg.Green.AutoscalingGroup))
+			}
+
+			if bgplan.Blue.ClusterUpdatePlan == nil {
+				return bgPlans, errors.New(fmt.Sprintf("ECS Cluster '%s' is not found. ", bg.Blue.Cluster))
+			}
+
+			if bgplan.Green.ClusterUpdatePlan == nil {
+				return bgPlans, errors.New(fmt.Sprintf("ECS Cluster '%s' is not found. ", bg.Green.Cluster))
+			}
+
+			bgPlans = append(bgPlans, bgplan)
+		}
+	}
+
+	return bgPlans, nil
+}
+
+func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *schema.BlueGreen, cplans []*plan.ServiceUpdatePlan) (*plan.BlueGreenPlan, error) {
 
 	blue := bluegreen.Blue
 	green := bluegreen.Green

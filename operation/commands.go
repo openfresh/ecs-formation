@@ -14,7 +14,6 @@ import (
 	"github.com/stormcat24/ecs-formation/util"
 	"github.com/stormcat24/ecs-formation/bluegreen"
 	"github.com/stormcat24/ecs-formation/logger"
-	"errors"
 )
 
 var Commands = []cli.Command{
@@ -171,7 +170,7 @@ func doBluegreen(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	bgController, errbgc := bluegreen.NewBlueGreenController(ecsManager, projectDir)
+	bgController, errbgc := bluegreen.NewBlueGreenController(ecsManager, projectDir, operation.TargetResource)
 	if errbgc != nil {
 		logger.Main.Error(color.Red(errbgc.Error()))
 		os.Exit(1)
@@ -270,50 +269,24 @@ func createTaskPlans(controller *task.TaskDefinitionController, projectDir strin
 
 func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.BlueGreenPlan, error) {
 
-	bgDefs := controller.GetBlueGreenDefs()
-	bgPlans := []*plan.BlueGreenPlan{}
+	bgmap := controller.GetBlueGreenMap()
 
 	cplans, errcp := controller.ClusterController.CreateServiceUpdatePlans()
 	if errcp != nil {
-		return bgPlans, errcp
+		return []*plan.BlueGreenPlan{}, errcp
 	}
 
-	for _, bg := range bgDefs {
+	bgplans, errbgp := controller.CreateBlueGreenPlans(bgmap, cplans)
+	if errbgp != nil {
+		return bgplans, errbgp
+	}
 
-		bgPlan, err := controller.CreateBlueGreenPlan(bg, cplans)
-		if err != nil {
-			return bgPlans, err
-		}
-
-		if bgPlan.Blue.CurrentService == nil {
-			return bgPlans, errors.New(fmt.Sprintf("Service '%s' is not found. ", bg.Blue.Service))
-		}
-
-		if bgPlan.Green.CurrentService == nil {
-			return bgPlans, errors.New(fmt.Sprintf("Service '%s' is not found. ", bg.Green.Service))
-		}
-
-		if bgPlan.Blue.AutoScalingGroup == nil {
-			return bgPlans, errors.New(fmt.Sprintf("AutoScaling Group '%s' is not found. ", bg.Blue.AutoscalingGroup))
-		}
-
-		if bgPlan.Green.AutoScalingGroup == nil {
-			return bgPlans, errors.New(fmt.Sprintf("AutoScaling Group '%s' is not found. ", bg.Green.AutoscalingGroup))
-		}
-
-		if bgPlan.Blue.ClusterUpdatePlan == nil {
-			return bgPlans, errors.New(fmt.Sprintf("ECS Cluster '%s' is not found. ", bg.Blue.Cluster))
-		}
-
-		if bgPlan.Green.ClusterUpdatePlan == nil {
-			return bgPlans, errors.New(fmt.Sprintf("ECS Cluster '%s' is not found. ", bg.Green.Cluster))
-		}
-
+	for _, bgplan := range bgplans {
 		fmt.Println(color.Cyan("    Blue:"))
-		fmt.Println(color.Cyan(fmt.Sprintf("        Cluster = %s", bg.Blue.Cluster)))
-		fmt.Println(color.Cyan(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgPlan.Blue.AutoScalingGroup.AutoScalingGroupARN)))
+		fmt.Println(color.Cyan(fmt.Sprintf("        Cluster = %s", bgplan.Blue.NewService.Cluster)))
+		fmt.Println(color.Cyan(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgplan.Blue.AutoScalingGroup.AutoScalingGroupARN)))
 		fmt.Println(color.Cyan("        Current services as follows:"))
-		for _, bcs := range bgPlan.Blue.ClusterUpdatePlan.CurrentServices {
+		for _, bcs := range bgplan.Blue.ClusterUpdatePlan.CurrentServices {
 			fmt.Println(color.Cyan(fmt.Sprintf("            %s:", *bcs.ServiceName)))
 			fmt.Println(color.Cyan(fmt.Sprintf("                ServiceARN = %s", *bcs.ServiceARN)))
 			fmt.Println(color.Cyan(fmt.Sprintf("                TaskDefinition = %s", *bcs.TaskDefinition)))
@@ -323,10 +296,10 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.Bl
 		}
 
 		fmt.Println(color.Green("    Green:"))
-		fmt.Println(color.Green(fmt.Sprintf("        Cluster = %s", bg.Green.Cluster)))
-		fmt.Println(color.Green(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgPlan.Green.AutoScalingGroup.AutoScalingGroupARN)))
+		fmt.Println(color.Green(fmt.Sprintf("        Cluster = %s", bgplan.Green.NewService.Cluster)))
+		fmt.Println(color.Green(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgplan.Green.AutoScalingGroup.AutoScalingGroupARN)))
 		fmt.Println(color.Green("        Current services as follows:"))
-		for _, gcs := range bgPlan.Green.ClusterUpdatePlan.CurrentServices {
+		for _, gcs := range bgplan.Green.ClusterUpdatePlan.CurrentServices {
 			fmt.Println(color.Green(fmt.Sprintf("            %s:", *gcs.ServiceName)))
 			fmt.Println(color.Green(fmt.Sprintf("                ServiceARN = %s", *gcs.ServiceARN)))
 			fmt.Println(color.Green(fmt.Sprintf("                TaskDefinition = %s", *gcs.TaskDefinition)))
@@ -336,11 +309,9 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.Bl
 		}
 
 		fmt.Println()
-
-		bgPlans = append(bgPlans, bgPlan)
 	}
 
-	return bgPlans, nil
+	return bgplans, nil
 }
 
 func buildECSManager() (*aws.ECSManager, error) {
