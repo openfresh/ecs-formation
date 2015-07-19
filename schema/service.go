@@ -59,9 +59,9 @@ func CreateServiceMap(data []byte) (map[string]Service, error) {
 	return servicesMap, err
 }
 
-func CreateBlueGreenMap(data []byte) (map[string]BlueGreen, error) {
+func CreateBlueGreen(data []byte) (*BlueGreen, error) {
 
-	bgMap := map[string]BlueGreen{}
-	err := yaml.Unmarshal(data, &bgMap)
-	return bgMap, err
+	bg := &BlueGreen{}
+	err := yaml.Unmarshal(data, bg)
+	return bg, err
 }

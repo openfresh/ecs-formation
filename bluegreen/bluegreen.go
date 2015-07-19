@@ -12,6 +12,7 @@ import (
 	"github.com/stormcat24/ecs-formation/service"
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/str1ngs/ansi/color"
+	"regexp"
 )
 
 type BlueGreenController struct {
@@ -55,18 +56,19 @@ func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]
 		return merged, err
 	}
 
+	filePattern := regexp.MustCompile("^(.+)\\.yml$")
+
 	for _, file := range files {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".yml") {
 			content, _ := ioutil.ReadFile(clusterDir + "/" + file.Name())
+			tokens := filePattern.FindStringSubmatch(file.Name())
+			name := tokens[1]
 
-			bgmap, err := schema.CreateBlueGreenMap(content)
+			bg, err := schema.CreateBlueGreen(content)
 			if err != nil {
 				return merged, err
 			}
-
-			for name, bg := range bgmap {
-				merged[name] = &bg
-			}
+			merged[name] = bg
 		}
 	}
 

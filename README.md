@@ -150,17 +150,16 @@ Make management file of Blue Green Deployment file in bluegreen directory.
 
 ```bash
 (path-to-path/test-ecs-formation/bluegreen) $ vim test-bluegreen.yml
-test-bluegreen:
-  blue:
-    cluster: test-blue
-    service: test-service
-    autoscaling_group: test-blue-asg
-  green:
-    cluster: test-green
-    service: test-service
-    autoscaling_group: test-green-asg
-  primary_elb: test-elb-primary
-  standby_elb: test-elb-standby
+blue:
+  cluster: test-blue
+  service: test-service
+  autoscaling_group: test-blue-asg
+green:
+  cluster: test-green
+  service: test-service
+  autoscaling_group: test-green-asg
+primary_elb: test-elb-primary
+standby_elb: test-elb-standby
 ```
 
 Show blue green deployment plan.
