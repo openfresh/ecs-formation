@@ -232,10 +232,6 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 		}
 	}
 
-	logger.Main.Info("Start to check whether service is running ...")
-	self.ClusterController.WaitActiveService(next.NewService.Cluster, next.NewService.Service)
-	logger.Main.Infof("Service '%s' is running\n", next.NewService.Service)
-
 	// attach next group to primary lb
 	_, erratt := apias.AttachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, []string{
 		primaryLb,
