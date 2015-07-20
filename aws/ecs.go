@@ -42,3 +42,17 @@ func (self *ECSManager) TaskApi() *EcsTaskApi {
 		Region: self.region,
 	}
 }
+
+func (self *ECSManager) ElbApi() *ElbApi {
+	return &ElbApi{
+		Credentials: self.credentials,
+		Region: self.region,
+	}
+}
+
+func (self *ECSManager) AutoscalingApi() *AutoscalingApi {
+	return &AutoscalingApi{
+		Credentials: self.credentials,
+		Region: self.region,
+	}
+}

@@ -115,3 +115,33 @@ func (self *EcsTaskApi) DeregisterTaskDefinition(taskName string) (*ecs.Deregist
 
 	return svc.DeregisterTaskDefinition(params)
 }
+
+func (self *EcsTaskApi) ListTasks(cluster string, service string) (*ecs.ListTasksOutput, error) {
+
+	svc := ecs.New(&aws.Config{
+		Region: self.Region,
+		Credentials: self.Credentials,
+	})
+
+	params := &ecs.ListTasksInput{
+		Cluster: aws.String(cluster),
+		ServiceName: aws.String(service),
+	}
+
+	return svc.ListTasks(params)
+}
+
+func (self *EcsTaskApi) DescribeTasks(cluster string, tasks []*string) (*ecs.DescribeTasksOutput, error) {
+
+	svc := ecs.New(&aws.Config{
+		Region: self.Region,
+		Credentials: self.Credentials,
+	})
+
+	params := &ecs.DescribeTasksInput{
+		Cluster: aws.String(cluster),
+		Tasks: tasks,
+	}
+
+	return svc.DescribeTasks(params)
+}

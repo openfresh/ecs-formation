@@ -2,10 +2,6 @@ package schema
 
 import "gopkg.in/yaml.v2"
 
-
-type ClusterManager struct {
-}
-
 type Cluster struct {
 
 	Name	string
@@ -19,7 +15,28 @@ type Service struct {
 	DesiredCount	int64	`yaml:"desired_count"`
 	LoadBalancers	[]LoadBalancer	`yaml:"load_balancers"`
 	Role	string	`yaml:"role"`
-	ForceRemake	bool `yaml:"force_remake"`
+}
+
+func (self *Service) FindLoadBalancerByContainer(conname string, port int64) *LoadBalancer {
+
+	for _, lb := range self.LoadBalancers {
+		if lb.ContainerName == conname &&
+			lb.ContainerPort == port {
+			return &lb
+		}
+	}
+	return nil
+}
+
+func (self *Service) FindLoadBalancerByName(name string) *LoadBalancer {
+
+	for _, lb := range self.LoadBalancers {
+		if lb.Name == name {
+			return &lb
+		}
+	}
+
+	return nil
 }
 
 type LoadBalancer struct {
@@ -40,4 +57,11 @@ func CreateServiceMap(data []byte) (map[string]Service, error) {
 	}
 
 	return servicesMap, err
+}
+
+func CreateBlueGreen(data []byte) (*BlueGreen, error) {
+
+	bg := &BlueGreen{}
+	err := yaml.Unmarshal(data, bg)
+	return bg, err
 }

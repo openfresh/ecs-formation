@@ -14,7 +14,9 @@ ecs-formation is a tool for defining several Docker continers and clusters on [A
 
 # Usage
 
-### Installation
+### Setup
+
+#### Installation
 
 ecs-formation is written by Go. Please run `go get`.
 
@@ -22,7 +24,7 @@ ecs-formation is written by Go. Please run `go get`.
 $ go get github.com/stormcat24/ecs-formation
 ```
 
-### Define environment variables
+#### Define environment variables
 
 ecs-formation requires environment variables to run, as follows.
 
@@ -30,21 +32,24 @@ ecs-formation requires environment variables to run, as follows.
 * AWS_SECRET_ACCESS_KEY: AWS secret access key
 * AWS_REGION: Target AWS region name
 
-### Make working directory
+#### Make working directory
 
 Make working directory for ecs-formation. This working directory should be managed by Git.
 
 ```bash
 $ mkdir -p path-to-path/test-ecs-formation
 $ mkdir -p path-to-path/test-ecs-formation/task
-$ mkdir -p path-to-path/test-ecs-formation/cluster
+$ mkdir -p path-to-path/test-ecs-formation/service
+$ mkdir -p path-to-path/test-ecs-formation/bluegreen
 ```
 
-### Make ECS Cluster
+### Manage Task Definition and Services
+
+#### Make ECS Cluster
 
 You need to create ECS cluster in advance. And also, ECS instance must be join in ECS cluster.
 
-### Define Task Definitions
+#### Define Task Definitions
 
 Make Task Definitions file in task directory. This file name is used as ECS Task Definition name.
 
@@ -82,14 +87,14 @@ redis:
   essential: true
 ```
 
-### Define Services on Cluster
+#### Define Services on Cluster
 
 Make Service Definition file in cluster directory. This file name must be equal ECS cluster name.
 
 For example, if target cluster name is `test-cluster`, you need to make `test-cluster.yml`.
 
 ```bash
-(path-to-path/test-ecs-formation/cluster) $ vim test-cluster.yml
+(path-to-path/test-ecs-formation/service) $ vim test-cluster.yml
 test-service:
   task_definition: test-definition
   desired_count: 1
@@ -101,7 +106,7 @@ test-service:
       container_port: 80
 ```
 
-### Manage Task Definitions
+#### Manage Task Definitions
 
 Show update plan.
 
@@ -115,20 +120,65 @@ Apply definition.
 (path-to-path/test-ecs-formation $ ecs-formation task apply
 ```
 
-### Manage Services on Cluster
+#### Manage Services on Cluster
 
 Show update plan.
 
 ```bash
-(path-to-path/test-ecs-formation $ ecs-formation cluster plan
+(path-to-path/test-ecs-formation $ ecs-formation service plan
 ```
 
 Apply definition.
 
 ```bash
-(path-to-path/test-ecs-formation $ ecs-formation cluster apply
+(path-to-path/test-ecs-formation $ ecs-formation service apply
 ```
 
+### Blue Green Deployment
+
+ecs-formation supports blue-green deployment. 
+
+#### Requirements on ecs-formation
+
+* Requires two ECS cluster. Blue and Green.
+* Requires two ELB. Primary ELB and Standby ELB.
+* ECS cluster should be built by EC2 Autoscaling group.
+
+#### Define Blue Green Deployment
+
+Make management file of Blue Green Deployment file in bluegreen directory. 
+
+```bash
+(path-to-path/test-ecs-formation/bluegreen) $ vim test-bluegreen.yml
+blue:
+  cluster: test-blue
+  service: test-service
+  autoscaling_group: test-blue-asg
+green:
+  cluster: test-green
+  service: test-service
+  autoscaling_group: test-green-asg
+primary_elb: test-elb-primary
+standby_elb: test-elb-standby
+```
+
+Show blue green deployment plan.
+
+```bash
+(path-to-path/test-ecs-formation $ ecs-formation bluegreen plan
+```
+
+Apply blue green deployment.
+
+```bash
+(path-to-path/test-ecs-formation $ ecs-formation bluegreen apply
+```
+
+if with `--nodeploy` option, not update services. Only swap ELB on blue and green groups.  
+
+```bash
+(path-to-path/test-ecs-formation $ ecs-formation bluegreen apply --nodeploy
+```
 
 License
 ===
