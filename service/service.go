@@ -84,7 +84,6 @@ func (self *ServiceController) CreateServiceUpdatePlans() ([]*plan.ServiceUpdate
 	plans := []*plan.ServiceUpdatePlan{}
 	for _, cluster := range self.GetClusters() {
 		if len(self.TargetResource) == 0 || self.TargetResource == cluster.Name {
-
 			cp, err := self.CreateServiceUpdatePlan(cluster)
 			if err != nil {
 				return plans, err
@@ -121,14 +120,16 @@ func (self *ServiceController) CreateServiceUpdatePlan(cluster schema.Cluster) (
 		return &plan.ServiceUpdatePlan{}, errls
 	}
 
-	resDescribeService, errds := api.DescribeService(cluster.Name, resListServices.ServiceARNs)
-	if errds != nil {
-		return &plan.ServiceUpdatePlan{}, errds
-	}
-
 	currentServices := map[string]*ecs.Service{}
-	for _, service := range resDescribeService.Services {
-		currentServices[*service.ServiceName] = service
+	if len(resListServices.ServiceARNs) > 0 {
+		resDescribeService, errds := api.DescribeService(cluster.Name, resListServices.ServiceARNs)
+		if errds != nil {
+			return &plan.ServiceUpdatePlan{}, errds
+		}
+
+		for _, service := range resDescribeService.Services {
+			currentServices[*service.ServiceName] = service
+		}
 	}
 
 	newServices := map[string]*schema.Service{}
