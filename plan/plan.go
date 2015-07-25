@@ -8,6 +8,7 @@ import (
 
 type ServiceUpdatePlan struct {
 	Name            string
+	InstanceARNs    []*string
 	CurrentServices map[string]*ecs.Service
 	NewServices     map[string]*schema.Service
 }
