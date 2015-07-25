@@ -134,7 +134,8 @@ func (self *ServiceController) CreateServiceUpdatePlan(cluster schema.Cluster) (
 
 	newServices := map[string]*schema.Service{}
 	for name, newService := range cluster.Services {
-		newServices[name] = &newService
+		s := newService
+		newServices[name] = &s
 	}
 
 	return &plan.ServiceUpdatePlan{
