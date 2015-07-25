@@ -97,7 +97,8 @@ func (self *ServiceController) CreateServiceUpdatePlans() ([]*plan.ServiceUpdate
 
 func (self *ServiceController) CreateServiceUpdatePlan(cluster schema.Cluster) (*plan.ServiceUpdatePlan, error) {
 
-	output, errdc := self.Ecs.ClusterApi().DescribeClusters([]*string{&cluster.Name})
+	clusterApi := self.Ecs.ClusterApi()
+	output, errdc := clusterApi.DescribeClusters([]*string{&cluster.Name})
 
 	if errdc != nil {
 		return &plan.ServiceUpdatePlan{}, errdc
@@ -107,22 +108,31 @@ func (self *ServiceController) CreateServiceUpdatePlan(cluster schema.Cluster) (
 		return &plan.ServiceUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' not found", cluster.Name))
 	}
 
+	rlci, errlci := clusterApi.ListContainerInstances(cluster.Name)
+	if errlci != nil {
+		return &plan.ServiceUpdatePlan{}, errlci
+	}
+
+	if len(rlci.ContainerInstanceARNs) == 0 {
+		return &plan.ServiceUpdatePlan{}, errors.New(fmt.Sprintf("ECS instances not found in cluster '%s' not found", cluster.Name))
+	}
+
 	target := output.Clusters[0]
 
 	if *target.Status != "ACTIVE" {
 		return &plan.ServiceUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' is not ACTIVE.", cluster.Name))
 	}
 
-	api := self.Ecs.ServiceApi()
+	serviceApi := self.Ecs.ServiceApi()
 
-	resListServices, errls := api.ListServices(cluster.Name)
+	resListServices, errls := serviceApi.ListServices(cluster.Name)
 	if errls != nil {
 		return &plan.ServiceUpdatePlan{}, errls
 	}
 
 	currentServices := map[string]*ecs.Service{}
 	if len(resListServices.ServiceARNs) > 0 {
-		resDescribeService, errds := api.DescribeService(cluster.Name, resListServices.ServiceARNs)
+		resDescribeService, errds := serviceApi.DescribeService(cluster.Name, resListServices.ServiceARNs)
 		if errds != nil {
 			return &plan.ServiceUpdatePlan{}, errds
 		}
@@ -140,6 +150,7 @@ func (self *ServiceController) CreateServiceUpdatePlan(cluster schema.Cluster) (
 
 	return &plan.ServiceUpdatePlan{
 		Name: cluster.Name,
+		InstanceARNs: rlci.ContainerInstanceARNs,
 		CurrentServices: currentServices,
 		NewServices: newServices,
 	}, nil

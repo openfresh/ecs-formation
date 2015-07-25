@@ -219,11 +219,16 @@ func createClusterPlans(controller *service.ServiceController, projectDir string
 	for _, plan := range plans {
 
 		fmt.Println(color.Yellow(fmt.Sprintf("Current status of ECS Cluster '%s':", plan.Name)))
+		if len(plan.InstanceARNs) > 0 {
+			fmt.Println(color.Yellow("    Container Instances as follows:"))
+			for _, instance := range plan.InstanceARNs {
+				fmt.Println(color.Yellow(fmt.Sprintf("        %s", *instance)))
+			}
+		}
 
-		if len(plan.CurrentServices) > 0 {
-			fmt.Println(color.Yellow("    Services as follows:"))
-		} else {
-			fmt.Println(color.Yellow("    No services are deployed."))
+		fmt.Println(color.Yellow("    Services as follows:"))
+		if len(plan.CurrentServices) == 0 {
+			fmt.Println(color.Yellow("         No services are deployed."))
 		}
 
 		for _, cs := range plan.CurrentServices {

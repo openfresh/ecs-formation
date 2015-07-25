@@ -66,3 +66,17 @@ func (self *EcsClusterApi) ListClusters(maxResult int64) (*ecs.ListClustersOutpu
 
 	return svc.ListClusters(params)
 }
+
+func (self *EcsClusterApi) ListContainerInstances(cluster string) (*ecs.ListContainerInstancesOutput, error) {
+
+	svc := ecs.New(&aws.Config{
+		Region: self.Region,
+		Credentials: self.Credentials,
+	})
+
+	params := &ecs.ListContainerInstancesInput{
+		Cluster: aws.String(cluster),
+	}
+
+	return svc.ListContainerInstances(params)
+}
