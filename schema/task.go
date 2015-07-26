@@ -12,20 +12,17 @@ type TaskDefinition struct {
 
 type ContainerDefinition struct {
 	Name	string
-	Image	string	`yaml:"image"`
-	Ports	[]string	`yaml:"ports"`
-	Environment	map[string]string	`yaml:"environment"`
-	Links	[]string	`yaml:"links"`
-	Volumes	[]string	`yaml:"volumes"`
-//	volumes:
-//- /var/lib/mysql
-//- cache/:/tmp/cache
-//- ~/configs:/etc/configs/:ro
-	Memory	int64	`yaml:"memory"`
-	CpuUnits	int64	`yaml:"cpu_units"`
-	Essential	bool	`yaml:"essential"`
-	EntryPoint	string	`yaml:"entry_point"`
-	Command	string	`yaml:"command"`
+	Image	string                 `yaml:"image"`
+	Ports	[]string               `yaml:"ports"`
+	Environment	map[string]string  `yaml:"environment"`
+	Links	[]string               `yaml:"links"`
+	Volumes	[]string               `yaml:"volumes"`
+	VolumesFrom []string           `yaml:"volumes_from"`
+	Memory	int64                  `yaml:"memory"`
+	CpuUnits	int64              `yaml:"cpu_units"`
+	Essential	bool               `yaml:"essential"`
+	EntryPoint	string             `yaml:"entry_point"`
+	Command	string                 `yaml:"command"`
 }
 
 func CreateTaskDefinition(taskDefName string, data []byte) (*TaskDefinition, error) {
