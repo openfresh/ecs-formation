@@ -33,7 +33,7 @@ func toPortMappings(values []string) ([]*ecs.PortMapping, error) {
 	mappings := []*ecs.PortMapping{}
 	for _, value := range values {
 
-		mp, err := toPortMapping(&value)
+		mp, err := toPortMapping(value)
 
 		if err != nil {
 			return []*ecs.PortMapping{}, err
@@ -45,9 +45,9 @@ func toPortMappings(values []string) ([]*ecs.PortMapping, error) {
 	return mappings, nil
 }
 
-func toPortMapping(value *string) (*ecs.PortMapping, error) {
+func toPortMapping(value string) (*ecs.PortMapping, error) {
 
-	tokens := strings.Split(*value, ":")
+	tokens := strings.Split(value, ":")
 	length := len(tokens)
 
 	if length == 1 {
@@ -94,7 +94,7 @@ func toPortMapping(value *string) (*ecs.PortMapping, error) {
 		}, nil
 
 	} else {
-		return &ecs.PortMapping{}, errors.New(fmt.Sprintf("Port mapping '%s' is invalid pattern.", *value))
+		return &ecs.PortMapping{}, errors.New(fmt.Sprintf("Port mapping '%s' is invalid pattern.", value))
 	}
 }
 
@@ -110,4 +110,43 @@ func toLoadBalancers(values *[]schema.LoadBalancer) []*ecs.LoadBalancer {
 	}
 
 	return loadBalancers
+}
+
+func toVolumesFroms(values []string) ([]*ecs.VolumeFrom, error) {
+
+	volumes := []*ecs.VolumeFrom{}
+	for _, value := range values {
+
+		vf, err := toVolumesFrom(value)
+
+		if err != nil {
+			return []*ecs.VolumeFrom{}, err
+		}
+
+		volumes = append(volumes, vf);
+	}
+
+	return volumes, nil
+}
+
+func toVolumesFrom(value string) (*ecs.VolumeFrom, error) {
+
+	tokens := strings.Split(value, ":")
+	length := len(tokens)
+
+	if length > 1 {
+		ro := tokens[1]
+
+		return &ecs.VolumeFrom{
+			SourceContainer: aws.String(tokens[0]),
+			ReadOnly: aws.Boolean(ro == "ro"),
+		}, nil
+	} else if length == 1 {
+		return &ecs.VolumeFrom{
+			SourceContainer: aws.String(tokens[0]),
+			ReadOnly: aws.Boolean(false),
+		}, nil
+	} else {
+		return &ecs.VolumeFrom{}, errors.New(fmt.Sprintf("Invalid port mapping value '%s'", value))
+	}
 }

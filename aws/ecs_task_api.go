@@ -75,6 +75,11 @@ func (self *EcsTaskApi) RegisterTaskDefinition(taskName string, containers []*sc
 			mountPoints = append(mountPoints, vp.MountPoint)
 		}
 
+		volumesFrom, err := toVolumesFroms(con.VolumesFrom)
+		if err != nil {
+			return &ecs.RegisterTaskDefinitionOutput{}, err
+		}
+
 		conDef := &ecs.ContainerDefinition{
 			CPU: aws.Long(con.CpuUnits),
 			Command: commands,
@@ -87,7 +92,7 @@ func (self *EcsTaskApi) RegisterTaskDefinition(taskName string, containers []*sc
 			MountPoints: mountPoints,
 			Name: aws.String(con.Name),
 			PortMappings: portMappings,
-			// VolumesFrom
+			VolumesFrom: volumesFrom,
 		}
 
 		conDefs = append(conDefs, conDef)
