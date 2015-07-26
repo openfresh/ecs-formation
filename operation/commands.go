@@ -249,7 +249,7 @@ func createClusterPlans(controller *service.ServiceController, projectDir string
 		fmt.Println()
 		fmt.Println(color.Yellow(fmt.Sprintf("Service update plan '%s':", plan.Name)))
 
-		fmt.Println(color.Yellow("    Containers:"))
+		fmt.Println(color.Yellow("    Services:"))
 		for _, add := range plan.NewServices {
 			fmt.Println(color.Yellow(fmt.Sprintf("        ----------[%s]----------", add.Name)))
 			fmt.Println(color.Yellow(fmt.Sprintf("        TaskDefinition = %s", add.TaskDefinition)))
