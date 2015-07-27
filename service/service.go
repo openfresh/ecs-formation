@@ -26,12 +26,12 @@ const (
 )
 
 type ServiceController struct {
-	Ecs            *aws.ECSManager
+	Ecs            *aws.AwsManager
 	TargetResource string
 	clusters       []schema.Cluster
 }
 
-func NewServiceController(ecs *aws.ECSManager, projectDir string, targetResource string) (*ServiceController, error) {
+func NewServiceController(ecs *aws.AwsManager, projectDir string, targetResource string) (*ServiceController, error) {
 
 	con := &ServiceController{
 		Ecs: ecs,

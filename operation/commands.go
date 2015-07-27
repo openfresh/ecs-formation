@@ -81,7 +81,7 @@ func assert(err error) {
 
 func doService(c *cli.Context) {
 
-	ecsManager, err := buildECSManager()
+	awsManager, err := buildAwsManager()
 
 	if err != nil {
 		logger.Main.Error(color.Red(err.Error()))
@@ -102,7 +102,7 @@ func doService(c *cli.Context) {
 	}
 
 	jsonOutput := c.Bool("json-output")
-	clusterController, err := service.NewServiceController(ecsManager, projectDir, operation.TargetResource)
+	clusterController, err := service.NewServiceController(awsManager, projectDir, operation.TargetResource)
 
 	plans, err := createClusterPlans(clusterController, projectDir, jsonOutput)
 
@@ -116,9 +116,13 @@ func doService(c *cli.Context) {
 	}
 }
 
+type Hoge struct {
+	Param1 string `json:param1`
+}
+
 func doTask(c *cli.Context) {
 
-	ecsManager, err := buildECSManager()
+	awsManager, err := buildAwsManager()
 
 	if err != nil {
 		logger.Main.Error(color.Red(err.Error()))
@@ -138,7 +142,7 @@ func doTask(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	taskController, err := task.NewTaskDefinitionController(ecsManager, projectDir, operation.TargetResource)
+	taskController, err := task.NewTaskDefinitionController(awsManager, projectDir, operation.TargetResource)
 	if err != nil {
 		logger.Main.Error(color.Red(err.Error()))
 		os.Exit(1)
@@ -163,7 +167,7 @@ func doTask(c *cli.Context) {
 
 func doBluegreen(c *cli.Context) {
 
-	ecsManager, err := buildECSManager()
+	awsManager, err := buildAwsManager()
 
 	if err != nil {
 		logger.Main.Error(color.Red(err.Error()))
@@ -183,7 +187,7 @@ func doBluegreen(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	bgController, errbgc := bluegreen.NewBlueGreenController(ecsManager, projectDir, operation.TargetResource)
+	bgController, errbgc := bluegreen.NewBlueGreenController(awsManager, projectDir, operation.TargetResource)
 	if errbgc != nil {
 		logger.Main.Error(color.Red(errbgc.Error()))
 		os.Exit(1)
@@ -432,7 +436,7 @@ type BlueGreenServiceJson struct {
 	RunningCount        int64
 }
 
-func buildECSManager() (*aws.ECSManager, error) {
+func buildAwsManager() (*aws.AwsManager, error) {
 
 	accessKey := strings.Trim(os.Getenv("AWS_ACCESS_KEY"), " ")
 	accessSecretKey := strings.Trim(os.Getenv("AWS_SECRET_ACCESS_KEY"), " ")
@@ -450,7 +454,7 @@ func buildECSManager() (*aws.ECSManager, error) {
 		return nil, fmt.Errorf("'AWS_REGION' is not specified.")
 	}
 
-	return aws.NewECSManager(accessKey, accessSecretKey, region), nil
+	return aws.NewAwsManager(accessKey, accessSecretKey, region), nil
 }
 
 func createOperation(args cli.Args) (Operation, error) {

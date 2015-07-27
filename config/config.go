@@ -19,7 +19,7 @@ func PrepareGlobalOptions(c *cli.Context) error {
 		SnsTopic: c.GlobalString("sns-topic"),
 	}
 
-	fmt.Println(awsutil.StringValue(AppConfig))
+	fmt.Println(awsutil.Prettify(AppConfig))
 
 	return nil
 }
