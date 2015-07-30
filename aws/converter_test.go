@@ -29,7 +29,7 @@ import (
 
 func TestToPortMappingsOnlyInt(t *testing.T) {
 
-	input := "3000"
+	input := "300034"
 
 	actual, _ := toPortMapping(input)
 

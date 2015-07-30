@@ -14,6 +14,7 @@ import (
 	"github.com/stormcat24/ecs-formation/logger"
 	"time"
 	"errors"
+	"github.com/stormcat24/ecs-formation/util"
 )
 
 type TaskWatchStatus int
@@ -333,15 +334,15 @@ func (self *ServiceController) checkRunningTask(dto *ecs.DescribeTasksOutput) Ta
 
 	status := []string{}
 	for _, task := range dto.Tasks {
-		fmt.Println(fmt.Sprintf("    %s:", *task.TaskARN))
-		fmt.Println(fmt.Sprintf("        LastStatus:%s", self.RoundColorStatus(*task.LastStatus)))
-		fmt.Println("        Containers:")
+		util.Println(fmt.Sprintf("    %s:", *task.TaskARN))
+		util.Println(fmt.Sprintf("        LastStatus:%s", self.RoundColorStatus(*task.LastStatus)))
+		util.Println("        Containers:")
 
 		for _, con := range task.Containers {
-			fmt.Println(fmt.Sprintf("            ----------[%s]----------", *con.Name))
-			fmt.Println(fmt.Sprintf("            ContainerARN:%s", *con.ContainerARN))
-			fmt.Println(fmt.Sprintf("            Status:%s", self.RoundColorStatus(*con.LastStatus)))
-			fmt.Println()
+			util.Println(fmt.Sprintf("            ----------[%s]----------", *con.Name))
+			util.Println(fmt.Sprintf("            ContainerARN:%s", *con.ContainerARN))
+			util.Println(fmt.Sprintf("            Status:%s", self.RoundColorStatus(*con.LastStatus)))
+			util.Println()
 		}
 
 		status = append(status, *task.LastStatus)
