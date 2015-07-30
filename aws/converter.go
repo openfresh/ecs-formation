@@ -60,8 +60,8 @@ func toPortMapping(value string) (*ecs.PortMapping, error) {
 		port, _ := strconv.ParseInt(tokens[0], 10, 64)
 
 		return &ecs.PortMapping{
-			HostPort: aws.Long(port),
-			ContainerPort: aws.Long(port),
+			HostPort: &port,
+			ContainerPort: &port,
 			Protocol: aws.String("tcp"),
 		}, nil
 
@@ -88,8 +88,8 @@ func toPortMapping(value string) (*ecs.PortMapping, error) {
 		}
 
 		return &ecs.PortMapping{
-			HostPort: aws.Long(hPort),
-			ContainerPort: aws.Long(cPort),
+			HostPort: &hPort,
+			ContainerPort: &cPort,
 			Protocol: aws.String(protocol),
 		}, nil
 
@@ -134,17 +134,20 @@ func toVolumesFrom(value string) (*ecs.VolumeFrom, error) {
 	tokens := strings.Split(value, ":")
 	length := len(tokens)
 
+	var readOnly bool
 	if length > 1 {
 		ro := tokens[1]
+		readOnly = (ro == "ro")
 
 		return &ecs.VolumeFrom{
 			SourceContainer: aws.String(tokens[0]),
-			ReadOnly: aws.Boolean(ro == "ro"),
+			ReadOnly: &readOnly,
 		}, nil
 	} else if length == 1 {
+		readOnly = false
 		return &ecs.VolumeFrom{
 			SourceContainer: aws.String(tokens[0]),
-			ReadOnly: aws.Boolean(false),
+			ReadOnly: &readOnly,
 		}, nil
 	} else {
 		return &ecs.VolumeFrom{}, errors.New(fmt.Sprintf("Invalid port mapping value '%s'", value))

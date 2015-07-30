@@ -14,6 +14,8 @@ import (
 	"github.com/stormcat24/ecs-formation/util"
 	"github.com/stormcat24/ecs-formation/bluegreen"
 	"github.com/stormcat24/ecs-formation/logger"
+	"encoding/json"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
 )
 
 var Commands = []cli.Command{
@@ -50,6 +52,10 @@ var commandBluegreen = cli.Command{
 		cli.BoolFlag{
 			Name: "nodeploy, nd",
 			Usage: "bbb",
+		},
+		cli.BoolFlag{
+			Name: "json-output, jo",
+			Usage: "Output json",
 		},
 	},
 	Action: doBluegreen,
@@ -176,7 +182,8 @@ func doBluegreen(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	bgPlans, err := createBlueGreenPlans(bgController)
+	jsonOutput := c.Bool("json-output")
+	bgPlans, err := createBlueGreenPlans(bgController, jsonOutput)
 
 	if err != nil {
 		logger.Main.Error(color.Red(err.Error()))
@@ -218,49 +225,49 @@ func createClusterPlans(controller *service.ServiceController, projectDir string
 
 	for _, plan := range plans {
 
-		fmt.Println(color.Yellow(fmt.Sprintf("Current status of ECS Cluster '%s':", plan.Name)))
+		util.PrintlnYellow(fmt.Sprintf("Current status of ECS Cluster '%s':", plan.Name))
 		if len(plan.InstanceARNs) > 0 {
-			fmt.Println(color.Yellow("    Container Instances as follows:"))
+			util.PrintlnYellow("    Container Instances as follows:")
 			for _, instance := range plan.InstanceARNs {
-				fmt.Println(color.Yellow(fmt.Sprintf("        %s", *instance)))
+				util.PrintlnYellow(fmt.Sprintf("        %s", *instance))
 			}
 		}
 
-		fmt.Println(color.Yellow("    Services as follows:"))
+		util.PrintlnYellow("    Services as follows:")
 		if len(plan.CurrentServices) == 0 {
-			fmt.Println(color.Yellow("         No services are deployed."))
+			util.PrintlnYellow("         No services are deployed.")
 		}
 
 		for _, cs := range plan.CurrentServices {
-			fmt.Println(color.Yellow(fmt.Sprintf("        ServiceName = %s", *cs.ServiceName)))
-			fmt.Println(color.Yellow(fmt.Sprintf("        ServiceARN = %s", *cs.ServiceARN)))
-			fmt.Println(color.Yellow(fmt.Sprintf("        TaskDefinition = %s", *cs.TaskDefinition)))
-			fmt.Println(color.Yellow(fmt.Sprintf("        DesiredCount = %d", *cs.DesiredCount)))
-			fmt.Println(color.Yellow(fmt.Sprintf("        PendingCount = %d", *cs.PendingCount)))
-			fmt.Println(color.Yellow(fmt.Sprintf("        RunningCount = %d", *cs.RunningCount)))
+			util.PrintlnYellow(fmt.Sprintf("        ServiceName = %s", *cs.ServiceName))
+			util.PrintlnYellow(fmt.Sprintf("        ServiceARN = %s", *cs.ServiceARN))
+			util.PrintlnYellow(fmt.Sprintf("        TaskDefinition = %s", *cs.TaskDefinition))
+			util.PrintlnYellow(fmt.Sprintf("        DesiredCount = %d", *cs.DesiredCount))
+			util.PrintlnYellow(fmt.Sprintf("        PendingCount = %d", *cs.PendingCount))
+			util.PrintlnYellow(fmt.Sprintf("        RunningCount = %d", *cs.RunningCount))
 			for _, lb := range cs.LoadBalancers {
-				fmt.Println(color.Yellow(fmt.Sprintf("        ELB = %s:", *lb.LoadBalancerName)))
-				fmt.Println(color.Yellow(fmt.Sprintf("            ContainerName = %s", *lb.ContainerName)))
-				fmt.Println(color.Yellow(fmt.Sprintf("            ContainerName = %d", *lb.ContainerPort)))
+				util.PrintlnYellow(fmt.Sprintf("        ELB = %s:", *lb.LoadBalancerName))
+				util.PrintlnYellow(fmt.Sprintf("            ContainerName = %s", *lb.ContainerName))
+				util.PrintlnYellow(fmt.Sprintf("            ContainerName = %d", *lb.ContainerPort))
 			}
-			fmt.Println(color.Yellow(fmt.Sprintf("        STATUS = %s", *cs.Status)))
+			util.PrintlnYellow(fmt.Sprintf("        STATUS = %s", *cs.Status))
 		}
 
-		fmt.Println()
-		fmt.Println(color.Yellow(fmt.Sprintf("Service update plan '%s':", plan.Name)))
+		util.Println()
+		util.PrintlnYellow(fmt.Sprintf("Service update plan '%s':", plan.Name))
 
-		fmt.Println(color.Yellow("    Services:"))
+		util.PrintlnYellow("    Services:")
 		for _, add := range plan.NewServices {
-			fmt.Println(color.Yellow(fmt.Sprintf("        ----------[%s]----------", add.Name)))
-			fmt.Println(color.Yellow(fmt.Sprintf("        TaskDefinition = %s", add.TaskDefinition)))
-			fmt.Println(color.Yellow(fmt.Sprintf("        DesiredCount = %d", add.DesiredCount)))
+			util.PrintlnYellow(fmt.Sprintf("        ----------[%s]----------", add.Name))
+			util.PrintlnYellow(fmt.Sprintf("        TaskDefinition = %s", add.TaskDefinition))
+			util.PrintlnYellow(fmt.Sprintf("        DesiredCount = %d", add.DesiredCount))
 			for _, lb := range add.LoadBalancers {
-				logger.Main.Info(color.Cyan(fmt.Sprintf("        ELB:%s", lb.Name)))
+				util.PrintlnYellow(fmt.Sprintf("        ELB:%s", lb.Name))
 			}
-			fmt.Println()
+			util.Println()
 		}
 
-		fmt.Println()
+		util.Println()
 	}
 
 	return plans, nil
@@ -275,21 +282,28 @@ func createTaskPlans(controller *task.TaskDefinitionController, projectDir strin
 		logger.Main.Infof("Task Definition '%s'", plan.Name)
 
 		for _, add := range plan.NewContainers {
-			fmt.Println(color.Cyan(fmt.Sprintf("    (+) %s", add.Name)))
-			fmt.Println(color.Cyan(fmt.Sprintf("      image: %s", add.Image)))
-			fmt.Println(color.Cyan(fmt.Sprintf("      ports: %s", add.Ports)))
-			fmt.Println(color.Cyan(fmt.Sprintf("      environment:\n%s", util.StringValueWithIndent(add.Environment, 4))))
-			fmt.Println(color.Cyan(fmt.Sprintf("      links: %s", add.Links)))
-			fmt.Println(color.Cyan(fmt.Sprintf("      volumes: %s", add.Volumes)))
+			util.PrintlnCyan(fmt.Sprintf("    (+) %s", add.Name))
+			util.PrintlnCyan(fmt.Sprintf("      image: %s", add.Image))
+			util.PrintlnCyan(fmt.Sprintf("      ports: %s", add.Ports))
+			util.PrintlnCyan(fmt.Sprintf("      environment:\n%s", util.StringValueWithIndent(add.Environment, 4)))
+			util.PrintlnCyan(fmt.Sprintf("      links: %s", add.Links))
+			util.PrintlnCyan(fmt.Sprintf("      volumes: %s", add.Volumes))
 		}
 
-		fmt.Println()
+		util.Println()
 	}
 
 	return plans
 }
 
-func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.BlueGreenPlan, error) {
+func createBlueGreenPlans(controller *bluegreen.BlueGreenController, jsonOutput bool) ([]*plan.BlueGreenPlan, error) {
+
+	if jsonOutput {
+		util.Output = false
+		defer func() {
+			util.Output = true
+		}()
+	}
 
 	bgmap := controller.GetBlueGreenMap()
 
@@ -303,37 +317,97 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.Bl
 		return bgplans, errbgp
 	}
 
+
+	jsonItems := []BlueGreenPlanJson{}
 	for _, bgplan := range bgplans {
-		fmt.Println(color.Cyan("    Blue:"))
-		fmt.Println(color.Cyan(fmt.Sprintf("        Cluster = %s", bgplan.Blue.NewService.Cluster)))
-		fmt.Println(color.Cyan(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgplan.Blue.AutoScalingGroup.AutoScalingGroupARN)))
-		fmt.Println(color.Cyan("        Current services as follows:"))
+		util.PrintlnCyan("    Blue:")
+		util.PrintlnCyan(fmt.Sprintf("        Cluster = %s", bgplan.Blue.NewService.Cluster))
+		util.PrintlnCyan(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgplan.Blue.AutoScalingGroup.AutoScalingGroupARN))
+		util.PrintlnCyan("        Current services as follows:")
 		for _, bcs := range bgplan.Blue.ClusterUpdatePlan.CurrentServices {
-			fmt.Println(color.Cyan(fmt.Sprintf("            %s:", *bcs.ServiceName)))
-			fmt.Println(color.Cyan(fmt.Sprintf("                ServiceARN = %s", *bcs.ServiceARN)))
-			fmt.Println(color.Cyan(fmt.Sprintf("                TaskDefinition = %s", *bcs.TaskDefinition)))
-			fmt.Println(color.Cyan(fmt.Sprintf("                DesiredCount = %d", *bcs.DesiredCount)))
-			fmt.Println(color.Cyan(fmt.Sprintf("                PendingCount = %d", *bcs.PendingCount)))
-			fmt.Println(color.Cyan(fmt.Sprintf("                RunningCount = %d", *bcs.RunningCount)))
+			util.PrintlnCyan(fmt.Sprintf("            %s:", *bcs.ServiceName))
+			util.PrintlnCyan(fmt.Sprintf("                ServiceARN = %s", *bcs.ServiceARN))
+			util.PrintlnCyan(fmt.Sprintf("                TaskDefinition = %s", *bcs.TaskDefinition))
+			util.PrintlnCyan(fmt.Sprintf("                DesiredCount = %d", *bcs.DesiredCount))
+			util.PrintlnCyan(fmt.Sprintf("                PendingCount = %d", *bcs.PendingCount))
+			util.PrintlnCyan(fmt.Sprintf("                RunningCount = %d", *bcs.RunningCount))
 		}
 
-		fmt.Println(color.Green("    Green:"))
-		fmt.Println(color.Green(fmt.Sprintf("        Cluster = %s", bgplan.Green.NewService.Cluster)))
-		fmt.Println(color.Green(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgplan.Green.AutoScalingGroup.AutoScalingGroupARN)))
-		fmt.Println(color.Green("        Current services as follows:"))
+		var active string
+		if bgplan.IsBlueWithPrimaryElb() {
+			active = "blue"
+		} else {
+			active = "green"
+		}
+
+		util.PrintlnGreen("    Green:")
+		util.PrintlnGreen(fmt.Sprintf("        Cluster = %s", bgplan.Green.NewService.Cluster))
+		util.PrintlnGreen(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgplan.Green.AutoScalingGroup.AutoScalingGroupARN))
+		util.PrintlnGreen("        Current services as follows:")
 		for _, gcs := range bgplan.Green.ClusterUpdatePlan.CurrentServices {
-			fmt.Println(color.Green(fmt.Sprintf("            %s:", *gcs.ServiceName)))
-			fmt.Println(color.Green(fmt.Sprintf("                ServiceARN = %s", *gcs.ServiceARN)))
-			fmt.Println(color.Green(fmt.Sprintf("                TaskDefinition = %s", *gcs.TaskDefinition)))
-			fmt.Println(color.Green(fmt.Sprintf("                DesiredCount = %d", *gcs.DesiredCount)))
-			fmt.Println(color.Green(fmt.Sprintf("                PendingCount = %d", *gcs.PendingCount)))
-			fmt.Println(color.Green(fmt.Sprintf("                RunningCount = %d", *gcs.RunningCount)))
+			util.PrintlnGreen(fmt.Sprintf("            %s:", *gcs.ServiceName))
+			util.PrintlnGreen(fmt.Sprintf("                ServiceARN = %s", *gcs.ServiceARN))
+			util.PrintlnGreen(fmt.Sprintf("                TaskDefinition = %s", *gcs.TaskDefinition))
+			util.PrintlnGreen(fmt.Sprintf("                DesiredCount = %d", *gcs.DesiredCount))
+			util.PrintlnGreen(fmt.Sprintf("                PendingCount = %d", *gcs.PendingCount))
+			util.PrintlnGreen(fmt.Sprintf("                RunningCount = %d", *gcs.RunningCount))
 		}
 
-		fmt.Println()
+		util.Println()
+
+		jsonItems = append(jsonItems, BlueGreenPlanJson{
+
+			Blue: BlueGreenServiceJson{
+				ClusterARN: *bgplan.Blue.CurrentService.ClusterARN,
+				AutoScalingGroupARN: *bgplan.Blue.AutoScalingGroup.AutoScalingGroupARN,
+				Instances: bgplan.Blue.AutoScalingGroup.Instances,
+				TaskDefinition: *bgplan.Blue.CurrentService.TaskDefinition,
+				DesiredCount: *bgplan.Blue.CurrentService.DesiredCount,
+				PendingCount: *bgplan.Blue.CurrentService.PendingCount,
+				RunningCount: *bgplan.Blue.CurrentService.RunningCount,
+			},
+			Green: BlueGreenServiceJson{
+				ClusterARN: *bgplan.Green.CurrentService.ClusterARN,
+				AutoScalingGroupARN: *bgplan.Green.AutoScalingGroup.AutoScalingGroupARN,
+				Instances: bgplan.Green.AutoScalingGroup.Instances,
+				TaskDefinition: *bgplan.Green.CurrentService.TaskDefinition,
+				DesiredCount: *bgplan.Green.CurrentService.DesiredCount,
+				PendingCount: *bgplan.Green.CurrentService.PendingCount,
+				RunningCount: *bgplan.Green.CurrentService.RunningCount,
+			},
+			PrimaryElb: bgplan.PrimaryElb,
+			StandbyElb: bgplan.StandbyElb,
+			Active: active,
+		})
+	}
+
+	if jsonOutput {
+		bt, err := json.Marshal(&jsonItems)
+		if err != nil {
+			return bgplans, err
+		}
+		fmt.Println(string(bt))
 	}
 
 	return bgplans, nil
+}
+
+type BlueGreenPlanJson struct {
+	Blue       BlueGreenServiceJson
+	Green      BlueGreenServiceJson
+	Active     string
+	PrimaryElb string
+	StandbyElb string
+}
+
+type BlueGreenServiceJson struct {
+	ClusterARN          string
+	AutoScalingGroupARN string
+	Instances           []*autoscaling.Instance
+	TaskDefinition      string
+	DesiredCount        int64
+	PendingCount        int64
+	RunningCount        int64
 }
 
 func buildECSManager() (*aws.ECSManager, error) {

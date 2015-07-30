@@ -8,7 +8,7 @@ import (
 
 type EcsClusterApi struct {
 	Credentials *credentials.Credentials
-	Region      string
+	Region      *string
 }
 
 func (self *EcsClusterApi) CreateCluster(clusterName string) (*ecs.CreateClusterOutput, error) {
@@ -61,7 +61,7 @@ func (self *EcsClusterApi) ListClusters(maxResult int64) (*ecs.ListClustersOutpu
 	})
 
 	params := &ecs.ListClustersInput{
-		MaxResults: aws.Long(maxResult),
+		MaxResults: &maxResult,
 	}
 
 	return svc.ListClusters(params)

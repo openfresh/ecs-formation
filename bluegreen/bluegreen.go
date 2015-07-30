@@ -200,7 +200,7 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 
 	apias := self.Ecs.AutoscalingApi()
 
-	targetGreen := bgplan.IsBluwWithPrimaryElb()
+	targetGreen := bgplan.IsBlueWithPrimaryElb()
 
 	var currentLabel *color.Escape
 	var nextLabel *color.Escape

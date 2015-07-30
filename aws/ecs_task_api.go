@@ -11,7 +11,7 @@ import (
 
 type EcsTaskApi struct {
 	Credentials *credentials.Credentials
-	Region      string
+	Region      *string
 }
 
 func (self *EcsTaskApi) DescribeTaskDefinition(defName string) (*ecs.DescribeTaskDefinitionOutput, error) {
@@ -81,14 +81,14 @@ func (self *EcsTaskApi) RegisterTaskDefinition(taskName string, containers []*sc
 		}
 
 		conDef := &ecs.ContainerDefinition{
-			CPU: aws.Long(con.CpuUnits),
+			CPU: &con.CpuUnits,
 			Command: commands,
 			EntryPoint: entryPoints,
 			Environment: toKeyValuePairs(con.Environment),
-			Essential: aws.Boolean(con.Essential),
+			Essential: &con.Essential,
 			Image: aws.String(con.Image),
 			Links: util.ConvertPointerString(con.Links),
-			Memory: aws.Long(con.Memory),
+			Memory: &con.Memory,
 			MountPoints: mountPoints,
 			Name: aws.String(con.Name),
 			PortMappings: portMappings,

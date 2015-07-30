@@ -32,7 +32,7 @@ func TestCreateVolumeInfoOneOnly(t *testing.T) {
 		*actual.MountPoint.ContainerPath != input ||
 		*actual.MountPoint.SourceVolume != "VarLogHoge" ||
 		*actual.MountPoint.ReadOnly != false {
-		t.Errorf("Unexpected value. Actual = %s", awsutil.StringValue(actual))
+		t.Errorf("Unexpected value. Actual = %s", awsutil.Prettify(actual))
 	}
 }
 
@@ -51,7 +51,7 @@ func TestCreateVolumeInfoPair(t *testing.T) {
 		*actual.MountPoint.ContainerPath != "/var/log/nginx" ||
 		*actual.MountPoint.SourceVolume != "VarLogContainerNginx" ||
 		*actual.MountPoint.ReadOnly != false {
-		t.Errorf("Unexpected value. Actual = %s", awsutil.StringValue(actual))
+		t.Errorf("Unexpected value. Actual = %s", awsutil.Prettify(actual))
 	}
 }
 
@@ -70,7 +70,7 @@ func TestCreateVolumeInfoPairWithReadOnly(t *testing.T) {
 	*actual.MountPoint.ContainerPath != "/var/log/nginx" ||
 	*actual.MountPoint.SourceVolume != "VarLogContainerNginx" ||
 	*actual.MountPoint.ReadOnly != true {
-		t.Errorf("Unexpected value. Actual = %s", awsutil.StringValue(actual))
+		t.Errorf("Unexpected value. Actual = %s", awsutil.Prettify(actual))
 	}
 }
 

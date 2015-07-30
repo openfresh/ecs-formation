@@ -30,7 +30,7 @@ type BlueGreenPlan struct {
 	StandbyElb string
 }
 
-func (self *BlueGreenPlan) IsBluwWithPrimaryElb() bool {
+func (self *BlueGreenPlan) IsBlueWithPrimaryElb() bool {
 
 	for _, lb := range self.Blue.AutoScalingGroup.LoadBalancerNames {
 		if *lb == self.PrimaryElb {

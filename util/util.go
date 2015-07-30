@@ -22,7 +22,7 @@ func ConvertPointerString(values []string) []*string {
 }
 
 func StringValueWithIndent(value interface{}, indent int) string {
-	sr := strings.NewReader(awsutil.StringValue(value))
+	sr := strings.NewReader(awsutil.Prettify(value))
 
 	reader := bufio.NewReader(sr)
 
