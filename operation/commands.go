@@ -30,6 +30,12 @@ var commandService = cli.Command{
 	Description: `
 	Manage services on ECS cluster.
 `,
+	Flags: []cli.Flag{
+		cli.BoolFlag{
+			Name: "json-output, jo",
+			Usage: "Output json",
+		},
+	},
 	Action: doService,
 }
 
@@ -95,9 +101,10 @@ func doService(c *cli.Context) {
 		os.Exit(1)
 	}
 
+	jsonOutput := c.Bool("json-output")
 	clusterController, err := service.NewServiceController(ecsManager, projectDir, operation.TargetResource)
 
-	plans, err := createClusterPlans(clusterController, projectDir)
+	plans, err := createClusterPlans(clusterController, projectDir, jsonOutput)
 
 	if err != nil {
 		logger.Main.Error(color.Red(err.Error()))
@@ -214,9 +221,16 @@ func doBluegreen(c *cli.Context) {
 	}
 }
 
-func createClusterPlans(controller *service.ServiceController, projectDir string) ([]*plan.ServiceUpdatePlan, error) {
+func createClusterPlans(controller *service.ServiceController, projectDir string, jsonOutput bool) ([]*plan.ServiceUpdatePlan, error) {
 
-	logger.Main.Infoln("Checking services on clusters...")
+	if jsonOutput {
+		util.Output = false
+		defer func() {
+			util.Output = true
+		}()
+	}
+
+	util.Infoln("Checking services on clusters...")
 	plans, err := controller.CreateServiceUpdatePlans()
 
 	if err != nil {
@@ -268,6 +282,14 @@ func createClusterPlans(controller *service.ServiceController, projectDir string
 		}
 
 		util.Println()
+	}
+
+	if jsonOutput {
+		bt, err := json.Marshal(&plans)
+		if err != nil {
+			return plans, err
+		}
+		fmt.Println(string(bt))
 	}
 
 	return plans, nil
