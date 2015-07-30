@@ -77,7 +77,7 @@ func CreateVolumeInfo(value string) (*VolumeInfo, error) {
 		MountPoint: &ecs.MountPoint{
 			SourceVolume: aws.String(volumeName),
 			ContainerPath: aws.String(containerPath),
-			ReadOnly: aws.Boolean(ro),
+			ReadOnly: &ro,
 		},
 	}, nil
 }

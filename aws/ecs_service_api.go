@@ -9,7 +9,7 @@ import (
 
 type EcsServiceApi struct {
 	Credentials *credentials.Credentials
-	Region      string
+	Region      *string
 }
 
 func (self *EcsServiceApi) CreateService(cluster string, service schema.Service) (*ecs.CreateServiceOutput, error) {
@@ -22,7 +22,7 @@ func (self *EcsServiceApi) CreateService(cluster string, service schema.Service)
 	params := &ecs.CreateServiceInput{
 		ServiceName: aws.String(service.Name),
 		Cluster: aws.String(cluster),
-		DesiredCount: aws.Long(service.DesiredCount),
+		DesiredCount: &service.DesiredCount,
 		LoadBalancers: toLoadBalancers(&service.LoadBalancers),
 		TaskDefinition: aws.String(service.TaskDefinition),
 	}
@@ -44,7 +44,7 @@ func (self *EcsServiceApi) UpdateService(cluster string, service schema.Service)
 	params := &ecs.UpdateServiceInput{
 		Cluster: aws.String(cluster),
 		Service: aws.String(service.Name),
-		DesiredCount: aws.Long(service.DesiredCount),
+		DesiredCount: &service.DesiredCount,
 		TaskDefinition: aws.String(service.TaskDefinition),
 	}
 

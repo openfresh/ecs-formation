@@ -9,7 +9,7 @@ import (
 
 type AutoscalingApi struct {
 	Credentials *credentials.Credentials
-	Region      string
+	Region      *string
 }
 
 func (self *AutoscalingApi) DescribeAutoScalingGroups(groups []string) (map[string]*autoscaling.Group, error) {

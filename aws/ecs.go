@@ -7,7 +7,7 @@ import (
 
 type ECSManager struct {
 	credentials *credentials.Credentials
-	region string
+	region *string
 }
 
 func NewECSManager(accessKey string, secretKey string, region string) *ECSManager {
@@ -16,7 +16,7 @@ func NewECSManager(accessKey string, secretKey string, region string) *ECSManage
 
 	manager := &ECSManager{
 		credentials: cred,
-		region: region,
+		region: &region,
 	}
 
 	return manager

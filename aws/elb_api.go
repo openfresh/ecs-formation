@@ -9,7 +9,7 @@ import (
 
 type ElbApi struct {
 	Credentials *credentials.Credentials
-	Region      string
+	Region      *string
 }
 
 func (self *ElbApi) DescribeLoadBalancers(names []string) (*elb.DescribeLoadBalancersOutput, error) {
