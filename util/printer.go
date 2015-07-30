@@ -3,6 +3,7 @@ package util
 import (
 	"fmt"
 	"github.com/str1ngs/ansi/color"
+	"github.com/stormcat24/ecs-formation/logger"
 )
 
 var (
@@ -27,4 +28,10 @@ func PrintlnGreen(a ...interface{}) (int, error) {
 
 func PrintlnYellow(a ...interface{}) (int, error) {
 	return Println(color.Yellow(fmt.Sprint(a...)))
+}
+
+func Infoln(a ...interface{}) {
+	if Output {
+		logger.Main.Infoln(a...)
+	}
 }
