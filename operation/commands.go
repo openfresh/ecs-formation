@@ -14,6 +14,8 @@ import (
 	"github.com/stormcat24/ecs-formation/util"
 	"github.com/stormcat24/ecs-formation/bluegreen"
 	"github.com/stormcat24/ecs-formation/logger"
+	"encoding/json"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
 )
 
 var Commands = []cli.Command{
@@ -50,6 +52,10 @@ var commandBluegreen = cli.Command{
 		cli.BoolFlag{
 			Name: "nodeploy, nd",
 			Usage: "bbb",
+		},
+		cli.BoolFlag{
+			Name: "json-output, jo",
+			Usage: "Output json",
 		},
 	},
 	Action: doBluegreen,
@@ -176,7 +182,8 @@ func doBluegreen(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	bgPlans, err := createBlueGreenPlans(bgController)
+	jsonOutput := c.Bool("json-output")
+	bgPlans, err := createBlueGreenPlans(bgController, jsonOutput)
 
 	if err != nil {
 		logger.Main.Error(color.Red(err.Error()))
@@ -289,7 +296,14 @@ func createTaskPlans(controller *task.TaskDefinitionController, projectDir strin
 	return plans
 }
 
-func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.BlueGreenPlan, error) {
+func createBlueGreenPlans(controller *bluegreen.BlueGreenController, jsonOutput bool) ([]*plan.BlueGreenPlan, error) {
+
+	if jsonOutput {
+		util.Output = false
+		defer func() {
+			util.Output = true
+		}()
+	}
 
 	bgmap := controller.GetBlueGreenMap()
 
@@ -303,6 +317,8 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.Bl
 		return bgplans, errbgp
 	}
 
+
+	jsonItems := []BlueGreenPlanJson{}
 	for _, bgplan := range bgplans {
 		util.PrintlnCyan("    Blue:")
 		util.PrintlnCyan(fmt.Sprintf("        Cluster = %s", bgplan.Blue.NewService.Cluster))
@@ -315,6 +331,13 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.Bl
 			util.PrintlnCyan(fmt.Sprintf("                DesiredCount = %d", *bcs.DesiredCount))
 			util.PrintlnCyan(fmt.Sprintf("                PendingCount = %d", *bcs.PendingCount))
 			util.PrintlnCyan(fmt.Sprintf("                RunningCount = %d", *bcs.RunningCount))
+		}
+
+		var active string
+		if bgplan.IsBlueWithPrimaryElb() {
+			active = "blue"
+		} else {
+			active = "green"
 		}
 
 		util.PrintlnGreen("    Green:")
@@ -331,9 +354,60 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController) ([]*plan.Bl
 		}
 
 		util.Println()
+
+		jsonItems = append(jsonItems, BlueGreenPlanJson{
+
+			Blue: BlueGreenServiceJson{
+				ClusterARN: *bgplan.Blue.CurrentService.ClusterARN,
+				AutoScalingGroupARN: *bgplan.Blue.AutoScalingGroup.AutoScalingGroupARN,
+				Instances: bgplan.Blue.AutoScalingGroup.Instances,
+				TaskDefinition: *bgplan.Blue.CurrentService.TaskDefinition,
+				DesiredCount: *bgplan.Blue.CurrentService.DesiredCount,
+				PendingCount: *bgplan.Blue.CurrentService.PendingCount,
+				RunningCount: *bgplan.Blue.CurrentService.RunningCount,
+			},
+			Green: BlueGreenServiceJson{
+				ClusterARN: *bgplan.Green.CurrentService.ClusterARN,
+				AutoScalingGroupARN: *bgplan.Green.AutoScalingGroup.AutoScalingGroupARN,
+				Instances: bgplan.Green.AutoScalingGroup.Instances,
+				TaskDefinition: *bgplan.Green.CurrentService.TaskDefinition,
+				DesiredCount: *bgplan.Green.CurrentService.DesiredCount,
+				PendingCount: *bgplan.Green.CurrentService.PendingCount,
+				RunningCount: *bgplan.Green.CurrentService.RunningCount,
+			},
+			PrimaryElb: bgplan.PrimaryElb,
+			StandbyElb: bgplan.StandbyElb,
+			Active: active,
+		})
+	}
+
+	if jsonOutput {
+		bt, err := json.Marshal(&jsonItems)
+		if err != nil {
+			return bgplans, err
+		}
+		fmt.Println(string(bt))
 	}
 
 	return bgplans, nil
+}
+
+type BlueGreenPlanJson struct {
+	Blue       BlueGreenServiceJson
+	Green      BlueGreenServiceJson
+	Active     string
+	PrimaryElb string
+	StandbyElb string
+}
+
+type BlueGreenServiceJson struct {
+	ClusterARN          string
+	AutoScalingGroupARN string
+	Instances           []*autoscaling.Instance
+	TaskDefinition      string
+	DesiredCount        int64
+	PendingCount        int64
+	RunningCount        int64
 }
 
 func buildECSManager() (*aws.ECSManager, error) {

@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	output = true
+	Output = true
 )
 
 func Println(a ...interface{}) (int, error) {
-	if output {
+	if Output {
 		return fmt.Println(a...)
 	} else {
 		return 0, nil
