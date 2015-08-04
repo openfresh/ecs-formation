@@ -99,3 +99,18 @@ func TestCreateVolumeNameSlash(t *testing.T) {
 		t.Errorf("expect '%s', but actual '%s'.", expected, actual)
 	}
 }
+
+func TestCreateVolumeNameDots(t *testing.T) {
+
+	expected := "VarRunDockerSock"
+	input := "/var/run/docker.sock"
+
+	actual, err := createVolumeName(&input)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if actual != expected {
+		t.Errorf("expect '%s', but actual '%s'.", expected, actual)
+	}
+}
