@@ -1,8 +1,7 @@
 package config
+
 import (
 	"github.com/codegangsta/cli"
-	"fmt"
-	"github.com/aws/aws-sdk-go/aws/awsutil"
 )
 
 var (
@@ -18,8 +17,6 @@ func PrepareGlobalOptions(c *cli.Context) error {
 	AppConfig = &ApplicationConfig{
 		SnsTopic: c.GlobalString("sns-topic"),
 	}
-
-	fmt.Println(awsutil.Prettify(AppConfig))
 
 	return nil
 }
