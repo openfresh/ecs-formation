@@ -16,13 +16,13 @@ import (
 )
 
 type BlueGreenController struct {
-	Ecs *aws.ECSManager
+	Ecs *aws.AwsManager
 	ClusterController *service.ServiceController
 	blueGreenMap map[string]*schema.BlueGreen
 	TargetResource string
 }
 
-func NewBlueGreenController(ecs *aws.ECSManager, projectDir string, targetResource string) (*BlueGreenController, error) {
+func NewBlueGreenController(ecs *aws.AwsManager, projectDir string, targetResource string) (*BlueGreenController, error) {
 
 	ccon, errcc := service.NewServiceController(ecs, projectDir, "")
 

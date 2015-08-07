@@ -12,12 +12,12 @@ import (
 )
 
 type TaskDefinitionController struct {
-	Ecs            *aws.ECSManager
+	Ecs            *aws.AwsManager
 	TargetResource string
 	defmap         map[string]*schema.TaskDefinition
 }
 
-func NewTaskDefinitionController(ecs *aws.ECSManager, projectDir string, targetResource string) (*TaskDefinitionController, error) {
+func NewTaskDefinitionController(ecs *aws.AwsManager, projectDir string, targetResource string) (*TaskDefinitionController, error) {
 
 	con := &TaskDefinitionController{
 		Ecs: ecs,

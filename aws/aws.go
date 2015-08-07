@@ -5,16 +5,16 @@ import (
 )
 
 
-type ECSManager struct {
+type AwsManager struct {
 	credentials *credentials.Credentials
 	region *string
 }
 
-func NewECSManager(accessKey string, secretKey string, region string) *ECSManager {
+func NewAwsManager(accessKey string, secretKey string, region string) *AwsManager {
 
 	cred := CreateAWSCredentials(accessKey, secretKey)
 
-	manager := &ECSManager{
+	manager := &AwsManager{
 		credentials: cred,
 		region: &region,
 	}
@@ -22,36 +22,43 @@ func NewECSManager(accessKey string, secretKey string, region string) *ECSManage
 	return manager
 }
 
-func (self *ECSManager) ClusterApi() *EcsClusterApi {
+func (self *AwsManager) ClusterApi() *EcsClusterApi {
 	return &EcsClusterApi{
 		Credentials: self.credentials,
 		Region: self.region,
 	}
 }
 
-func (self *ECSManager) ServiceApi() *EcsServiceApi {
+func (self *AwsManager) ServiceApi() *EcsServiceApi {
 	return &EcsServiceApi{
 		Credentials: self.credentials,
 		Region: self.region,
 	}
 }
 
-func (self *ECSManager) TaskApi() *EcsTaskApi {
+func (self *AwsManager) TaskApi() *EcsTaskApi {
 	return &EcsTaskApi{
 		Credentials: self.credentials,
 		Region: self.region,
 	}
 }
 
-func (self *ECSManager) ElbApi() *ElbApi {
+func (self *AwsManager) ElbApi() *ElbApi {
 	return &ElbApi{
 		Credentials: self.credentials,
 		Region: self.region,
 	}
 }
 
-func (self *ECSManager) AutoscalingApi() *AutoscalingApi {
+func (self *AwsManager) AutoscalingApi() *AutoscalingApi {
 	return &AutoscalingApi{
+		Credentials: self.credentials,
+		Region: self.region,
+	}
+}
+
+func (self *AwsManager) SnsApi() *SnsApi {
+	return &SnsApi{
 		Credentials: self.credentials,
 		Region: self.region,
 	}

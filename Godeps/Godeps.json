@@ -66,6 +66,11 @@
 			"Rev": "a28ecdc9741b7905b5198059c94aed20868ffc08"
 		},
 		{
+			"ImportPath": "github.com/aws/aws-sdk-go/service/sns",
+			"Comment": "v0.7.0-7-ga28ecdc",
+			"Rev": "a28ecdc9741b7905b5198059c94aed20868ffc08"
+		},
+		{
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-74-g50c77ec",
 			"Rev": "50c77ecec0068c9aef9d90ae0fd0fdf410041da3"
