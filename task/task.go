@@ -9,6 +9,7 @@ import (
 	"github.com/stormcat24/ecs-formation/plan"
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/aws/aws-sdk-go/service/ecs"
+	"time"
 )
 
 type TaskDefinitionController struct {
@@ -107,6 +108,7 @@ func (self *TaskDefinitionController) ApplyTaskDefinitionPlans(plans []*plan.Tas
 		if err != nil {
 			return []*ecs.RegisterTaskDefinitionOutput{}, err
 		}
+		time.Sleep(1 * time.Second)
 
 		outputs = append(outputs, result)
 	}
