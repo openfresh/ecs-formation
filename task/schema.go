@@ -1,4 +1,4 @@
-package schema
+package task
 
 import (
 	"gopkg.in/yaml.v2"

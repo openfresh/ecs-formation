@@ -3,9 +3,7 @@ package bluegreen
 import (
 	"io/ioutil"
 	"github.com/stormcat24/ecs-formation/aws"
-	"github.com/stormcat24/ecs-formation/schema"
 	"strings"
-	"github.com/stormcat24/ecs-formation/plan"
 	"time"
 	"fmt"
 	"errors"
@@ -13,13 +11,14 @@ import (
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/str1ngs/ansi/color"
 	"regexp"
+	"gopkg.in/yaml.v2"
 )
 
 type BlueGreenController struct {
-	Ecs *aws.AwsManager
+	Ecs               *aws.AwsManager
 	ClusterController *service.ServiceController
-	blueGreenMap map[string]*schema.BlueGreen
-	TargetResource string
+	blueGreenMap      map[string]*BlueGreen
+	TargetResource    string
 }
 
 func NewBlueGreenController(ecs *aws.AwsManager, projectDir string, targetResource string) (*BlueGreenController, error) {
@@ -45,12 +44,12 @@ func NewBlueGreenController(ecs *aws.AwsManager, projectDir string, targetResour
 	return con, nil
 }
 
-func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]*schema.BlueGreen, error) {
+func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]*BlueGreen, error) {
 
 	clusterDir := projectDir + "/bluegreen"
 	files, err := ioutil.ReadDir(clusterDir)
 
-	merged := map[string]*schema.BlueGreen{}
+	merged := map[string]*BlueGreen{}
 
 	if err != nil {
 		return merged, err
@@ -64,7 +63,7 @@ func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]
 			tokens := filePattern.FindStringSubmatch(file.Name())
 			name := tokens[1]
 
-			bg, err := schema.CreateBlueGreen(content)
+			bg, err := CreateBlueGreen(content)
 			if err != nil {
 				return merged, err
 			}
@@ -75,13 +74,21 @@ func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]
 	return merged, nil
 }
 
-func (self *BlueGreenController) GetBlueGreenMap() map[string]*schema.BlueGreen {
+func CreateBlueGreen(data []byte) (*BlueGreen, error) {
+
+	bg := &BlueGreen{}
+	err := yaml.Unmarshal(data, bg)
+	return bg, err
+}
+
+
+func (self *BlueGreenController) GetBlueGreenMap() map[string]*BlueGreen {
 	return self.blueGreenMap
 }
 
-func (self *BlueGreenController) CreateBlueGreenPlans(bgmap map[string]*schema.BlueGreen, cplans []*plan.ServiceUpdatePlan) ([]*plan.BlueGreenPlan, error) {
+func (self *BlueGreenController) CreateBlueGreenPlans(bgmap map[string]*BlueGreen, cplans []*service.ServiceUpdatePlan) ([]*BlueGreenPlan, error) {
 
-	bgPlans := []*plan.BlueGreenPlan{}
+	bgPlans := []*BlueGreenPlan{}
 
 	for name, bg := range bgmap {
 
@@ -123,25 +130,26 @@ func (self *BlueGreenController) CreateBlueGreenPlans(bgmap map[string]*schema.B
 	return bgPlans, nil
 }
 
-func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *schema.BlueGreen, cplans []*plan.ServiceUpdatePlan) (*plan.BlueGreenPlan, error) {
+func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *BlueGreen, cplans []*service.ServiceUpdatePlan) (*BlueGreenPlan, error) {
 
 	blue := bluegreen.Blue
 	green := bluegreen.Green
 
-	clusterMap := make(map[string]*plan.ServiceUpdatePlan, len(cplans))
+	clusterMap := make(map[string]*service.ServiceUpdatePlan, len(cplans))
 	for _, cp := range cplans {
 		clusterMap[cp.Name] = cp
 	}
 
-	bgPlan := plan.BlueGreenPlan{
-		Blue: &plan.ServiceSet{
+	bgPlan := BlueGreenPlan{
+		Blue: &ServiceSet{
 			ClusterUpdatePlan: clusterMap[blue.Cluster],
 		},
-		Green: &plan.ServiceSet{
+		Green: &ServiceSet{
 			ClusterUpdatePlan: clusterMap[green.Cluster],
 		},
 		PrimaryElb: bluegreen.PrimaryElb,
 		StandbyElb: bluegreen.StandbyElb,
+		ChainElb: bluegreen.ChainElb,
 	}
 
 	// describe services
@@ -164,7 +172,7 @@ func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *schema.BlueGreen
 	}
 
 	// describe autoscaling group
-	asgmap, err := self.Ecs.AutoscalingApi().DescribeAutoScalingGroups([]string {
+	asgmap, err := self.Ecs.AutoscalingApi().DescribeAutoScalingGroups([]string{
 		blue.AutoscalingGroup,
 		green.AutoscalingGroup,
 	})
@@ -185,7 +193,7 @@ func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *schema.BlueGreen
 }
 
 
-func (self *BlueGreenController) ApplyBlueGreenDeploys(plans []*plan.BlueGreenPlan, nodeploy bool) error {
+func (self *BlueGreenController) ApplyBlueGreenDeploys(plans []*BlueGreenPlan, nodeploy bool) error {
 
 	for _, plan := range plans {
 		if err := self.ApplyBlueGreenDeploy(plan, nodeploy); err != nil {
@@ -196,7 +204,7 @@ func (self *BlueGreenController) ApplyBlueGreenDeploys(plans []*plan.BlueGreenPl
 	return nil
 }
 
-func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan, nodeploy bool) error {
+func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *BlueGreenPlan, nodeploy bool) error {
 
 	apias := self.Ecs.AutoscalingApi()
 
@@ -204,8 +212,8 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 
 	var currentLabel *color.Escape
 	var nextLabel *color.Escape
-	var current *plan.ServiceSet
-	var next *plan.ServiceSet
+	var current *ServiceSet
+	var next *ServiceSet
 	primaryLb := bgplan.PrimaryElb
 	standbyLb := bgplan.StandbyElb
 	if targetGreen {
@@ -218,6 +226,13 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 		next = bgplan.Blue
 		currentLabel = color.Green("green")
 		nextLabel = color.Cyan("blue")
+	}
+
+	primaryGroup := []string{primaryLb}
+	standbyGroup := []string{standbyLb}
+	for _, entry := range bgplan.ChainElb {
+		primaryGroup = append(primaryGroup, entry.PrimaryElb)
+		standbyGroup = append(standbyGroup, entry.StandbyElb)
 	}
 
 	logger.Main.Infof("Current status is '%s'", currentLabel)
@@ -233,46 +248,41 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 	}
 
 	// attach next group to primary lb
-	_, erratt := apias.AttachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, []string{
-		primaryLb,
-	})
-	if erratt != nil {
-		return erratt
+	if _, err := apias.AttachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, primaryGroup); err != nil {
+		return err
 	}
-	logger.Main.Infof("Attached to attach %s group to %s(primary).", nextLabel, primaryLb)
+	for _, e := range primaryGroup {
+		logger.Main.Infof("Attached to attach %s group to %s(primary).", nextLabel, e)
+	}
 
-	errwlb := self.waitLoadBalancer(*next.AutoScalingGroup.AutoScalingGroupName, primaryLb)
-	if errwlb != nil {
-		return errwlb
+	if err := self.waitLoadBalancer(*next.AutoScalingGroup.AutoScalingGroupName, primaryLb); err != nil {
+		return err
 	}
 	logger.Main.Infof("Added %s group to primary", nextLabel)
 
 	// detach current group from primary lb
-	_, errelbb := apias.DetachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, []string{
-		primaryLb,
-	})
-	if errelbb != nil {
-		return errelbb
+	if _, err := apias.DetachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, primaryGroup); err != nil {
+		return err
 	}
-	logger.Main.Infof("Detached %s group from %s(primary).", currentLabel, primaryLb)
+	for _, e := range primaryGroup {
+		logger.Main.Infof("Detached %s group from %s(primary).", currentLabel, e)
+	}
 
 	// detach next group from standby lb
-	_, errelbg := apias.DetachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, []string{
-		standbyLb,
-	})
-	if errelbg != nil {
-		return errelbg
+	if _, err := apias.DetachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, standbyGroup); err != nil {
+		return err
 	}
-	logger.Main.Infof("Detached %s group from %s(standby).", nextLabel, standbyLb)
+	for _, e := range standbyGroup {
+		logger.Main.Infof("Detached %s group from %s(standby).", nextLabel, e)
+	}
 
 	// attach current group to standby lb
-	_, errelba := apias.AttachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, []string{
-		standbyLb,
-	})
-	if errelba != nil {
-		return errelba
+	if _, err := apias.AttachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, standbyGroup); err != nil {
+		return err
 	}
-	logger.Main.Infof("Attached %s group to %s(standby).", currentLabel, standbyLb)
+	for _, e := range standbyGroup {
+		logger.Main.Infof("Attached %s group to %s(standby).", currentLabel, e)
+	}
 
 	return nil
 }

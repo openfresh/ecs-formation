@@ -136,7 +136,7 @@ Apply definition.
 
 ### Blue Green Deployment
 
-ecs-formation supports blue-green deployment. 
+ecs-formation supports blue-green deployment.
 
 #### Requirements on ecs-formation
 
@@ -146,7 +146,7 @@ ecs-formation supports blue-green deployment.
 
 #### Define Blue Green Deployment
 
-Make management file of Blue Green Deployment file in bluegreen directory. 
+Make management file of Blue Green Deployment file in bluegreen directory.
 
 ```bash
 (path-to-path/test-ecs-formation/bluegreen) $ vim test-bluegreen.yml
@@ -174,10 +174,29 @@ Apply blue green deployment.
 (path-to-path/test-ecs-formation $ ecs-formation bluegreen apply
 ```
 
-if with `--nodeploy` option, not update services. Only swap ELB on blue and green groups.  
+if with `--nodeploy` option, not update services. Only swap ELB on blue and green groups.
 
 ```bash
 (path-to-path/test-ecs-formation $ ecs-formation bluegreen apply --nodeploy
+```
+
+If autoscaling group have several different ELB, you should specify array property of `chain_elb`. ecs-formation can swap `chain_elb` ELB group with main ELB group at the same time.
+
+```Ruby
+(path-to-path/test-ecs-formation/bluegreen) $ vim test-bluegreen.yml
+blue:
+  cluster: test-blue
+  service: test-service
+  autoscaling_group: test-blue-asg
+green:
+  cluster: test-green
+  service: test-service
+  autoscaling_group: test-green-asg
+primary_elb: test-elb-primary
+standby_elb: test-elb-standby
+chain_elb:
+  - primary_elb: test-internal-elb-primary
+    standby_elb: test-internal-elb-standby
 ```
 
 License

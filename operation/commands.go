@@ -10,7 +10,6 @@ import (
 	"github.com/stormcat24/ecs-formation/task"
 	"strings"
 	"github.com/str1ngs/ansi/color"
-	"github.com/stormcat24/ecs-formation/plan"
 	"github.com/stormcat24/ecs-formation/util"
 	"github.com/stormcat24/ecs-formation/bluegreen"
 	"github.com/stormcat24/ecs-formation/logger"
@@ -225,7 +224,7 @@ func doBluegreen(c *cli.Context) {
 	}
 }
 
-func createClusterPlans(controller *service.ServiceController, projectDir string, jsonOutput bool) ([]*plan.ServiceUpdatePlan, error) {
+func createClusterPlans(controller *service.ServiceController, projectDir string, jsonOutput bool) ([]*service.ServiceUpdatePlan, error) {
 
 	if jsonOutput {
 		util.Output = false
@@ -238,7 +237,7 @@ func createClusterPlans(controller *service.ServiceController, projectDir string
 	plans, err := controller.CreateServiceUpdatePlans()
 
 	if err != nil {
-		return []*plan.ServiceUpdatePlan{}, err
+		return []*service.ServiceUpdatePlan{}, err
 	}
 
 	for _, plan := range plans {
@@ -299,7 +298,7 @@ func createClusterPlans(controller *service.ServiceController, projectDir string
 	return plans, nil
 }
 
-func createTaskPlans(controller *task.TaskDefinitionController, projectDir string) []*plan.TaskUpdatePlan {
+func createTaskPlans(controller *task.TaskDefinitionController, projectDir string) []*task.TaskUpdatePlan {
 
 	taskDefs := controller.GetTaskDefinitionMap()
 	plans := controller.CreateTaskUpdatePlans(taskDefs)
@@ -322,7 +321,7 @@ func createTaskPlans(controller *task.TaskDefinitionController, projectDir strin
 	return plans
 }
 
-func createBlueGreenPlans(controller *bluegreen.BlueGreenController, jsonOutput bool) ([]*plan.BlueGreenPlan, error) {
+func createBlueGreenPlans(controller *bluegreen.BlueGreenController, jsonOutput bool) ([]*bluegreen.BlueGreenPlan, error) {
 
 	if jsonOutput {
 		util.Output = false
@@ -335,7 +334,7 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController, jsonOutput 
 
 	cplans, errcp := controller.ClusterController.CreateServiceUpdatePlans()
 	if errcp != nil {
-		return []*plan.BlueGreenPlan{}, errcp
+		return []*bluegreen.BlueGreenPlan{}, errcp
 	}
 
 	bgplans, errbgp := controller.CreateBlueGreenPlans(bgmap, cplans)
