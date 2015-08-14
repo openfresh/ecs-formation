@@ -3,7 +3,6 @@ package aws
 import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/stormcat24/ecs-formation/schema"
 	"github.com/aws/aws-sdk-go/aws"
 )
 
@@ -12,7 +11,7 @@ type EcsServiceApi struct {
 	Region      *string
 }
 
-func (self *EcsServiceApi) CreateService(cluster string, service schema.Service) (*ecs.CreateServiceOutput, error) {
+func (self *EcsServiceApi) CreateService(cluster string, service string, desiredCount int64, lb []*ecs.LoadBalancer, taskDef string, role string) (*ecs.CreateServiceOutput, error) {
 
 	svc := ecs.New(&aws.Config{
 		Region: self.Region,
@@ -20,21 +19,21 @@ func (self *EcsServiceApi) CreateService(cluster string, service schema.Service)
 	})
 
 	params := &ecs.CreateServiceInput{
-		ServiceName: aws.String(service.Name),
+		ServiceName: aws.String(service),
 		Cluster: aws.String(cluster),
-		DesiredCount: &service.DesiredCount,
-		LoadBalancers: toLoadBalancers(&service.LoadBalancers),
-		TaskDefinition: aws.String(service.TaskDefinition),
+		DesiredCount: &desiredCount,
+		LoadBalancers: lb,
+		TaskDefinition: aws.String(taskDef),
 	}
 
-	if service.Role != "" {
-		params.Role	= aws.String(service.Role)
+	if role != "" {
+		params.Role	= aws.String(role)
 	}
 
 	return svc.CreateService(params)
 }
 
-func (self *EcsServiceApi) UpdateService(cluster string, service schema.Service) (*ecs.UpdateServiceOutput, error) {
+func (self *EcsServiceApi) UpdateService(cluster string, service string, desiredCount int64, taskDef string) (*ecs.UpdateServiceOutput, error) {
 
 	svc := ecs.New(&aws.Config{
 		Region: self.Region,
@@ -43,9 +42,9 @@ func (self *EcsServiceApi) UpdateService(cluster string, service schema.Service)
 
 	params := &ecs.UpdateServiceInput{
 		Cluster: aws.String(cluster),
-		Service: aws.String(service.Name),
-		DesiredCount: &service.DesiredCount,
-		TaskDefinition: aws.String(service.TaskDefinition),
+		Service: aws.String(service),
+		DesiredCount: &desiredCount,
+		TaskDefinition: aws.String(taskDef),
 	}
 
 	return svc.UpdateService(params)

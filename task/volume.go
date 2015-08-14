@@ -1,4 +1,5 @@
-package aws
+package task
+
 import (
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"errors"

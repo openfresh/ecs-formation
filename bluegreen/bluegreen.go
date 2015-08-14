@@ -3,9 +3,7 @@ package bluegreen
 import (
 	"io/ioutil"
 	"github.com/stormcat24/ecs-formation/aws"
-	"github.com/stormcat24/ecs-formation/schema"
 	"strings"
-	"github.com/stormcat24/ecs-formation/plan"
 	"time"
 	"fmt"
 	"errors"
@@ -13,12 +11,13 @@ import (
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/str1ngs/ansi/color"
 	"regexp"
+	"gopkg.in/yaml.v2"
 )
 
 type BlueGreenController struct {
 	Ecs *aws.AwsManager
 	ClusterController *service.ServiceController
-	blueGreenMap map[string]*schema.BlueGreen
+	blueGreenMap map[string]*BlueGreen
 	TargetResource string
 }
 
@@ -45,12 +44,12 @@ func NewBlueGreenController(ecs *aws.AwsManager, projectDir string, targetResour
 	return con, nil
 }
 
-func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]*schema.BlueGreen, error) {
+func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]*BlueGreen, error) {
 
 	clusterDir := projectDir + "/bluegreen"
 	files, err := ioutil.ReadDir(clusterDir)
 
-	merged := map[string]*schema.BlueGreen{}
+	merged := map[string]*BlueGreen{}
 
 	if err != nil {
 		return merged, err
@@ -64,7 +63,7 @@ func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]
 			tokens := filePattern.FindStringSubmatch(file.Name())
 			name := tokens[1]
 
-			bg, err := schema.CreateBlueGreen(content)
+			bg, err := CreateBlueGreen(content)
 			if err != nil {
 				return merged, err
 			}
@@ -75,13 +74,21 @@ func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]
 	return merged, nil
 }
 
-func (self *BlueGreenController) GetBlueGreenMap() map[string]*schema.BlueGreen {
+func CreateBlueGreen(data []byte) (*BlueGreen, error) {
+
+	bg := &BlueGreen{}
+	err := yaml.Unmarshal(data, bg)
+	return bg, err
+}
+
+
+func (self *BlueGreenController) GetBlueGreenMap() map[string]*BlueGreen {
 	return self.blueGreenMap
 }
 
-func (self *BlueGreenController) CreateBlueGreenPlans(bgmap map[string]*schema.BlueGreen, cplans []*plan.ServiceUpdatePlan) ([]*plan.BlueGreenPlan, error) {
+func (self *BlueGreenController) CreateBlueGreenPlans(bgmap map[string]*BlueGreen, cplans []*service.ServiceUpdatePlan) ([]*BlueGreenPlan, error) {
 
-	bgPlans := []*plan.BlueGreenPlan{}
+	bgPlans := []*BlueGreenPlan{}
 
 	for name, bg := range bgmap {
 
@@ -123,21 +130,21 @@ func (self *BlueGreenController) CreateBlueGreenPlans(bgmap map[string]*schema.B
 	return bgPlans, nil
 }
 
-func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *schema.BlueGreen, cplans []*plan.ServiceUpdatePlan) (*plan.BlueGreenPlan, error) {
+func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *BlueGreen, cplans []*service.ServiceUpdatePlan) (*BlueGreenPlan, error) {
 
 	blue := bluegreen.Blue
 	green := bluegreen.Green
 
-	clusterMap := make(map[string]*plan.ServiceUpdatePlan, len(cplans))
+	clusterMap := make(map[string]*service.ServiceUpdatePlan, len(cplans))
 	for _, cp := range cplans {
 		clusterMap[cp.Name] = cp
 	}
 
-	bgPlan := plan.BlueGreenPlan{
-		Blue: &plan.ServiceSet{
+	bgPlan := BlueGreenPlan{
+		Blue: &ServiceSet{
 			ClusterUpdatePlan: clusterMap[blue.Cluster],
 		},
-		Green: &plan.ServiceSet{
+		Green: &ServiceSet{
 			ClusterUpdatePlan: clusterMap[green.Cluster],
 		},
 		PrimaryElb: bluegreen.PrimaryElb,
@@ -185,7 +192,7 @@ func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *schema.BlueGreen
 }
 
 
-func (self *BlueGreenController) ApplyBlueGreenDeploys(plans []*plan.BlueGreenPlan, nodeploy bool) error {
+func (self *BlueGreenController) ApplyBlueGreenDeploys(plans []*BlueGreenPlan, nodeploy bool) error {
 
 	for _, plan := range plans {
 		if err := self.ApplyBlueGreenDeploy(plan, nodeploy); err != nil {
@@ -196,7 +203,7 @@ func (self *BlueGreenController) ApplyBlueGreenDeploys(plans []*plan.BlueGreenPl
 	return nil
 }
 
-func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan, nodeploy bool) error {
+func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *BlueGreenPlan, nodeploy bool) error {
 
 	apias := self.Ecs.AutoscalingApi()
 
@@ -204,8 +211,8 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *plan.BlueGreenPlan
 
 	var currentLabel *color.Escape
 	var nextLabel *color.Escape
-	var current *plan.ServiceSet
-	var next *plan.ServiceSet
+	var current *ServiceSet
+	var next *ServiceSet
 	primaryLb := bgplan.PrimaryElb
 	standbyLb := bgplan.StandbyElb
 	if targetGreen {

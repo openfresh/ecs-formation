@@ -16,7 +16,7 @@ func main() {
 	app.Author = "Akinori Yamada(@stormcat24)"
 	app.Email = "a.yamada24@gmail.com"
 	app.Commands = operation.Commands
-	app.Flags = []cli.Flag {
+	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name: "sns-topic, s",
 			Usage: "AWS SNS Topic Name",

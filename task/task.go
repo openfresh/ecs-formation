@@ -2,23 +2,23 @@ package task
 
 import (
 	"io/ioutil"
-	"github.com/stormcat24/ecs-formation/schema"
 	"strings"
 	"regexp"
-	"github.com/stormcat24/ecs-formation/aws"
-	"github.com/stormcat24/ecs-formation/plan"
+	efaws "github.com/stormcat24/ecs-formation/aws"
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"time"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/stormcat24/ecs-formation/util"
 )
 
 type TaskDefinitionController struct {
-	Ecs            *aws.AwsManager
+	Ecs            *efaws.AwsManager
 	TargetResource string
-	defmap         map[string]*schema.TaskDefinition
+	defmap         map[string]*TaskDefinition
 }
 
-func NewTaskDefinitionController(ecs *aws.AwsManager, projectDir string, targetResource string) (*TaskDefinitionController, error) {
+func NewTaskDefinitionController(ecs *efaws.AwsManager, projectDir string, targetResource string) (*TaskDefinitionController, error) {
 
 	con := &TaskDefinitionController{
 		Ecs: ecs,
@@ -37,16 +37,16 @@ func NewTaskDefinitionController(ecs *aws.AwsManager, projectDir string, targetR
 	return con, nil
 }
 
-func (self *TaskDefinitionController) GetTaskDefinitionMap() map[string]*schema.TaskDefinition {
+func (self *TaskDefinitionController) GetTaskDefinitionMap() map[string]*TaskDefinition {
 	return self.defmap
 }
 
-func (self *TaskDefinitionController) searchTaskDefinitions(projectDir string) (map[string]*schema.TaskDefinition, error) {
+func (self *TaskDefinitionController) searchTaskDefinitions(projectDir string) (map[string]*TaskDefinition, error) {
 
 	taskDir := projectDir + "/task"
 	files, err := ioutil.ReadDir(taskDir)
 
-	taskDefMap := map[string]*schema.TaskDefinition{}
+	taskDefMap := map[string]*TaskDefinition{}
 
 	if err != nil {
 		return taskDefMap, err
@@ -61,7 +61,7 @@ func (self *TaskDefinitionController) searchTaskDefinitions(projectDir string) (
 			tokens := filePattern.FindStringSubmatch(file.Name())
 			taskDefName := tokens[1]
 
-			taskDefinition, _ := schema.CreateTaskDefinition(taskDefName, content)
+			taskDefinition, _ := CreateTaskDefinition(taskDefName, content)
 
 			taskDefMap[taskDefName] = taskDefinition
 		}
@@ -70,9 +70,9 @@ func (self *TaskDefinitionController) searchTaskDefinitions(projectDir string) (
 	return taskDefMap, nil
 }
 
-func (self *TaskDefinitionController) CreateTaskUpdatePlans(tasks map[string]*schema.TaskDefinition) []*plan.TaskUpdatePlan {
+func (self *TaskDefinitionController) CreateTaskUpdatePlans(tasks map[string]*TaskDefinition) []*TaskUpdatePlan {
 
-	plans := []*plan.TaskUpdatePlan{}
+	plans := []*TaskUpdatePlan{}
 	for _, task := range tasks {
 		if len(self.TargetResource) == 0 || self.TargetResource == task.Name {
 			plans = append(plans, self.CreateTaskUpdatePlan(task))
@@ -82,21 +82,21 @@ func (self *TaskDefinitionController) CreateTaskUpdatePlans(tasks map[string]*sc
 	return plans
 }
 
-func (self *TaskDefinitionController) CreateTaskUpdatePlan(task *schema.TaskDefinition) *plan.TaskUpdatePlan {
+func (self *TaskDefinitionController) CreateTaskUpdatePlan(task *TaskDefinition) *TaskUpdatePlan {
 
-	newContainers := map[string]*schema.ContainerDefinition{}
+	newContainers := map[string]*ContainerDefinition{}
 
 	for _, con := range task.ContainerDefinitions {
 		newContainers[con.Name] = con
 	}
 
-	return &plan.TaskUpdatePlan{
+	return &TaskUpdatePlan{
 		Name: task.Name,
 		NewContainers: newContainers,
 	}
 }
 
-func (self *TaskDefinitionController) ApplyTaskDefinitionPlans(plans []*plan.TaskUpdatePlan) ([]*ecs.RegisterTaskDefinitionOutput, error) {
+func (self *TaskDefinitionController) ApplyTaskDefinitionPlans(plans []*TaskUpdatePlan) ([]*ecs.RegisterTaskDefinitionOutput, error) {
 
 	logger.Main.Info("Start apply Task definitions...")
 
@@ -116,12 +116,75 @@ func (self *TaskDefinitionController) ApplyTaskDefinitionPlans(plans []*plan.Tas
 	return outputs, nil
 }
 
-func (self *TaskDefinitionController) ApplyTaskDefinitionPlan(task *plan.TaskUpdatePlan) (*ecs.RegisterTaskDefinitionOutput, error) {
+func (self *TaskDefinitionController) ApplyTaskDefinitionPlan(task *TaskUpdatePlan) (*ecs.RegisterTaskDefinitionOutput, error) {
 
-	containers := []*schema.ContainerDefinition{}
+	containers := []*ContainerDefinition{}
 	for _, con := range task.NewContainers {
 		containers = append(containers, con)
 	}
 
-	return self.Ecs.TaskApi().RegisterTaskDefinition(task.Name, containers)
+	conDefs := []*ecs.ContainerDefinition{}
+	volumes := []*ecs.Volume{}
+
+	for _, con := range containers {
+
+		var commands []*string
+		if (len(con.Command) > 0) {
+			for _, token := range strings.Split(con.Command, " ") {
+				commands = append(commands, aws.String(token))
+			}
+		} else {
+			commands = nil
+		}
+
+		var entryPoints []*string
+		if (len(con.EntryPoint) > 0) {
+			for _, token := range strings.Split(con.EntryPoint, " ") {
+				entryPoints = append(entryPoints, aws.String(token))
+			}
+		} else {
+			entryPoints = nil
+		}
+
+		portMappings, err := toPortMappings(con.Ports)
+		if err != nil {
+			return &ecs.RegisterTaskDefinitionOutput{}, err
+		}
+
+		volumeItems, err := CreateVolumeInfoItems(con.Volumes)
+		if err != nil {
+			return &ecs.RegisterTaskDefinitionOutput{}, err
+		}
+
+		mountPoints := []*ecs.MountPoint{}
+		for _, vp := range volumeItems {
+			volumes = append(volumes, vp.Volume)
+
+			mountPoints = append(mountPoints, vp.MountPoint)
+		}
+
+		volumesFrom, err := toVolumesFroms(con.VolumesFrom)
+		if err != nil {
+			return &ecs.RegisterTaskDefinitionOutput{}, err
+		}
+
+		conDef := &ecs.ContainerDefinition{
+			CPU: &con.CpuUnits,
+			Command: commands,
+			EntryPoint: entryPoints,
+			Environment: toKeyValuePairs(con.Environment),
+			Essential: &con.Essential,
+			Image: aws.String(con.Image),
+			Links: util.ConvertPointerString(con.Links),
+			Memory: &con.Memory,
+			MountPoints: mountPoints,
+			Name: aws.String(con.Name),
+			PortMappings: portMappings,
+			VolumesFrom: volumesFrom,
+		}
+
+		conDefs = append(conDefs, conDef)
+	}
+
+	return self.Ecs.TaskApi().RegisterTaskDefinition(task.Name, conDefs, volumes)
 }

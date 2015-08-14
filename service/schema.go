@@ -1,6 +1,8 @@
-package schema
+package service
 
-import "gopkg.in/yaml.v2"
+import (
+	"gopkg.in/yaml.v2"
+)
 
 type Cluster struct {
 
@@ -21,7 +23,7 @@ func (self *Service) FindLoadBalancerByContainer(conname string, port int64) *Lo
 
 	for _, lb := range self.LoadBalancers {
 		if lb.ContainerName == conname &&
-			lb.ContainerPort == port {
+		lb.ContainerPort == port {
 			return &lb
 		}
 	}
@@ -57,11 +59,4 @@ func CreateServiceMap(data []byte) (map[string]Service, error) {
 	}
 
 	return servicesMap, err
-}
-
-func CreateBlueGreen(data []byte) (*BlueGreen, error) {
-
-	bg := &BlueGreen{}
-	err := yaml.Unmarshal(data, bg)
-	return bg, err
 }

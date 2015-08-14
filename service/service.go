@@ -2,7 +2,6 @@ package service
 
 import (
 	"io/ioutil"
-	"github.com/stormcat24/ecs-formation/schema"
 	"fmt"
 	"strings"
 	"regexp"
@@ -10,7 +9,6 @@ import (
 	"os"
 	"github.com/str1ngs/ansi/color"
 	"github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/stormcat24/ecs-formation/plan"
 	"github.com/stormcat24/ecs-formation/logger"
 	"time"
 	"errors"
@@ -28,7 +26,7 @@ const (
 type ServiceController struct {
 	Ecs            *aws.AwsManager
 	TargetResource string
-	clusters       []schema.Cluster
+	clusters       []Cluster
 }
 
 func NewServiceController(ecs *aws.AwsManager, projectDir string, targetResource string) (*ServiceController, error) {
@@ -51,12 +49,12 @@ func NewServiceController(ecs *aws.AwsManager, projectDir string, targetResource
 	return con, nil
 }
 
-func (self *ServiceController) searchServices(projectDir string) ([]schema.Cluster, error) {
+func (self *ServiceController) searchServices(projectDir string) ([]Cluster, error) {
 
 	clusterDir := projectDir + "/service"
 	files, err := ioutil.ReadDir(clusterDir)
 
-	clusters := []schema.Cluster{}
+	clusters := []Cluster{}
 
 	if err != nil {
 		return clusters, err
@@ -71,8 +69,8 @@ func (self *ServiceController) searchServices(projectDir string) ([]schema.Clust
 			tokens := filePattern.FindStringSubmatch(file.Name())
 			clusterName := tokens[1]
 
-			serviceMap, _ := schema.CreateServiceMap(content)
-			cluster := schema.Cluster{
+			serviceMap, _ := CreateServiceMap(content)
+			cluster := Cluster{
 				Name: clusterName,
 				Services: serviceMap,
 			}
@@ -84,13 +82,13 @@ func (self *ServiceController) searchServices(projectDir string) ([]schema.Clust
 	return clusters, nil
 }
 
-func (self *ServiceController) GetClusters() []schema.Cluster {
+func (self *ServiceController) GetClusters() []Cluster {
 	return self.clusters
 }
 
-func (self *ServiceController) CreateServiceUpdatePlans() ([]*plan.ServiceUpdatePlan, error) {
+func (self *ServiceController) CreateServiceUpdatePlans() ([]*ServiceUpdatePlan, error) {
 
-	plans := []*plan.ServiceUpdatePlan{}
+	plans := []*ServiceUpdatePlan{}
 	for _, cluster := range self.GetClusters() {
 		if len(self.TargetResource) == 0 || self.TargetResource == cluster.Name {
 			cp, err := self.CreateServiceUpdatePlan(cluster)
@@ -104,46 +102,46 @@ func (self *ServiceController) CreateServiceUpdatePlans() ([]*plan.ServiceUpdate
 	return plans, nil
 }
 
-func (self *ServiceController) CreateServiceUpdatePlan(cluster schema.Cluster) (*plan.ServiceUpdatePlan, error) {
+func (self *ServiceController) CreateServiceUpdatePlan(cluster Cluster) (*ServiceUpdatePlan, error) {
 
 	clusterApi := self.Ecs.ClusterApi()
 	output, errdc := clusterApi.DescribeClusters([]*string{&cluster.Name})
 
 	if errdc != nil {
-		return &plan.ServiceUpdatePlan{}, errdc
+		return &ServiceUpdatePlan{}, errdc
 	}
 
 	if len(output.Failures) > 0 {
-		return &plan.ServiceUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' not found", cluster.Name))
+		return &ServiceUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' not found", cluster.Name))
 	}
 
 	rlci, errlci := clusterApi.ListContainerInstances(cluster.Name)
 	if errlci != nil {
-		return &plan.ServiceUpdatePlan{}, errlci
+		return &ServiceUpdatePlan{}, errlci
 	}
 
 	if len(rlci.ContainerInstanceARNs) == 0 {
-		return &plan.ServiceUpdatePlan{}, errors.New(fmt.Sprintf("ECS instances not found in cluster '%s' not found", cluster.Name))
+		return &ServiceUpdatePlan{}, errors.New(fmt.Sprintf("ECS instances not found in cluster '%s' not found", cluster.Name))
 	}
 
 	target := output.Clusters[0]
 
 	if *target.Status != "ACTIVE" {
-		return &plan.ServiceUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' is not ACTIVE.", cluster.Name))
+		return &ServiceUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' is not ACTIVE.", cluster.Name))
 	}
 
 	serviceApi := self.Ecs.ServiceApi()
 
 	resListServices, errls := serviceApi.ListServices(cluster.Name)
 	if errls != nil {
-		return &plan.ServiceUpdatePlan{}, errls
+		return &ServiceUpdatePlan{}, errls
 	}
 
 	currentServices := map[string]*ecs.Service{}
 	if len(resListServices.ServiceARNs) > 0 {
 		resDescribeService, errds := serviceApi.DescribeService(cluster.Name, resListServices.ServiceARNs)
 		if errds != nil {
-			return &plan.ServiceUpdatePlan{}, errds
+			return &ServiceUpdatePlan{}, errds
 		}
 
 		for _, service := range resDescribeService.Services {
@@ -151,13 +149,13 @@ func (self *ServiceController) CreateServiceUpdatePlan(cluster schema.Cluster) (
 		}
 	}
 
-	newServices := map[string]*schema.Service{}
+	newServices := map[string]*Service{}
 	for name, newService := range cluster.Services {
 		s := newService
 		newServices[name] = &s
 	}
 
-	return &plan.ServiceUpdatePlan{
+	return &ServiceUpdatePlan{
 		Name: cluster.Name,
 		InstanceARNs: rlci.ContainerInstanceARNs,
 		CurrentServices: currentServices,
@@ -165,7 +163,7 @@ func (self *ServiceController) CreateServiceUpdatePlan(cluster schema.Cluster) (
 	}, nil
 }
 
-func (self *ServiceController) ApplyServicePlans(plans []*plan.ServiceUpdatePlan) {
+func (self *ServiceController) ApplyServicePlans(plans []*ServiceUpdatePlan) {
 
 	logger.Main.Info("Start apply serivces...")
 
@@ -177,17 +175,14 @@ func (self *ServiceController) ApplyServicePlans(plans []*plan.ServiceUpdatePlan
 	}
 }
 
-func (self *ServiceController) ApplyServicePlan(plan *plan.ServiceUpdatePlan) error {
+func (self *ServiceController) ApplyServicePlan(plan *ServiceUpdatePlan) error {
 
 	api := self.Ecs.ServiceApi()
 
 	for _, current := range plan.CurrentServices {
 
 		// set desired_count = 0
-		if _, err := api.UpdateService(plan.Name, schema.Service{
-			Name: *current.ServiceName,
-			DesiredCount: 0,
-		}); err != nil {
+		if _, err := api.UpdateService(plan.Name, *current.ServiceName, 0, *current.TaskDefinition); err != nil {
 			return err
 		}
 
@@ -214,14 +209,7 @@ func (self *ServiceController) ApplyServicePlan(plan *plan.ServiceUpdatePlan) er
 
 	for _, add := range plan.NewServices {
 
-		result, err := api.CreateService(plan.Name, schema.Service{
-			Name: add.Name,
-			DesiredCount: add.DesiredCount,
-			LoadBalancers: add.LoadBalancers,
-			TaskDefinition: add.TaskDefinition,
-			Role: add.Role,
-		})
-
+		result, err := api.CreateService(plan.Name, add.Name, add.DesiredCount, toLoadBalancers(&add.LoadBalancers), add.TaskDefinition, add.Role)
 		if err != nil {
 			return err
 		}
@@ -235,6 +223,21 @@ func (self *ServiceController) ApplyServicePlan(plan *plan.ServiceUpdatePlan) er
 
 	return nil
 }
+
+func toLoadBalancers(values *[]LoadBalancer) []*ecs.LoadBalancer {
+
+	loadBalancers := []*ecs.LoadBalancer{}
+	for _, lb := range *values {
+		loadBalancers = append(loadBalancers, &ecs.LoadBalancer{
+			LoadBalancerName: &lb.Name,
+			ContainerName: &lb.ContainerName,
+			ContainerPort: &lb.ContainerPort,
+		})
+	}
+
+	return loadBalancers
+}
+
 
 func (self *ServiceController) waitStoppingService(cluster string, service string) error {
 

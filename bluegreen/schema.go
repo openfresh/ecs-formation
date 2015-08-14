@@ -1,4 +1,4 @@
-package schema
+package bluegreen
 
 type BlueGreen struct {
 	Blue  BlueGreenTarget    `yaml:"blue"`
