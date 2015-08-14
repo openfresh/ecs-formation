@@ -11,6 +11,7 @@ type BlueGreenPlan struct {
 	Green      *ServiceSet
 	PrimaryElb string
 	StandbyElb string
+	ChainElb   []BlueGreenChainElb
 }
 
 func (self *BlueGreenPlan) IsBlueWithPrimaryElb() bool {

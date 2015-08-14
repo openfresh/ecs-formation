@@ -15,10 +15,10 @@ import (
 )
 
 type BlueGreenController struct {
-	Ecs *aws.AwsManager
+	Ecs               *aws.AwsManager
 	ClusterController *service.ServiceController
-	blueGreenMap map[string]*BlueGreen
-	TargetResource string
+	blueGreenMap      map[string]*BlueGreen
+	TargetResource    string
 }
 
 func NewBlueGreenController(ecs *aws.AwsManager, projectDir string, targetResource string) (*BlueGreenController, error) {
@@ -149,6 +149,7 @@ func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *BlueGreen, cplan
 		},
 		PrimaryElb: bluegreen.PrimaryElb,
 		StandbyElb: bluegreen.StandbyElb,
+		ChainElb: bluegreen.ChainElb,
 	}
 
 	// describe services
@@ -171,7 +172,7 @@ func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *BlueGreen, cplan
 	}
 
 	// describe autoscaling group
-	asgmap, err := self.Ecs.AutoscalingApi().DescribeAutoScalingGroups([]string {
+	asgmap, err := self.Ecs.AutoscalingApi().DescribeAutoScalingGroups([]string{
 		blue.AutoscalingGroup,
 		green.AutoscalingGroup,
 	})
@@ -227,6 +228,13 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *BlueGreenPlan, nod
 		nextLabel = color.Cyan("blue")
 	}
 
+	primaryGroup := []string{primaryLb}
+	standbyGroup := []string{standbyLb}
+	for _, entry := range bgplan.ChainElb {
+		primaryGroup = append(primaryGroup, entry.PrimaryElb)
+		standbyGroup = append(standbyGroup, entry.StandbyElb)
+	}
+
 	logger.Main.Infof("Current status is '%s'", currentLabel)
 	logger.Main.Infof("Start Blue-Green Deployment: %s to %s ...", currentLabel, nextLabel)
 	if nodeploy {
@@ -240,46 +248,41 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *BlueGreenPlan, nod
 	}
 
 	// attach next group to primary lb
-	_, erratt := apias.AttachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, []string{
-		primaryLb,
-	})
-	if erratt != nil {
-		return erratt
+	if _, err := apias.AttachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, primaryGroup); err != nil {
+		return err
 	}
-	logger.Main.Infof("Attached to attach %s group to %s(primary).", nextLabel, primaryLb)
+	for _, e := range primaryGroup {
+		logger.Main.Infof("Attached to attach %s group to %s(primary).", nextLabel, e)
+	}
 
-	errwlb := self.waitLoadBalancer(*next.AutoScalingGroup.AutoScalingGroupName, primaryLb)
-	if errwlb != nil {
-		return errwlb
+	if err := self.waitLoadBalancer(*next.AutoScalingGroup.AutoScalingGroupName, primaryLb); err != nil {
+		return err
 	}
 	logger.Main.Infof("Added %s group to primary", nextLabel)
 
 	// detach current group from primary lb
-	_, errelbb := apias.DetachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, []string{
-		primaryLb,
-	})
-	if errelbb != nil {
-		return errelbb
+	if _, err := apias.DetachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, primaryGroup); err != nil {
+		return err
 	}
-	logger.Main.Infof("Detached %s group from %s(primary).", currentLabel, primaryLb)
+	for _, e := range primaryGroup {
+		logger.Main.Infof("Detached %s group from %s(primary).", currentLabel, e)
+	}
 
 	// detach next group from standby lb
-	_, errelbg := apias.DetachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, []string{
-		standbyLb,
-	})
-	if errelbg != nil {
-		return errelbg
+	if _, err := apias.DetachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, standbyGroup); err != nil {
+		return err
 	}
-	logger.Main.Infof("Detached %s group from %s(standby).", nextLabel, standbyLb)
+	for _, e := range standbyGroup {
+		logger.Main.Infof("Detached %s group from %s(standby).", nextLabel, e)
+	}
 
 	// attach current group to standby lb
-	_, errelba := apias.AttachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, []string{
-		standbyLb,
-	})
-	if errelba != nil {
-		return errelba
+	if _, err := apias.AttachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, standbyGroup); err != nil {
+		return err
 	}
-	logger.Main.Infof("Attached %s group to %s(standby).", currentLabel, standbyLb)
+	for _, e := range standbyGroup {
+		logger.Main.Infof("Attached %s group to %s(standby).", currentLabel, e)
+	}
 
 	return nil
 }
