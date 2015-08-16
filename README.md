@@ -2,6 +2,8 @@ ecs-formation
 ==========
 
 [![Circle CI](https://circleci.com/gh/stormcat24/ecs-formation.svg?style=shield&circle-token=baf60b45ce2de8c5d11b3e6d77a3a23ebf2d5991)](https://circleci.com/gh/stormcat24/ecs-formation)
+[![Language](http://img.shields.io/badge/language-go-brightgreen.svg?style=flat)](https://golang.org/)
+[![issues](https://img.shields.io/github/issues/stormcat24/ecs-formation.svg?style=flat)](https://github.com/stormcat24/ecs-formation/issues?state=open)
 [![License: MIT](http://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 
 ecs-formation is a tool for defining several Docker continers and clusters on [Amazon EC2 Container Service(ECS)](https://aws.amazon.com/ecs/).
