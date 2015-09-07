@@ -10,6 +10,7 @@ import (
 	"time"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/stormcat24/ecs-formation/util"
+	"github.com/str1ngs/ansi/color"
 )
 
 type TaskDefinitionController struct {
@@ -106,10 +107,11 @@ func (self *TaskDefinitionController) ApplyTaskDefinitionPlans(plans []*TaskUpda
 		result, err := self.ApplyTaskDefinitionPlan(plan)
 
 		if err != nil {
+			logger.Main.Errorf("Register Task Definition '%s' is error.", plan.Name)
 			return []*ecs.RegisterTaskDefinitionOutput{}, err
 		}
+		logger.Main.Infof("Register Task Definition '%s' is success.", color.Cyan(plan.Name))
 		time.Sleep(1 * time.Second)
-
 		outputs = append(outputs, result)
 	}
 
