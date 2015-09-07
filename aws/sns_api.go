@@ -26,7 +26,7 @@ func (self *SnsApi) Publish(topicArn string, message interface{}) (*sns.PublishO
 	})
 
 	params := &sns.PublishInput{
-		TopicARN: aws.String(topicArn),
+		TopicArn: aws.String(topicArn),
 		Message: aws.String(string(data)),
 		MessageStructure: aws.String("json"),
 	}

@@ -169,7 +169,7 @@ func (self *TaskDefinitionController) ApplyTaskDefinitionPlan(task *TaskUpdatePl
 		}
 
 		conDef := &ecs.ContainerDefinition{
-			CPU: &con.CpuUnits,
+			Cpu: &con.CpuUnits,
 			Command: commands,
 			EntryPoint: entryPoints,
 			Environment: toKeyValuePairs(con.Environment),
