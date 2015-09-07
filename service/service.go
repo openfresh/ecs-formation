@@ -96,7 +96,9 @@ func (self *ServiceController) CreateServiceUpdatePlans() ([]*ServiceUpdatePlan,
 				return plans, err
 			}
 
-			plans = append(plans, cp)
+			if cp != nil {
+				plans = append(plans, cp)
+			}
 		}
 	}
 	return plans, nil
@@ -108,59 +110,61 @@ func (self *ServiceController) CreateServiceUpdatePlan(cluster Cluster) (*Servic
 	output, errdc := clusterApi.DescribeClusters([]*string{&cluster.Name})
 
 	if errdc != nil {
-		return &ServiceUpdatePlan{}, errdc
+		return nil, errdc
 	}
 
 	if len(output.Failures) > 0 {
-		return &ServiceUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' not found", cluster.Name))
+		return nil, errors.New(fmt.Sprintf("Cluster '%s' not found", cluster.Name))
 	}
 
 	rlci, errlci := clusterApi.ListContainerInstances(cluster.Name)
 	if errlci != nil {
-		return &ServiceUpdatePlan{}, errlci
+		return nil, errlci
 	}
 
 	if len(rlci.ContainerInstanceArns) == 0 {
-		return &ServiceUpdatePlan{}, errors.New(fmt.Sprintf("ECS instances not found in cluster '%s' not found", cluster.Name))
-	}
+		logger.Main.Warnf("ECS instances not found in cluster '%s' not found", cluster.Name)
+		return nil, nil
 
-	target := output.Clusters[0]
+	} else {
+		target := output.Clusters[0]
 
-	if *target.Status != "ACTIVE" {
-		return &ServiceUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' is not ACTIVE.", cluster.Name))
-	}
-
-	serviceApi := self.Ecs.ServiceApi()
-
-	resListServices, errls := serviceApi.ListServices(cluster.Name)
-	if errls != nil {
-		return &ServiceUpdatePlan{}, errls
-	}
-
-	currentServices := map[string]*ecs.Service{}
-	if len(resListServices.ServiceArns) > 0 {
-		resDescribeService, errds := serviceApi.DescribeService(cluster.Name, resListServices.ServiceArns)
-		if errds != nil {
-			return &ServiceUpdatePlan{}, errds
+		if *target.Status != "ACTIVE" {
+			return &ServiceUpdatePlan{}, errors.New(fmt.Sprintf("Cluster '%s' is not ACTIVE.", cluster.Name))
 		}
 
-		for _, service := range resDescribeService.Services {
-			currentServices[*service.ServiceName] = service
+		serviceApi := self.Ecs.ServiceApi()
+
+		resListServices, errls := serviceApi.ListServices(cluster.Name)
+		if errls != nil {
+			return &ServiceUpdatePlan{}, errls
 		}
-	}
 
-	newServices := map[string]*Service{}
-	for name, newService := range cluster.Services {
-		s := newService
-		newServices[name] = &s
-	}
+		currentServices := map[string]*ecs.Service{}
+		if len(resListServices.ServiceArns) > 0 {
+			resDescribeService, errds := serviceApi.DescribeService(cluster.Name, resListServices.ServiceArns)
+			if errds != nil {
+				return &ServiceUpdatePlan{}, errds
+			}
 
-	return &ServiceUpdatePlan{
-		Name: cluster.Name,
-		InstanceARNs: rlci.ContainerInstanceArns,
-		CurrentServices: currentServices,
-		NewServices: newServices,
-	}, nil
+			for _, service := range resDescribeService.Services {
+				currentServices[*service.ServiceName] = service
+			}
+		}
+
+		newServices := map[string]*Service{}
+		for name, newService := range cluster.Services {
+			s := newService
+			newServices[name] = &s
+		}
+
+		return &ServiceUpdatePlan{
+			Name: cluster.Name,
+			InstanceARNs: rlci.ContainerInstanceArns,
+			CurrentServices: currentServices,
+			NewServices: newServices,
+		}, nil
+	}
 }
 
 func (self *ServiceController) ApplyServicePlans(plans []*ServiceUpdatePlan) {
