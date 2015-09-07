@@ -120,7 +120,7 @@ func (self *ServiceController) CreateServiceUpdatePlan(cluster Cluster) (*Servic
 		return &ServiceUpdatePlan{}, errlci
 	}
 
-	if len(rlci.ContainerInstanceARNs) == 0 {
+	if len(rlci.ContainerInstanceArns) == 0 {
 		return &ServiceUpdatePlan{}, errors.New(fmt.Sprintf("ECS instances not found in cluster '%s' not found", cluster.Name))
 	}
 
@@ -138,8 +138,8 @@ func (self *ServiceController) CreateServiceUpdatePlan(cluster Cluster) (*Servic
 	}
 
 	currentServices := map[string]*ecs.Service{}
-	if len(resListServices.ServiceARNs) > 0 {
-		resDescribeService, errds := serviceApi.DescribeService(cluster.Name, resListServices.ServiceARNs)
+	if len(resListServices.ServiceArns) > 0 {
+		resDescribeService, errds := serviceApi.DescribeService(cluster.Name, resListServices.ServiceArns)
 		if errds != nil {
 			return &ServiceUpdatePlan{}, errds
 		}
@@ -157,7 +157,7 @@ func (self *ServiceController) CreateServiceUpdatePlan(cluster Cluster) (*Servic
 
 	return &ServiceUpdatePlan{
 		Name: cluster.Name,
-		InstanceARNs: rlci.ContainerInstanceARNs,
+		InstanceARNs: rlci.ContainerInstanceArns,
 		CurrentServices: currentServices,
 		NewServices: newServices,
 	}, nil
@@ -195,7 +195,7 @@ func (self *ServiceController) ApplyServicePlan(plan *ServiceUpdatePlan) error {
 
 
 		// delete service
-		result, err := api.DeleteService(plan.Name, *current.ServiceARN)
+		result, err := api.DeleteService(plan.Name, *current.ServiceArn)
 		if err != nil {
 			return err
 		}
@@ -204,7 +204,7 @@ func (self *ServiceController) ApplyServicePlan(plan *ServiceUpdatePlan) error {
 			return err
 		}
 
-		logger.Main.Infof("Deleted service '%s'", *result.Service.ServiceARN)
+		logger.Main.Infof("Deleted service '%s'", *result.Service.ServiceArn)
 	}
 
 	for _, add := range plan.NewServices {
@@ -214,7 +214,7 @@ func (self *ServiceController) ApplyServicePlan(plan *ServiceUpdatePlan) error {
 			return err
 		}
 
-		logger.Main.Infof("Created service '%s'", *result.Service.ServiceARN)
+		logger.Main.Infof("Created service '%s'", *result.Service.ServiceArn)
 		errwas := self.WaitActiveService(plan.Name, add.Name)
 		if errwas != nil {
 			return errwas
@@ -304,10 +304,10 @@ func (self *ServiceController) WaitActiveService(cluster string, service string)
 					return errlt
 				}
 
-				if len(reslt.TaskARNs) == 0 {
+				if len(reslt.TaskArns) == 0 {
 					continue
 				} else {
-					taskARNs = reslt.TaskARNs
+					taskARNs = reslt.TaskArns
 					flag = true
 				}
 			}
@@ -337,13 +337,13 @@ func (self *ServiceController) checkRunningTask(dto *ecs.DescribeTasksOutput) Ta
 
 	status := []string{}
 	for _, task := range dto.Tasks {
-		util.Println(fmt.Sprintf("    %s:", *task.TaskARN))
+		util.Println(fmt.Sprintf("    %s:", *task.TaskArn))
 		util.Println(fmt.Sprintf("        LastStatus:%s", self.RoundColorStatus(*task.LastStatus)))
 		util.Println("        Containers:")
 
 		for _, con := range task.Containers {
 			util.Println(fmt.Sprintf("            ----------[%s]----------", *con.Name))
-			util.Println(fmt.Sprintf("            ContainerARN:%s", *con.ContainerARN))
+			util.Println(fmt.Sprintf("            ContainerARN:%s", *con.ContainerArn))
 			util.Println(fmt.Sprintf("            Status:%s", self.RoundColorStatus(*con.LastStatus)))
 			util.Println()
 		}

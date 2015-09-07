@@ -257,7 +257,7 @@ func createClusterPlans(controller *service.ServiceController, projectDir string
 
 		for _, cs := range plan.CurrentServices {
 			util.PrintlnYellow(fmt.Sprintf("        ServiceName = %s", *cs.ServiceName))
-			util.PrintlnYellow(fmt.Sprintf("        ServiceARN = %s", *cs.ServiceARN))
+			util.PrintlnYellow(fmt.Sprintf("        ServiceARN = %s", *cs.ServiceArn))
 			util.PrintlnYellow(fmt.Sprintf("        TaskDefinition = %s", *cs.TaskDefinition))
 			util.PrintlnYellow(fmt.Sprintf("        DesiredCount = %d", *cs.DesiredCount))
 			util.PrintlnYellow(fmt.Sprintf("        PendingCount = %d", *cs.PendingCount))
@@ -351,7 +351,7 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController, jsonOutput 
 		util.PrintlnCyan("        Current services as follows:")
 		for _, bcs := range bgplan.Blue.ClusterUpdatePlan.CurrentServices {
 			util.PrintlnCyan(fmt.Sprintf("            %s:", *bcs.ServiceName))
-			util.PrintlnCyan(fmt.Sprintf("                ServiceARN = %s", *bcs.ServiceARN))
+			util.PrintlnCyan(fmt.Sprintf("                ServiceARN = %s", *bcs.ServiceArn))
 			util.PrintlnCyan(fmt.Sprintf("                TaskDefinition = %s", *bcs.TaskDefinition))
 			util.PrintlnCyan(fmt.Sprintf("                DesiredCount = %d", *bcs.DesiredCount))
 			util.PrintlnCyan(fmt.Sprintf("                PendingCount = %d", *bcs.PendingCount))
@@ -371,7 +371,7 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController, jsonOutput 
 		util.PrintlnGreen("        Current services as follows:")
 		for _, gcs := range bgplan.Green.ClusterUpdatePlan.CurrentServices {
 			util.PrintlnGreen(fmt.Sprintf("            %s:", *gcs.ServiceName))
-			util.PrintlnGreen(fmt.Sprintf("                ServiceARN = %s", *gcs.ServiceARN))
+			util.PrintlnGreen(fmt.Sprintf("                ServiceARN = %s", *gcs.ServiceArn))
 			util.PrintlnGreen(fmt.Sprintf("                TaskDefinition = %s", *gcs.TaskDefinition))
 			util.PrintlnGreen(fmt.Sprintf("                DesiredCount = %d", *gcs.DesiredCount))
 			util.PrintlnGreen(fmt.Sprintf("                PendingCount = %d", *gcs.PendingCount))
@@ -383,7 +383,7 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController, jsonOutput 
 		jsonItems = append(jsonItems, BlueGreenPlanJson{
 
 			Blue: BlueGreenServiceJson{
-				ClusterARN: *bgplan.Blue.CurrentService.ClusterARN,
+				ClusterARN: *bgplan.Blue.CurrentService.ClusterArn,
 				AutoScalingGroupARN: *bgplan.Blue.AutoScalingGroup.AutoScalingGroupARN,
 				Instances: bgplan.Blue.AutoScalingGroup.Instances,
 				TaskDefinition: *bgplan.Blue.CurrentService.TaskDefinition,
@@ -392,7 +392,7 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController, jsonOutput 
 				RunningCount: *bgplan.Blue.CurrentService.RunningCount,
 			},
 			Green: BlueGreenServiceJson{
-				ClusterARN: *bgplan.Green.CurrentService.ClusterARN,
+				ClusterARN: *bgplan.Green.CurrentService.ClusterArn,
 				AutoScalingGroupARN: *bgplan.Green.AutoScalingGroup.AutoScalingGroupARN,
 				Instances: bgplan.Green.AutoScalingGroup.Instances,
 				TaskDefinition: *bgplan.Green.CurrentService.TaskDefinition,
