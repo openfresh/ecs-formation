@@ -1,5 +1,17 @@
+machine:
+  environment:
+    GO_VERSION: 1.5
+
 dependencies:
   pre:
+    # go1.5
+    - curl -L -O https://storage.googleapis.com/golang/go$GO_VERSION.linux-amd64.tar.gz > /dev/null
+    - tar xzf go$GO_VERSION.linux-amd64.tar.gz
+    - sudo rm -rf /usr/local/go
+    - sudo mv go /usr/local/go-$GO_VERSION
+    - sudo ln -s /usr/local/go-$GO_VERSION /usr/local/go
+
+    # deps
     - make deps-test
 
 test:
