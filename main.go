@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/stormcat24/ecs-formation/operation"
 	"github.com/codegangsta/cli"
-	"os"
 	"github.com/stormcat24/ecs-formation/config"
+	"github.com/stormcat24/ecs-formation/operation"
+	"os"
 )
 
 func main() {
@@ -18,9 +18,14 @@ func main() {
 	app.Commands = operation.Commands
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
-			Name: "sns-topic, s",
-			Usage: "AWS SNS Topic Name",
+			Name:   "sns-topic, s",
+			Usage:  "AWS SNS Topic Name",
 			EnvVar: "ECSF_SNS_TOPIC",
+		},
+		cli.IntFlag{
+			Name:   "retry-count, r",
+			Usage:  "AWS API Max Retry Count",
+			EnvVar: "ECSF_RETRY_COUNT",
 		},
 	}
 	app.Before = config.PrepareGlobalOptions
