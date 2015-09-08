@@ -1,13 +1,19 @@
 package aws
 
 import (
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/service/autoscaling"
+	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/sns"
+	"github.com/stormcat24/ecs-formation/config"
 )
-
 
 type AwsManager struct {
 	credentials *credentials.Credentials
-	region *string
+	region      string
+	retryCount  int
 }
 
 func NewAwsManager(accessKey string, secretKey string, region string) *AwsManager {
@@ -16,50 +22,49 @@ func NewAwsManager(accessKey string, secretKey string, region string) *AwsManage
 
 	manager := &AwsManager{
 		credentials: cred,
-		region: &region,
+		region:      region,
+		retryCount:  config.AppConfig.RetryCount,
 	}
 
 	return manager
 }
 
-func (self *AwsManager) ClusterApi() *EcsClusterApi {
-	return &EcsClusterApi{
-		Credentials: self.credentials,
-		Region: self.region,
-	}
-}
-
-func (self *AwsManager) ServiceApi() *EcsServiceApi {
-	return &EcsServiceApi{
-		Credentials: self.credentials,
-		Region: self.region,
-	}
-}
-
-func (self *AwsManager) TaskApi() *EcsTaskApi {
-	return &EcsTaskApi{
-		Credentials: self.credentials,
-		Region: self.region,
+func (self *AwsManager) EcsApi() *EcsApi {
+	return &EcsApi{
+		service: ecs.New(&aws.Config{
+			Credentials: self.credentials,
+			Region:      &self.region,
+			MaxRetries:  &self.retryCount,
+		}),
 	}
 }
 
 func (self *AwsManager) ElbApi() *ElbApi {
 	return &ElbApi{
-		Credentials: self.credentials,
-		Region: self.region,
+		service: elb.New(&aws.Config{
+			Credentials: self.credentials,
+			Region:      &self.region,
+			MaxRetries:  &self.retryCount,
+		}),
 	}
 }
 
 func (self *AwsManager) AutoscalingApi() *AutoscalingApi {
 	return &AutoscalingApi{
-		Credentials: self.credentials,
-		Region: self.region,
+		service: autoscaling.New(&aws.Config{
+			Credentials: self.credentials,
+			Region:      &self.region,
+			MaxRetries:  &self.retryCount,
+		}),
 	}
 }
 
 func (self *AwsManager) SnsApi() *SnsApi {
 	return &SnsApi{
-		Credentials: self.credentials,
-		Region: self.region,
+		service: sns.New(&aws.Config{
+			Credentials: self.credentials,
+			Region:      &self.region,
+			MaxRetries:  &self.retryCount,
+		}),
 	}
 }

@@ -1,38 +1,38 @@
 package bluegreen
 
 import (
-	"io/ioutil"
+	"errors"
+	"fmt"
 	"github.com/stormcat24/ecs-formation/aws"
+	"github.com/stormcat24/ecs-formation/logger"
+	"github.com/stormcat24/ecs-formation/service"
+	"github.com/str1ngs/ansi/color"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"regexp"
 	"strings"
 	"time"
-	"fmt"
-	"errors"
-	"github.com/stormcat24/ecs-formation/service"
-	"github.com/stormcat24/ecs-formation/logger"
-	"github.com/str1ngs/ansi/color"
-	"regexp"
-	"gopkg.in/yaml.v2"
 )
 
 type BlueGreenController struct {
-	Ecs               *aws.AwsManager
+	manager           *aws.AwsManager
 	ClusterController *service.ServiceController
 	blueGreenMap      map[string]*BlueGreen
 	TargetResource    string
 }
 
-func NewBlueGreenController(ecs *aws.AwsManager, projectDir string, targetResource string) (*BlueGreenController, error) {
+func NewBlueGreenController(manager *aws.AwsManager, projectDir string, targetResource string) (*BlueGreenController, error) {
 
-	ccon, errcc := service.NewServiceController(ecs, projectDir, "")
+	ccon, errcc := service.NewServiceController(manager, projectDir, "")
 
 	if errcc != nil {
 		return nil, errcc
 	}
 
 	con := &BlueGreenController{
-		Ecs: ecs,
+		manager:           manager,
 		ClusterController: ccon,
-		TargetResource: targetResource,
+		TargetResource:    targetResource,
 	}
 
 	defs, errs := con.searchBlueGreen(projectDir)
@@ -80,7 +80,6 @@ func CreateBlueGreen(data []byte) (*BlueGreen, error) {
 	err := yaml.Unmarshal(data, bg)
 	return bg, err
 }
-
 
 func (self *BlueGreenController) GetBlueGreenMap() map[string]*BlueGreen {
 	return self.blueGreenMap
@@ -149,11 +148,13 @@ func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *BlueGreen, cplan
 		},
 		PrimaryElb: bluegreen.PrimaryElb,
 		StandbyElb: bluegreen.StandbyElb,
-		ChainElb: bluegreen.ChainElb,
+		ChainElb:   bluegreen.ChainElb,
 	}
 
 	// describe services
-	bsrv, _ := self.Ecs.ServiceApi().DescribeService(blue.Cluster, []*string{
+	apiecs := self.manager.EcsApi()
+	apias := self.manager.AutoscalingApi()
+	bsrv, _ := apiecs.DescribeService(blue.Cluster, []*string{
 		&blue.Service,
 	})
 
@@ -162,7 +163,7 @@ func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *BlueGreen, cplan
 		bgPlan.Blue.CurrentService = bsrv.Services[0]
 	}
 
-	gsrv, _ := self.Ecs.ServiceApi().DescribeService(green.Cluster, []*string{
+	gsrv, _ := apiecs.DescribeService(green.Cluster, []*string{
 		&green.Service,
 	})
 
@@ -172,7 +173,7 @@ func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *BlueGreen, cplan
 	}
 
 	// describe autoscaling group
-	asgmap, err := self.Ecs.AutoscalingApi().DescribeAutoScalingGroups([]string{
+	asgmap, err := apias.DescribeAutoScalingGroups([]string{
 		blue.AutoscalingGroup,
 		green.AutoscalingGroup,
 	})
@@ -192,7 +193,6 @@ func (self *BlueGreenController) CreateBlueGreenPlan(bluegreen *BlueGreen, cplan
 	return &bgPlan, nil
 }
 
-
 func (self *BlueGreenController) ApplyBlueGreenDeploys(plans []*BlueGreenPlan, nodeploy bool) error {
 
 	for _, plan := range plans {
@@ -206,7 +206,7 @@ func (self *BlueGreenController) ApplyBlueGreenDeploys(plans []*BlueGreenPlan, n
 
 func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *BlueGreenPlan, nodeploy bool) error {
 
-	apias := self.Ecs.AutoscalingApi()
+	apias := self.manager.AutoscalingApi()
 
 	targetGreen := bgplan.IsBlueWithPrimaryElb()
 
@@ -289,12 +289,12 @@ func (self *BlueGreenController) ApplyBlueGreenDeploy(bgplan *BlueGreenPlan, nod
 
 func (self *BlueGreenController) waitLoadBalancer(group string, lb string) error {
 
-	api := self.Ecs.AutoscalingApi()
+	apias := self.manager.AutoscalingApi()
 
 	for {
 		time.Sleep(5 * time.Second)
 
-		result, err := api.DescribeLoadBalancerState(group)
+		result, err := apias.DescribeLoadBalancerState(group)
 
 		if err != nil {
 			return err
