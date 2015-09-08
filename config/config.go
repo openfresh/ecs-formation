@@ -2,7 +2,6 @@ package config
 
 import (
 	"github.com/codegangsta/cli"
-	"github.com/stormcat24/ecs-formation/logger"
 )
 
 var (
@@ -20,8 +19,6 @@ func PrepareGlobalOptions(c *cli.Context) error {
 		SnsTopic:   c.GlobalString("sns-topic"),
 		RetryCount: c.GlobalInt("retry-count"),
 	}
-
-	logger.Main.Infof("retry-count=%d", AppConfig.RetryCount)
 
 	return nil
 }
