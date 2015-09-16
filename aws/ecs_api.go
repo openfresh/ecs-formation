@@ -16,7 +16,13 @@ func (self *EcsApi) CreateCluster(clusterName string) (*ecs.CreateClusterOutput,
 		ClusterName: aws.String(clusterName),
 	}
 
-	return self.service.CreateCluster(params)
+	result, err := self.service.CreateCluster(params)
+
+	if isRateExceeded(err) {
+		return self.CreateCluster(clusterName)
+	}
+
+	return result, err
 }
 
 func (self *EcsApi) DeleteCluster(clusterName string) (*ecs.DeleteClusterOutput, error) {
@@ -25,7 +31,13 @@ func (self *EcsApi) DeleteCluster(clusterName string) (*ecs.DeleteClusterOutput,
 		Cluster: aws.String(clusterName),
 	}
 
-	return self.service.DeleteCluster(params)
+	result, err := self.service.DeleteCluster(params)
+
+	if isRateExceeded(err) {
+		return self.DeleteCluster(clusterName)
+	}
+
+	return result, err
 }
 
 func (self *EcsApi) DescribeClusters(clusterNames []*string) (*ecs.DescribeClustersOutput, error) {
@@ -34,7 +46,13 @@ func (self *EcsApi) DescribeClusters(clusterNames []*string) (*ecs.DescribeClust
 		Clusters: clusterNames,
 	}
 
-	return self.service.DescribeClusters(params)
+	result, err := self.service.DescribeClusters(params)
+
+	if isRateExceeded(err) {
+		return self.DescribeClusters(clusterNames)
+	}
+
+	return result, err
 }
 
 func (self *EcsApi) ListClusters(maxResult int64) (*ecs.ListClustersOutput, error) {
@@ -43,7 +61,12 @@ func (self *EcsApi) ListClusters(maxResult int64) (*ecs.ListClustersOutput, erro
 		MaxResults: &maxResult,
 	}
 
-	return self.service.ListClusters(params)
+	result, err := self.service.ListClusters(params)
+	if isRateExceeded(err) {
+		return self.ListClusters(maxResult)
+	}
+
+	return result, err
 }
 
 func (self *EcsApi) ListContainerInstances(cluster string) (*ecs.ListContainerInstancesOutput, error) {
@@ -52,7 +75,12 @@ func (self *EcsApi) ListContainerInstances(cluster string) (*ecs.ListContainerIn
 		Cluster: aws.String(cluster),
 	}
 
-	return self.service.ListContainerInstances(params)
+	result, err := self.service.ListContainerInstances(params)
+	if isRateExceeded(err) {
+		return self.ListContainerInstances(cluster)
+	}
+
+	return result, err
 }
 
 // Service API
@@ -70,7 +98,12 @@ func (self *EcsApi) CreateService(cluster string, service string, desiredCount i
 		params.Role = aws.String(role)
 	}
 
-	return self.service.CreateService(params)
+	result, err := self.service.CreateService(params)
+	if isRateExceeded(err) {
+		return self.CreateService(cluster, service, desiredCount, lb, taskDef, role)
+	}
+
+	return result, err
 }
 
 func (self *EcsApi) UpdateService(cluster string, service string, desiredCount int64, taskDef string) (*ecs.UpdateServiceOutput, error) {
@@ -82,7 +115,12 @@ func (self *EcsApi) UpdateService(cluster string, service string, desiredCount i
 		TaskDefinition: aws.String(taskDef),
 	}
 
-	return self.service.UpdateService(params)
+	result, err := self.service.UpdateService(params)
+	if isRateExceeded(err) {
+		return self.UpdateService(cluster, service, desiredCount, taskDef)
+	}
+
+	return result, err
 }
 
 func (self *EcsApi) DescribeService(cluster string, services []*string) (*ecs.DescribeServicesOutput, error) {
@@ -92,7 +130,12 @@ func (self *EcsApi) DescribeService(cluster string, services []*string) (*ecs.De
 		Services: services,
 	}
 
-	return self.service.DescribeServices(params)
+	result, err := self.service.DescribeServices(params)
+	if isRateExceeded(err) {
+		return self.DescribeService(cluster, services)
+	}
+
+	return result, err
 }
 
 func (self *EcsApi) DeleteService(cluster string, service string) (*ecs.DeleteServiceOutput, error) {
@@ -102,7 +145,11 @@ func (self *EcsApi) DeleteService(cluster string, service string) (*ecs.DeleteSe
 		Service: aws.String(service),
 	}
 
-	return self.service.DeleteService(params)
+	result, err := self.service.DeleteService(params)
+	if isRateExceeded(err) {
+		return self.DeleteService(cluster, service)
+	}
+	return result, err
 }
 
 func (self *EcsApi) ListServices(cluster string) (*ecs.ListServicesOutput, error) {
@@ -111,7 +158,11 @@ func (self *EcsApi) ListServices(cluster string) (*ecs.ListServicesOutput, error
 		Cluster: aws.String(cluster),
 	}
 
-	return self.service.ListServices(params)
+	result, err := self.service.ListServices(params)
+	if isRateExceeded(err) {
+		return self.ListServices(cluster)
+	}
+	return result, err
 }
 
 // TASK API
@@ -121,7 +172,11 @@ func (self *EcsApi) DescribeTaskDefinition(defName string) (*ecs.DescribeTaskDef
 		TaskDefinition: aws.String(defName),
 	}
 
-	return self.service.DescribeTaskDefinition(params)
+	result, err := self.service.DescribeTaskDefinition(params)
+	if isRateExceeded(err) {
+		return self.DescribeTaskDefinition(defName)
+	}
+	return result, err
 }
 
 func (self *EcsApi) RegisterTaskDefinition(taskName string, conDefs []*ecs.ContainerDefinition, volumes []*ecs.Volume) (*ecs.RegisterTaskDefinitionOutput, error) {
@@ -132,7 +187,11 @@ func (self *EcsApi) RegisterTaskDefinition(taskName string, conDefs []*ecs.Conta
 		Volumes:              volumes,
 	}
 
-	return self.service.RegisterTaskDefinition(params)
+	result, err := self.service.RegisterTaskDefinition(params)
+	if isRateExceeded(err) {
+		return self.RegisterTaskDefinition(taskName, conDefs, volumes)
+	}
+	return result, err
 }
 
 func (self *EcsApi) DeregisterTaskDefinition(taskName string) (*ecs.DeregisterTaskDefinitionOutput, error) {
@@ -141,7 +200,11 @@ func (self *EcsApi) DeregisterTaskDefinition(taskName string) (*ecs.DeregisterTa
 		TaskDefinition: aws.String(taskName),
 	}
 
-	return self.service.DeregisterTaskDefinition(params)
+	result, err := self.service.DeregisterTaskDefinition(params)
+	if isRateExceeded(err) {
+		return self.DeregisterTaskDefinition(taskName)
+	}
+	return result, err
 }
 
 func (self *EcsApi) ListTasks(cluster string, service string) (*ecs.ListTasksOutput, error) {
@@ -151,7 +214,11 @@ func (self *EcsApi) ListTasks(cluster string, service string) (*ecs.ListTasksOut
 		ServiceName: aws.String(service),
 	}
 
-	return self.service.ListTasks(params)
+	result, err := self.service.ListTasks(params)
+	if isRateExceeded(err) {
+		return self.ListTasks(cluster, service)
+	}
+	return result, err
 }
 
 func (self *EcsApi) DescribeTasks(cluster string, tasks []*string) (*ecs.DescribeTasksOutput, error) {
@@ -161,5 +228,9 @@ func (self *EcsApi) DescribeTasks(cluster string, tasks []*string) (*ecs.Describ
 		Tasks:   tasks,
 	}
 
-	return self.service.DescribeTasks(params)
+	result, err := self.service.DescribeTasks(params)
+	if isRateExceeded(err) {
+		return self.DescribeTasks(cluster, tasks)
+	}
+	return result, err
 }
