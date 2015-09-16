@@ -244,7 +244,7 @@ func (self *ServiceController) waitStoppingService(cluster string, service strin
 	api := self.manager.EcsApi()
 
 	for {
-		time.Sleep(5 * time.Second)
+		time.Sleep(10 * time.Second)
 
 		result, err := api.DescribeService(cluster, []*string{&service})
 
@@ -274,7 +274,7 @@ func (self *ServiceController) WaitActiveService(cluster string, service string)
 	var taskARNs []*string
 
 	for {
-		time.Sleep(5 * time.Second)
+		time.Sleep(10 * time.Second)
 
 		result, err := api.DescribeService(cluster, []*string{&service})
 

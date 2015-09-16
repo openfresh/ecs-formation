@@ -16,7 +16,12 @@ func (self *ElbApi) DescribeLoadBalancers(names []string) (*elb.DescribeLoadBala
 		LoadBalancerNames: util.ConvertPointerString(names),
 	}
 
-	return self.service.DescribeLoadBalancers(params)
+	result, err := self.service.DescribeLoadBalancers(params)
+	if isRateExceeded(err) {
+		return self.DescribeLoadBalancers(names)
+	}
+
+	return result, err
 }
 
 func (self *ElbApi) RegisterInstancesWithLoadBalancer(name string, instances []*elb.Instance) (*elb.RegisterInstancesWithLoadBalancerOutput, error) {
@@ -26,7 +31,12 @@ func (self *ElbApi) RegisterInstancesWithLoadBalancer(name string, instances []*
 		Instances:        instances,
 	}
 
-	return self.service.RegisterInstancesWithLoadBalancer(params)
+	result, err := self.service.RegisterInstancesWithLoadBalancer(params)
+	if isRateExceeded(err) {
+		return self.RegisterInstancesWithLoadBalancer(name, instances)
+	}
+
+	return result, err
 }
 
 func (self *ElbApi) DeregisterInstancesFromLoadBalancer(lb string, instances []*elb.Instance) (*elb.DeregisterInstancesFromLoadBalancerOutput, error) {
@@ -36,5 +46,11 @@ func (self *ElbApi) DeregisterInstancesFromLoadBalancer(lb string, instances []*
 		Instances:        instances,
 	}
 
-	return self.service.DeregisterInstancesFromLoadBalancer(params)
+	result, err := self.service.DeregisterInstancesFromLoadBalancer(params)
+
+	if isRateExceeded(err) {
+		return self.DeregisterInstancesFromLoadBalancer(lb, instances)
+	}
+
+	return result, err
 }

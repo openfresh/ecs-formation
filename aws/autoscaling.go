@@ -18,6 +18,10 @@ func (self *AutoscalingApi) DescribeAutoScalingGroups(groups []string) (map[stri
 
 	asgmap := map[string]*autoscaling.Group{}
 	result, err := self.service.DescribeAutoScalingGroups(params)
+	if isRateExceeded(err) {
+		return self.DescribeAutoScalingGroups(groups)
+	}
+
 	if err != nil {
 		return asgmap, err
 	}
@@ -37,6 +41,10 @@ func (self *AutoscalingApi) DescribeLoadBalancerState(group string) (map[string]
 
 	lbmap := map[string]*autoscaling.LoadBalancerState{}
 	result, err := self.service.DescribeLoadBalancers(params)
+	if isRateExceeded(err) {
+		return self.DescribeLoadBalancerState(group)
+	}
+
 	if err != nil {
 		return lbmap, err
 	}
@@ -55,7 +63,11 @@ func (self *AutoscalingApi) AttachLoadBalancers(group string, lb []string) (*aut
 		LoadBalancerNames:    util.ConvertPointerString(lb),
 	}
 
-	return self.service.AttachLoadBalancers(params)
+	result, err := self.service.AttachLoadBalancers(params)
+	if isRateExceeded(err) {
+		return self.AttachLoadBalancers(group, lb)
+	}
+	return result, err
 }
 
 func (self *AutoscalingApi) DetachLoadBalancers(group string, lb []string) (*autoscaling.DetachLoadBalancersOutput, error) {
@@ -65,5 +77,9 @@ func (self *AutoscalingApi) DetachLoadBalancers(group string, lb []string) (*aut
 		LoadBalancerNames:    util.ConvertPointerString(lb),
 	}
 
-	return self.service.DetachLoadBalancers(params)
+	result, err := self.service.DetachLoadBalancers(params)
+	if isRateExceeded(err) {
+		return self.DetachLoadBalancers(group, lb)
+	}
+	return result, err
 }
