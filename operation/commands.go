@@ -35,23 +35,9 @@ func assert(err error) {
 
 func buildAwsManager() (*aws.AwsManager, error) {
 
-	accessKey := strings.Trim(os.Getenv("AWS_ACCESS_KEY"), " ")
-	accessSecretKey := strings.Trim(os.Getenv("AWS_SECRET_ACCESS_KEY"), " ")
 	region := strings.Trim(os.Getenv("AWS_REGION"), " ")
 
-	if len(accessKey) == 0 {
-		return nil, fmt.Errorf("'AWS_ACCESS_KEY' is not specified.")
-	}
-
-	if len(accessSecretKey) == 0 {
-		return nil, fmt.Errorf("'AWS_SECRET_ACCESS_KEY' is not specified.")
-	}
-
-	if len(region) == 0 {
-		return nil, fmt.Errorf("'AWS_REGION' is not specified.")
-	}
-
-	return aws.NewAwsManager(accessKey, accessSecretKey, region), nil
+	return aws.NewAwsManager(region), nil
 }
 
 func createOperation(args cli.Args) (Operation, error) {
