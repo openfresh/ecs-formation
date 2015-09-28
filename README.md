@@ -108,6 +108,21 @@ test-service:
       container_port: 80
 ```
 
+#### Keep desired_count at updating service
+
+If you modify value of `desired_count` by AWS Management Console or aws-cli, you'll fear override value of `desired_count` by ecs-formation. This value should be flexibly changed in the operation.
+ 
+If `keep_desired_count` is `true`, keep current `desired_count` at updating service.
+
+```bash
+(path-to-path/test-ecs-formation/service) $ vim test-cluster.yml
+test-service:
+  task_definition: test-definition
+  desired_count: 1
+  keep_desired_count: true
+```
+  
+
 #### Manage Task Definitions
 
 Show update plan.

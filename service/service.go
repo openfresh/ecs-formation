@@ -181,7 +181,10 @@ func (self *ServiceController) ApplyServicePlan(plan *ServiceUpdatePlan) error {
 
 	api := self.manager.EcsApi()
 
+	currentSizeMap := make(map[string]int64, 0)
+
 	for _, current := range plan.CurrentServices {
+		currentSizeMap[*current.ServiceName] = *current.DesiredCount
 
 		// set desired_count = 0
 		if _, err := api.UpdateService(plan.Name, *current.ServiceName, 0, *current.TaskDefinition); err != nil {
@@ -210,7 +213,19 @@ func (self *ServiceController) ApplyServicePlan(plan *ServiceUpdatePlan) error {
 
 	for _, add := range plan.NewServices {
 
-		result, err := api.CreateService(plan.Name, add.Name, add.DesiredCount, toLoadBalancers(&add.LoadBalancers), add.TaskDefinition, add.Role)
+		var nextDesiredCount int64
+		if add.KeepDesiredCount {
+			if dc, ok := currentSizeMap[add.Name]; ok {
+				nextDesiredCount = dc
+				logger.Main.Infof("Keep DesiredCount %d at '%s'", add.Name, nextDesiredCount)
+			} else {
+				nextDesiredCount = add.DesiredCount
+			}
+		} else {
+			nextDesiredCount = add.DesiredCount
+		}
+
+		result, err := api.CreateService(plan.Name, add.Name, nextDesiredCount, toLoadBalancers(&add.LoadBalancers), add.TaskDefinition, add.Role)
 		if err != nil {
 			return err
 		}

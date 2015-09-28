@@ -120,6 +120,7 @@ func createClusterPlans(controller *service.ServiceController, projectDir string
 			util.PrintlnYellow(fmt.Sprintf("        ----------[%s]----------", add.Name))
 			util.PrintlnYellow(fmt.Sprintf("        TaskDefinition = %s", add.TaskDefinition))
 			util.PrintlnYellow(fmt.Sprintf("        DesiredCount = %d", add.DesiredCount))
+			util.PrintlnYellow(fmt.Sprintf("        KeepDesiredCount = %t", add.KeepDesiredCount))
 			for _, lb := range add.LoadBalancers {
 				util.PrintlnYellow(fmt.Sprintf("        ELB:%s", lb.Name))
 			}
