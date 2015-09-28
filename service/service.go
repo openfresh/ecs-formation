@@ -217,7 +217,7 @@ func (self *ServiceController) ApplyServicePlan(plan *ServiceUpdatePlan) error {
 		if add.KeepDesiredCount {
 			if dc, ok := currentSizeMap[add.Name]; ok {
 				nextDesiredCount = dc
-				logger.Main.Infof("Keep DesiredCount %d at '%s'", *add.Name, nextDesiredCount)
+				logger.Main.Infof("Keep DesiredCount %d at '%s'", add.Name, nextDesiredCount)
 			} else {
 				nextDesiredCount = add.DesiredCount
 			}
