@@ -234,3 +234,17 @@ func (self *EcsApi) DescribeTasks(cluster string, tasks []*string) (*ecs.Describ
 	}
 	return result, err
 }
+
+func (self *EcsApi) StopTask(cluster string, task string) (*ecs.StopTaskOutput, error) {
+
+	params := &ecs.StopTaskInput{
+		Cluster: aws.String(cluster),
+		Task:    aws.String(task),
+	}
+
+	result, err := self.service.StopTask(params)
+	if isRateExceeded(err) {
+		return self.StopTask(cluster, task)
+	}
+	return result, err
+}
