@@ -22,11 +22,6 @@ func main() {
 			Usage:  "AWS SNS Topic Name",
 			EnvVar: "ECSF_SNS_TOPIC",
 		},
-		cli.IntFlag{
-			Name:   "retry-count, r",
-			Usage:  "AWS API Max Retry Count",
-			EnvVar: "ECSF_RETRY_COUNT",
-		},
 	}
 	app.Before = config.PrepareGlobalOptions
 

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/codegangsta/cli"
-	"github.com/stormcat24/ecs-formation/config"
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/stormcat24/ecs-formation/service"
 	"github.com/stormcat24/ecs-formation/util"
@@ -28,8 +27,6 @@ var commandService = cli.Command{
 }
 
 func doService(c *cli.Context) {
-
-	logger.Main.Infof("retry-count=%d", config.AppConfig.RetryCount)
 
 	awsManager, err := buildAwsManager()
 

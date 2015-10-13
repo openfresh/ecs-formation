@@ -3,7 +3,6 @@ package operation
 import (
 	"fmt"
 	"github.com/codegangsta/cli"
-	"github.com/stormcat24/ecs-formation/config"
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/stormcat24/ecs-formation/task"
 	"github.com/stormcat24/ecs-formation/util"
@@ -21,8 +20,6 @@ var commandTask = cli.Command{
 }
 
 func doTask(c *cli.Context) {
-
-	logger.Main.Infof("retry-count=%d", config.AppConfig.RetryCount)
 
 	awsManager, err := buildAwsManager()
 

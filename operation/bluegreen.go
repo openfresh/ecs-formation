@@ -6,7 +6,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/codegangsta/cli"
 	"github.com/stormcat24/ecs-formation/bluegreen"
-	"github.com/stormcat24/ecs-formation/config"
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/stormcat24/ecs-formation/util"
 	"github.com/str1ngs/ansi/color"
@@ -51,8 +50,6 @@ var commandBluegreen = cli.Command{
 }
 
 func doBluegreen(c *cli.Context) {
-
-	logger.Main.Infof("retry-count=%d", config.AppConfig.RetryCount)
 
 	awsManager, err := buildAwsManager()
 
