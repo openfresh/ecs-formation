@@ -1,0 +1,29 @@
+package: github.com/stormcat24/ecs-formation
+import:
+  - package: github.com/Sirupsen/logrus
+    ref: 07d998d174c4e2dc90e2f1989a20724220bca1ff
+  - package: github.com/codegangsta/cli
+    ref: 50c77ecec0068c9aef9d90ae0fd0fdf410041da3
+  - package: github.com/naoina/go-stringutil
+    ref: 360db0db4b01d34e12a2ec042c09e7d37fece761
+  - package: github.com/str1ngs/ansi/color
+    ref: 5dc1bc5ac1f5bcbf5bd4818dd27ef912beb4bb7c
+  - package: github.com/vaughan0/go-ini
+    ref: a98ad7ee00ec53921f08832bc06ecf7fd600e6a1
+  - package: gopkg.in/yaml.v2
+    ref: 7ad95dd0798a40da1ccdff6dff35fd177b5edf40
+  - package: github.com/aws/aws-sdk-go
+    ref: 308eaa65c0ddf03c701d511b7d73b3f3620452a1
+    subpackages:
+      - aws
+      - internal/endpoints
+      - internal/protocol/json/jsonutil
+      - internal/protocol/jsonrpc
+      - internal/protocol/query
+      - internal/protocol/rest
+      - internal/protocol/xml/xmlutil
+      - internal/signer/v4
+      - service/autoscaling
+      - service/ecs
+      - service/elb
+      - service/sns

@@ -10,20 +10,20 @@ TEST_TARGETS=$(addprefix test-,$(PACKAGES))
 
 
 deps:
-	go get github.com/tools/godep
-	godep restore
+	go get github.com/Masterminds/glide
+	GO15VENDOREXPERIMENT=1 glide update
 
 deps-save:
-	godep save $(BASE_PACKAGE)/...
+	glide update
 
 deps-test:
-	go get github.com/tools/godep
-	godep restore
+	go get github.com/Masterminds/glide
+	GO15VENDOREXPERIMENT=1 glide update
 	go get github.com/golang/lint/golint
 	go get github.com/jstemmer/go-junit-report
 
 build:
-	godep go build -o bin/ecs-formation main.go
+	GO15VENDOREXPERIMENT=1 go build -o bin/ecs-formation main.go
 
 test: $(TEST_TARGETS)
 
@@ -31,6 +31,6 @@ $(TEST_TARGETS): test-%:
 		@echo "**********************************************************"
 		@echo " testing package: $*"
 		@echo "**********************************************************"
-		godep go test -v -covermode=atomic -coverprofile=coverage.out $(GOTEST_FLAGS) $(BASE_PACKAGE)/$(*)
-		godep go test -v -run=nonthing -benchmem -bench=".*" $(GOTEST_FLAGS) $(BASE_PACKAGE)/$(*)
+		GO15VENDOREXPERIMENT=1 go test -v -covermode=atomic -coverprofile=coverage.out $(GOTEST_FLAGS) $(BASE_PACKAGE)/$(*)
+		GO15VENDOREXPERIMENT=1 go test -v -run=nonthing -benchmem -bench=".*" $(GOTEST_FLAGS) $(BASE_PACKAGE)/$(*)
 
