@@ -16,11 +16,6 @@ dependencies:
     - make deps-test
 
 test:
-  pre:
-    - rm -rf /home/ubuntu/.go_workspace/src/github.com/stormcat24/ecs-formation
-    - mkdir -p /home/ubuntu/.go_workspace/src/github.com/stormcat24/ecs-formation
-    - rsync -avz --exclude=.git/ . /home/ubuntu/.go_workspace/src/github.com/stormcat24/ecs-formation
-
   override:
     - make test
 
