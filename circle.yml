@@ -11,7 +11,7 @@ dependencies:
     - sudo mv go /usr/local/go-$GO_VERSION
     - sudo ln -s /usr/local/go-$GO_VERSION /usr/local/go
 
-    # deps
+  override:
     - make deps-test
 
 test:
