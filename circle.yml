@@ -1,6 +1,7 @@
 machine:
   environment:
     GO_VERSION: 1.5
+    GO15VENDOREXPERIMENT: 1
 
 dependencies:
   pre:
@@ -16,8 +17,6 @@ dependencies:
 
 test:
   override:
-    - mkdir -p ./Godeps/stormcat24/ecs-formation
-    - rsync -avz --exclude=.git/ --exclude=Godeps/ . ./Godeps/stormcat24/ecs-formation
     - make test
 
 deployment:
