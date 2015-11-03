@@ -3,6 +3,7 @@ package task
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/mattn/go-shellwords"
 	efaws "github.com/stormcat24/ecs-formation/aws"
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/stormcat24/ecs-formation/util"
@@ -141,9 +142,11 @@ func (self *TaskDefinitionController) ApplyTaskDefinitionPlan(task *TaskUpdatePl
 
 		var entryPoints []*string
 		if len(con.EntryPoint) > 0 {
-			for _, token := range strings.Split(con.EntryPoint, " ") {
-				entryPoints = append(entryPoints, aws.String(token))
+			ep, err := parseEntrypoint(con.EntryPoint)
+			if err != nil {
+				return nil, err
 			}
+			entryPoints = ep
 		} else {
 			entryPoints = nil
 		}
@@ -189,4 +192,18 @@ func (self *TaskDefinitionController) ApplyTaskDefinitionPlan(task *TaskUpdatePl
 	}
 
 	return self.manager.EcsApi().RegisterTaskDefinition(task.Name, conDefs, volumes)
+}
+
+func parseEntrypoint(target string) ([]*string, error) {
+	tokens, err := shellwords.Parse(target)
+	if err != nil {
+		return []*string{}, err
+	}
+
+	result := []*string{}
+	for _, token := range tokens {
+		s := token
+		result = append(result, &s)
+	}
+	return result, nil
 }

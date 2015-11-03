@@ -4,7 +4,8 @@ default: deps
 
 BASE_PACKAGE=github.com/stormcat24/ecs-formation
 PACKAGES=util \
-		aws
+		aws \
+		task
 
 TEST_TARGETS=$(addprefix test-,$(PACKAGES))
 
