@@ -248,7 +248,7 @@ func (self *ServiceController) ApplyServicePlan(plan *ServiceUpdatePlan) error {
 			if err != nil {
 				return err
 			}
-			logger.Main.Infof("Created service '%s', task-definition is '%s'.", *svc.Service.ServiceArn)
+			logger.Main.Infof("Created service '%v', task-definition is '%v'.", *svc.Service.ServiceArn, *svc.Service.TaskDefinition)
 			logger.Main.Infof("Launching task definition '%s' ...", *svc.Service.TaskDefinition)
 
 			var targetServiceId string
