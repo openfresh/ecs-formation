@@ -6,6 +6,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/aws/aws-sdk-go/service/elb"
@@ -13,7 +14,7 @@ import (
 )
 
 type AwsManager struct {
-	conf *aws.Config
+	session *session.Session
 }
 
 func NewAwsManager(region string) *AwsManager {
@@ -24,31 +25,33 @@ func NewAwsManager(region string) *AwsManager {
 		&ec2rolecreds.EC2RoleProvider{ExpiryWindow: 5 * time.Minute},
 	})
 
+	conf := aws.NewConfig().WithCredentials(cred).WithMaxRetries(aws.UseServiceDefaultRetries).WithRegion(region)
+
 	return &AwsManager{
-		conf: aws.NewConfig().WithCredentials(cred).WithMaxRetries(aws.DefaultRetries).WithRegion(region),
+		session: session.New(conf),
 	}
 }
 
 func (self *AwsManager) EcsApi() *EcsApi {
 	return &EcsApi{
-		service: ecs.New(self.conf),
+		service: ecs.New(self.session),
 	}
 }
 
 func (self *AwsManager) ElbApi() *ElbApi {
 	return &ElbApi{
-		service: elb.New(self.conf),
+		service: elb.New(self.session),
 	}
 }
 
 func (self *AwsManager) AutoscalingApi() *AutoscalingApi {
 	return &AutoscalingApi{
-		service: autoscaling.New(self.conf),
+		service: autoscaling.New(self.session),
 	}
 }
 
 func (self *AwsManager) SnsApi() *SnsApi {
 	return &SnsApi{
-		service: sns.New(self.conf),
+		service: sns.New(self.session),
 	}
 }
