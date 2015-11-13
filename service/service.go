@@ -239,9 +239,10 @@ func (self *ServiceController) ApplyServicePlan(plan *ServiceUpdatePlan) error {
 			var nextDesiredCount int64
 			if add.KeepDesiredCount {
 				nextDesiredCount = *current.DesiredCount
+				logger.Main.Infof("Keep DesiredCount = %d at '%s'", nextDesiredCount, add.Name)
 			} else {
 				nextDesiredCount = add.DesiredCount
-				logger.Main.Infof("Keep DesiredCount = %d at '%s'", nextDesiredCount, add.Name)
+				logger.Main.Infof("Next DesiredCount = %d at '%s'", nextDesiredCount, add.Name)
 			}
 
 			svc, err := api.UpdateService(plan.Name, add.Name, nextDesiredCount, add.TaskDefinition)
@@ -278,17 +279,20 @@ func (self *ServiceController) ApplyServicePlan(plan *ServiceUpdatePlan) error {
 				}
 			}
 
-			dts, err := api.DescribeTasks(plan.Name, taskIds)
-			if err != nil {
-				return err
-			}
+			if len(taskIds) > 0 {
+				dts, err := api.DescribeTasks(plan.Name, taskIds)
+				if err != nil {
+					return err
+				}
 
-			for _, t := range dts.Tasks {
-				if *t.StartedBy == targetServiceId {
-					if _, err := api.StopTask(plan.Name, *t.TaskArn); err != nil {
-						return err
+				for _, t := range dts.Tasks {
+					if *t.StartedBy == targetServiceId {
+						if _, err := api.StopTask(plan.Name, *t.TaskArn); err != nil {
+							logger.Main.Warnf("Task '%s' is not found, so cannot stop.", *t.TaskArn)
+						} else {
+							logger.Main.Infof("Stopped Task '%s'", *t.TaskArn)
+						}
 					}
-					logger.Main.Infof("Stopped Task '%s'", *t.TaskArn)
 				}
 			}
 
