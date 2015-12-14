@@ -10,6 +10,10 @@
 			"Comment": "v0.8.7-53-g446d1c1",
 			"Rev": "446d1c146faa8ed3f4218f056fcd165f6bcfda81"
 		},
+    {
+      "ImportPath": "golang.org/x/sys/unix",
+      "Rev": "833a04a10549a95dc34458c195cbad61bbb6cb4d"
+    },
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/aws",
 			"Comment": "v1.0.4",
