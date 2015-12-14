@@ -12,15 +12,17 @@ import (
 )
 
 var commandService = cli.Command{
-	Name:  "service",
-	Usage: "Manage ECS services on cluster",
-	Description: `
-	Manage services on ECS cluster.
-`,
+	Name:        "service",
+	Usage:       "Manage ECS services on cluster",
+	Description: "Manage services on ECS cluster.",
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "json-output, jo",
 			Usage: "Output json",
+		},
+		cli.StringSliceFlag{
+			Name:  "params, p",
+			Usage: "parameters",
 		},
 	},
 	Action: doService,
@@ -35,7 +37,7 @@ func doService(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	operation, errSubCommand := createOperation(c.Args())
+	operation, errSubCommand := createOperation(c)
 
 	if errSubCommand != nil {
 		logger.Main.Error(color.Red(errSubCommand.Error()))
@@ -49,7 +51,11 @@ func doService(c *cli.Context) {
 	}
 
 	jsonOutput := c.Bool("json-output")
-	clusterController, err := service.NewServiceController(awsManager, projectDir, operation.TargetResource)
+	clusterController, err := service.NewServiceController(awsManager, projectDir, operation.TargetResource, operation.Params)
+	if err != nil {
+		logger.Main.Error(color.Red(err.Error()))
+		os.Exit(1)
+	}
 
 	plans, err := createClusterPlans(clusterController, projectDir, jsonOutput)
 

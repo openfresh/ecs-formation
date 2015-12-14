@@ -6,6 +6,7 @@ import (
 	"github.com/stormcat24/ecs-formation/aws"
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/stormcat24/ecs-formation/service"
+	"github.com/stormcat24/ecs-formation/util"
 	"github.com/str1ngs/ansi/color"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -19,20 +20,21 @@ type BlueGreenController struct {
 	ClusterController *service.ServiceController
 	blueGreenMap      map[string]*BlueGreen
 	TargetResource    string
+	params            map[string]string
 }
 
-func NewBlueGreenController(manager *aws.AwsManager, projectDir string, targetResource string) (*BlueGreenController, error) {
+func NewBlueGreenController(manager *aws.AwsManager, projectDir string, targetResource string, params map[string]string) (*BlueGreenController, error) {
 
-	ccon, errcc := service.NewServiceController(manager, projectDir, "")
-
-	if errcc != nil {
-		return nil, errcc
+	ccon, err := service.NewServiceController(manager, projectDir, "", params)
+	if err != nil {
+		return nil, err
 	}
 
 	con := &BlueGreenController{
 		manager:           manager,
 		ClusterController: ccon,
 		TargetResource:    targetResource,
+		params:            params,
 	}
 
 	defs, errs := con.searchBlueGreen(projectDir)
@@ -59,11 +61,16 @@ func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]
 
 	for _, file := range files {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".yml") {
-			content, _ := ioutil.ReadFile(clusterDir + "/" + file.Name())
+			content, err := ioutil.ReadFile(clusterDir + "/" + file.Name())
+			if err != nil {
+				return nil, err
+			}
+
+			mergedYaml := util.MergeYamlWithParameters(content, self.params)
 			tokens := filePattern.FindStringSubmatch(file.Name())
 			name := tokens[1]
 
-			bg, err := CreateBlueGreen(content)
+			bg, err := CreateBlueGreen(mergedYaml)
 			if err != nil {
 				return merged, err
 			}
@@ -74,11 +81,14 @@ func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]
 	return merged, nil
 }
 
-func CreateBlueGreen(data []byte) (*BlueGreen, error) {
+func CreateBlueGreen(data string) (*BlueGreen, error) {
 
 	bg := &BlueGreen{}
-	err := yaml.Unmarshal(data, bg)
-	return bg, err
+	if err := yaml.Unmarshal([]byte(data), bg); err != nil {
+		return nil, errors.New(fmt.Sprintf("%v\n\n%v", err.Error(), data))
+	}
+
+	return bg, nil
 }
 
 func (self *BlueGreenController) GetBlueGreenMap() map[string]*BlueGreen {

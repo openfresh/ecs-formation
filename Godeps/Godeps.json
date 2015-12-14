@@ -1,79 +1,102 @@
 {
 	"ImportPath": "github.com/stormcat24/ecs-formation",
-	"GoVersion": "go1.5.1",
+	"GoVersion": "go1.5.2",
 	"Packages": [
 		"github.com/stormcat24/ecs-formation/..."
 	],
 	"Deps": [
 		{
 			"ImportPath": "github.com/Sirupsen/logrus",
-			"Comment": "v0.8.3-3-g07d998d",
-			"Rev": "07d998d174c4e2dc90e2f1989a20724220bca1ff"
+			"Comment": "v0.8.7-53-g446d1c1",
+			"Rev": "446d1c146faa8ed3f4218f056fcd165f6bcfda81"
 		},
+    {
+      "ImportPath": "golang.org/x/sys/unix",
+      "Rev": "833a04a10549a95dc34458c195cbad61bbb6cb4d"
+    },
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/aws",
-			"Comment": "v0.10.1-2-g2a76bd5",
-			"Rev": "2a76bd5c7daceae9b072d5070d555bde8c6f17d7"
+			"Comment": "v1.0.4",
+			"Rev": "999b1591218c36d5050d1ba7266eba956e65965f"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/private/endpoints",
-			"Comment": "v0.10.1-2-g2a76bd5",
-			"Rev": "2a76bd5c7daceae9b072d5070d555bde8c6f17d7"
+			"Comment": "v1.0.4",
+			"Rev": "999b1591218c36d5050d1ba7266eba956e65965f"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/private/protocol/json/jsonutil",
-			"Comment": "v0.10.1-2-g2a76bd5",
-			"Rev": "2a76bd5c7daceae9b072d5070d555bde8c6f17d7"
+			"Comment": "v1.0.4",
+			"Rev": "999b1591218c36d5050d1ba7266eba956e65965f"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/private/protocol/jsonrpc",
-			"Comment": "v0.10.1-2-g2a76bd5",
-			"Rev": "2a76bd5c7daceae9b072d5070d555bde8c6f17d7"
+			"Comment": "v1.0.4",
+			"Rev": "999b1591218c36d5050d1ba7266eba956e65965f"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/private/protocol/query",
-			"Comment": "v0.10.1-2-g2a76bd5",
-			"Rev": "2a76bd5c7daceae9b072d5070d555bde8c6f17d7"
+			"Comment": "v1.0.4",
+			"Rev": "999b1591218c36d5050d1ba7266eba956e65965f"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/private/protocol/rest",
-			"Comment": "v0.10.1-2-g2a76bd5",
-			"Rev": "2a76bd5c7daceae9b072d5070d555bde8c6f17d7"
+			"Comment": "v1.0.4",
+			"Rev": "999b1591218c36d5050d1ba7266eba956e65965f"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil",
-			"Comment": "v0.10.1-2-g2a76bd5",
-			"Rev": "2a76bd5c7daceae9b072d5070d555bde8c6f17d7"
+			"Comment": "v1.0.4",
+			"Rev": "999b1591218c36d5050d1ba7266eba956e65965f"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/private/signer/v4",
-			"Comment": "v0.10.1-2-g2a76bd5",
-			"Rev": "2a76bd5c7daceae9b072d5070d555bde8c6f17d7"
+			"Comment": "v1.0.4",
+			"Rev": "999b1591218c36d5050d1ba7266eba956e65965f"
+		},
+		{
+			"ImportPath": "github.com/aws/aws-sdk-go/private/waiter",
+			"Comment": "v1.0.4",
+			"Rev": "999b1591218c36d5050d1ba7266eba956e65965f"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/service/autoscaling",
-			"Comment": "v0.10.1-2-g2a76bd5",
-			"Rev": "2a76bd5c7daceae9b072d5070d555bde8c6f17d7"
+			"Comment": "v1.0.4",
+			"Rev": "999b1591218c36d5050d1ba7266eba956e65965f"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/service/ecs",
-			"Comment": "v0.10.1-2-g2a76bd5",
-			"Rev": "2a76bd5c7daceae9b072d5070d555bde8c6f17d7"
+			"Comment": "v1.0.4",
+			"Rev": "999b1591218c36d5050d1ba7266eba956e65965f"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/service/elb",
-			"Comment": "v0.10.1-2-g2a76bd5",
-			"Rev": "2a76bd5c7daceae9b072d5070d555bde8c6f17d7"
+			"Comment": "v1.0.4",
+			"Rev": "999b1591218c36d5050d1ba7266eba956e65965f"
 		},
 		{
 			"ImportPath": "github.com/aws/aws-sdk-go/service/sns",
-			"Comment": "v0.10.1-2-g2a76bd5",
-			"Rev": "2a76bd5c7daceae9b072d5070d555bde8c6f17d7"
+			"Comment": "v1.0.4",
+			"Rev": "999b1591218c36d5050d1ba7266eba956e65965f"
 		},
 		{
 			"ImportPath": "github.com/codegangsta/cli",
 			"Comment": "1.2.0-74-g50c77ec",
 			"Rev": "50c77ecec0068c9aef9d90ae0fd0fdf410041da3"
+		},
+		{
+			"ImportPath": "github.com/go-ini/ini",
+			"Comment": "v0-48-g060d7da",
+			"Rev": "060d7da055ba6ec5ea7a31f116332fe5efa04ce0"
+		},
+		{
+			"ImportPath": "github.com/jmespath/go-jmespath",
+			"Comment": "0.2.1",
+			"Rev": "53d419364047eb08a64c29471db23c60ea585b85"
+		},
+		{
+			"ImportPath": "github.com/mattn/go-shellwords",
+			"Rev": "f4e566c536cf69158e808ec28ef4182a37fdc981"
 		},
 		{
 			"ImportPath": "github.com/naoina/go-stringutil",
@@ -82,10 +105,6 @@
 		{
 			"ImportPath": "github.com/str1ngs/ansi/color",
 			"Rev": "5dc1bc5ac1f5bcbf5bd4818dd27ef912beb4bb7c"
-		},
-		{
-			"ImportPath": "github.com/vaughan0/go-ini",
-			"Rev": "a98ad7ee00ec53921f08832bc06ecf7fd600e6a1"
 		},
 		{
 			"ImportPath": "gopkg.in/yaml.v2",

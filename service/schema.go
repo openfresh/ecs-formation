@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+	"fmt"
 	"gopkg.in/yaml.v2"
 )
 
@@ -46,15 +48,17 @@ type LoadBalancer struct {
 	ContainerPort int64  `yaml:"container_port"`
 }
 
-func CreateServiceMap(data []byte) (map[string]Service, error) {
+func CreateServiceMap(data string) (map[string]Service, error) {
 
 	servicesMap := map[string]Service{}
-	err := yaml.Unmarshal(data, &servicesMap)
+	if err := yaml.Unmarshal([]byte(data), &servicesMap); err != nil {
+		return nil, errors.New(fmt.Sprintf("%v\n\n%v", err.Error(), data))
+	}
 
 	for name, service := range servicesMap {
 		service.Name = name
 		servicesMap[name] = service
 	}
 
-	return servicesMap, err
+	return servicesMap, nil
 }

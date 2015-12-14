@@ -1,6 +1,6 @@
 machine:
   environment:
-    GO_VERSION: 1.5.1
+    GO_VERSION: 1.5.2
 
 dependencies:
   pre:
