@@ -27,12 +27,14 @@ type ServiceController struct {
 	manager        *aws.AwsManager
 	TargetResource string
 	clusters       []Cluster
+	params         map[string]string
 }
 
-func NewServiceController(manager *aws.AwsManager, projectDir string, targetResource string) (*ServiceController, error) {
+func NewServiceController(manager *aws.AwsManager, projectDir string, targetResource string, params map[string]string) (*ServiceController, error) {
 
 	con := &ServiceController{
 		manager: manager,
+		params:  params,
 	}
 
 	clusters, err := con.searchServices(projectDir)
@@ -64,12 +66,20 @@ func (self *ServiceController) searchServices(projectDir string) ([]Cluster, err
 
 	for _, file := range files {
 		if !file.IsDir() && strings.HasSuffix(file.Name(), ".yml") {
-			content, _ := ioutil.ReadFile(clusterDir + "/" + file.Name())
+			content, err := ioutil.ReadFile(clusterDir + "/" + file.Name())
+			if err != nil {
+				return []Cluster{}, err
+			}
+
+			merged := util.MergeYamlWithParameters(content, self.params)
 
 			tokens := filePattern.FindStringSubmatch(file.Name())
 			clusterName := tokens[1]
 
-			serviceMap, _ := CreateServiceMap(content)
+			serviceMap, err := CreateServiceMap(merged)
+			if err != nil {
+				return []Cluster{}, err
+			}
 			cluster := Cluster{
 				Name:     clusterName,
 				Services: serviceMap,

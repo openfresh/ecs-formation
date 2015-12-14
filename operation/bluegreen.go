@@ -45,6 +45,10 @@ var commandBluegreen = cli.Command{
 			Name:  "json-output, jo",
 			Usage: "Output json",
 		},
+		cli.StringSliceFlag{
+			Name:  "params, p",
+			Usage: "parameters",
+		},
 	},
 	Action: doBluegreen,
 }
@@ -58,7 +62,7 @@ func doBluegreen(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	operation, errSubCommand := createOperation(c.Args())
+	operation, errSubCommand := createOperation(c)
 
 	if errSubCommand != nil {
 		logger.Main.Error(color.Red(errSubCommand.Error()))
@@ -71,15 +75,14 @@ func doBluegreen(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	bgController, errbgc := bluegreen.NewBlueGreenController(awsManager, projectDir, operation.TargetResource)
-	if errbgc != nil {
-		logger.Main.Error(color.Red(errbgc.Error()))
+	bgController, err := bluegreen.NewBlueGreenController(awsManager, projectDir, operation.TargetResource, operation.Params)
+	if err != nil {
+		logger.Main.Error(color.Red(err.Error()))
 		os.Exit(1)
 	}
 
 	jsonOutput := c.Bool("json-output")
 	bgPlans, err := createBlueGreenPlans(bgController, jsonOutput)
-
 	if err != nil {
 		logger.Main.Error(color.Red(err.Error()))
 		os.Exit(1)

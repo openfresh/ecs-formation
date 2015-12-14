@@ -11,11 +11,15 @@ import (
 )
 
 var commandTask = cli.Command{
-	Name:  "task",
-	Usage: "Manage ECS Task Definitions",
-	Description: `
-	Manage ECS Task Definitions.
-`,
+	Name:        "task",
+	Usage:       "Manage ECS Task Definitions",
+	Description: "Manage ECS Task Definitions.",
+	Flags: []cli.Flag{
+		cli.StringSliceFlag{
+			Name:  "params, p",
+			Usage: "parameters",
+		},
+	},
 	Action: doTask,
 }
 
@@ -28,7 +32,7 @@ func doTask(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	operation, errSubCommand := createOperation(c.Args())
+	operation, errSubCommand := createOperation(c)
 
 	if errSubCommand != nil {
 		logger.Main.Error(color.Red(errSubCommand.Error()))
@@ -41,7 +45,7 @@ func doTask(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	taskController, err := task.NewTaskDefinitionController(awsManager, projectDir, operation.TargetResource)
+	taskController, err := task.NewTaskDefinitionController(awsManager, projectDir, operation.TargetResource, operation.Params)
 	if err != nil {
 		logger.Main.Error(color.Red(err.Error()))
 		os.Exit(1)

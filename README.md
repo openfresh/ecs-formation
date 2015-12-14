@@ -111,7 +111,7 @@ test-service:
 #### Keep desired_count at updating service
 
 If you modify value of `desired_count` by AWS Management Console or aws-cli, you'll fear override value of `desired_count` by ecs-formation. This value should be flexibly changed in the operation.
- 
+
 If `keep_desired_count` is `true`, keep current `desired_count` at updating service.
 
 ```bash
@@ -121,7 +121,7 @@ test-service:
   desired_count: 1
   keep_desired_count: true
 ```
-  
+
 
 #### Manage Task Definitions
 
@@ -214,6 +214,24 @@ standby_elb: test-elb-standby
 chain_elb:
   - primary_elb: test-internal-elb-primary
     standby_elb: test-internal-elb-standby
+```
+
+### Others
+#### Passing custom parameters
+
+You can use custom parameters. Define parameters in yaml file(task, service, bluegreen) as follows.
+
+```Ruby
+nginx:
+    image: stormcat24/nginx:${NGINX_VERSION}
+    ports:
+        - 80:${NGINX_PORT}
+```
+
+You can set value for these parameters by using `-p` option.
+
+```bash
+ecs-formation task -p NGINX_VERSION=1.0 -p NGINX_PORT=80 plan your-web-task
 ```
 
 License

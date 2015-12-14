@@ -5,6 +5,7 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/stormcat24/ecs-formation/aws"
 
+	"github.com/stormcat24/ecs-formation/util"
 	"log"
 	"os"
 	"strings"
@@ -13,6 +14,7 @@ import (
 type Operation struct {
 	SubCommand     string
 	TargetResource string
+	Params         map[string]string
 }
 
 var Commands = []cli.Command{
@@ -40,7 +42,9 @@ func buildAwsManager() (*aws.AwsManager, error) {
 	return aws.NewAwsManager(region), nil
 }
 
-func createOperation(args cli.Args) (Operation, error) {
+func createOperation(c *cli.Context) (Operation, error) {
+
+	args := c.Args()
 
 	if len(args) == 0 {
 		return Operation{}, fmt.Errorf("subcommand is not specified.")
@@ -54,9 +58,12 @@ func createOperation(args cli.Args) (Operation, error) {
 			targetResource = args[1]
 		}
 
+		params := c.StringSlice("params")
+
 		return Operation{
 			SubCommand:     sub,
 			TargetResource: targetResource,
+			Params:         util.ParseKeyValues(params),
 		}, nil
 	} else {
 		return Operation{}, fmt.Errorf("'%s' is invalid subcommand.", sub)
