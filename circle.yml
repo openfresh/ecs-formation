@@ -1,9 +1,21 @@
+general:
+  build_dir: ../.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+
 machine:
   environment:
     GO_VERSION: 1.5.2
 
+  post:
+    - rm -rf ".go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
+    - mkdir -p ".go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME"
+    - mv $CIRCLE_PROJECT_REPONAME ".go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/"
+    - mkdir -p $CIRCLE_PROJECT_REPONAME
+
 dependencies:
-  pre:
+  cache_directories:
+    - "~/.glide"
+
+  override:
     # go1.5
     - curl -L -O https://storage.googleapis.com/golang/go$GO_VERSION.linux-amd64.tar.gz > /dev/null
     - tar xzf go$GO_VERSION.linux-amd64.tar.gz
@@ -14,11 +26,10 @@ dependencies:
     # deps
     - make deps-test
 
+
 test:
   override:
-    - mkdir -p ./Godeps/stormcat24/ecs-formation
-    - rsync -avz --exclude=.git/ --exclude=Godeps/ . ./Godeps/stormcat24/ecs-formation
-    - make test
+    - make ci-test
 
 deployment:
   build:

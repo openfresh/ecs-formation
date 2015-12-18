@@ -1,0 +1,42 @@
+parent: null
+package: main
+import:
+- package: github.com/jmespath/go-jmespath
+  version: 53d419364047eb08a64c29471db23c60ea585b85
+- package: github.com/str1ngs/ansi
+  version: 5dc1bc5ac1f5bcbf5bd4818dd27ef912beb4bb7c
+  subpackages:
+  - color
+- package: gopkg.in/yaml.v2
+  version: 7ad95dd0798a40da1ccdff6dff35fd177b5edf40
+- package: github.com/stormcat24/ecs-formation
+- package: github.com/aws/aws-sdk-go
+  version: 999b1591218c36d5050d1ba7266eba956e65965f
+  subpackages:
+  - aws
+  - private/endpoints
+  - private/protocol/json/jsonutil
+  - private/protocol/jsonrpc
+  - private/protocol/query
+  - private/protocol/rest
+  - private/protocol/xml/xmlutil
+  - private/signer/v4
+  - private/waiter
+  - service/autoscaling
+  - service/ecs
+  - service/elb
+  - service/sns
+- package: github.com/codegangsta/cli
+  version: 565493f259bf868adb54d45d5f4c68d405117adf
+- package: github.com/go-ini/ini
+  version: 060d7da055ba6ec5ea7a31f116332fe5efa04ce0
+- package: github.com/Sirupsen/logrus
+  version: 446d1c146faa8ed3f4218f056fcd165f6bcfda81
+- package: golang.org/x/sys
+  version: 833a04a10549a95dc34458c195cbad61bbb6cb4d
+  subpackages:
+  - unix
+- package: github.com/mattn/go-shellwords
+  version: f4e566c536cf69158e808ec28ef4182a37fdc981
+- package: github.com/naoina/go-stringutil
+  version: 360db0db4b01d34e12a2ec042c09e7d37fece761

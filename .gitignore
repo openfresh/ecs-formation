@@ -27,7 +27,7 @@ _testmain.go
 .idea/
 *.iml
 
-Godeps/_workspace/
+vendor/
 bin/*
 coverage.out
 coverage.html
