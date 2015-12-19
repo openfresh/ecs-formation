@@ -1,8 +1,8 @@
 hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-updated: 2015-12-16T17:42:48.849942181+09:00
+updated: 2015-12-19T20:56:35.497498102+09:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 999b1591218c36d5050d1ba7266eba956e65965f
+  version: 18177cad2597e3cac4173b4f267b784abdb3c854
   subpackages:
   - aws
   - private/endpoints
@@ -39,8 +39,6 @@ imports:
   version: a422bbe96644373c5753384a59d678f7d261ff10
 - name: github.com/Sirupsen/logrus
   version: 446d1c146faa8ed3f4218f056fcd165f6bcfda81
-- name: github.com/stormcat24/ecs-formation
-  version: 000e9dd12c0463331ba7901bc4fdb6d87e539081
 - name: github.com/str1ngs/ansi
   version: 5dc1bc5ac1f5bcbf5bd4818dd27ef912beb4bb7c
   subpackages:
@@ -52,17 +50,17 @@ imports:
 - name: golang.org/x/crypto
   version: f18420efc3b4f8e9f3d51f6bd2476e92c46260e9
 - name: golang.org/x/net
-  version: 548f7bf20c8aae87fecd9aa09cc89065451e6271
+  version: 68a055e15f0ce90989da5564fd947fb72ce67513
 - name: golang.org/x/sys
   version: 833a04a10549a95dc34458c195cbad61bbb6cb4d
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: 92ca7bbb695e2e9675f1d731fa85760f95d2c0df
+  version: cf4986612c83df6c55578ba198316d1684a9a287
 - name: golang.org/x/tools
-  version: 1cdaff4a02c554c9fb39dda0b56241c5f0949d91
+  version: fa833fdef560f0fe9b40dbb37fd03030ac3d514b
 - name: google.golang.org/appengine
-  version: ea2803184885858bb094b58ddeac06b3675b9994
+  version: 58c0e2a2044a8d1abd8dd1d97939cd74497d0806
 - name: gopkg.in/airbrake/gobrake.v2
   version: c9d51adc624b5cc4c1bf8de730a09af4878ffe2d
 - name: gopkg.in/gemnasium/logrus-airbrake-hook.v2
