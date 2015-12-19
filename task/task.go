@@ -9,6 +9,8 @@ import (
 	"github.com/stormcat24/ecs-formation/util"
 	"github.com/str1ngs/ansi/color"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -48,35 +50,33 @@ func (self *TaskDefinitionController) GetTaskDefinitionMap() map[string]*TaskDef
 func (self *TaskDefinitionController) searchTaskDefinitions(projectDir string) (map[string]*TaskDefinition, error) {
 
 	taskDir := projectDir + "/task"
-	files, err := ioutil.ReadDir(taskDir)
 
 	taskDefMap := map[string]*TaskDefinition{}
+	filePattern := regexp.MustCompile(`^.+\/(.+)\.yml$`)
 
-	if err != nil {
-		return taskDefMap, err
-	}
-
-	filePattern := regexp.MustCompile("^(.+)\\.yml$")
-
-	for _, file := range files {
-		if !file.IsDir() && strings.HasSuffix(file.Name(), ".yml") {
-			content, err := ioutil.ReadFile(taskDir + "/" + file.Name())
-			if err != nil {
-				return nil, err
-			}
-
-			merged := util.MergeYamlWithParameters(content, self.params)
-			tokens := filePattern.FindStringSubmatch(file.Name())
-			taskDefName := tokens[1]
-
-			taskDefinition, err := CreateTaskDefinition(taskDefName, merged)
-			if err != nil {
-				return nil, err
-			}
-
-			taskDefMap[taskDefName] = taskDefinition
+	filepath.Walk(taskDir, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() || !strings.HasSuffix(path, ".yml") {
+			return nil
 		}
-	}
+
+		content, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		merged := util.MergeYamlWithParameters(content, self.params)
+		tokens := filePattern.FindStringSubmatch(path)
+		taskDefName := tokens[1]
+
+		taskDefinition, err := CreateTaskDefinition(taskDefName, merged)
+		if err != nil {
+			return err
+		}
+
+		taskDefMap[taskDefName] = taskDefinition
+
+		return nil
+	})
 
 	return taskDefMap, nil
 }
