@@ -10,6 +10,7 @@ import (
 	"github.com/str1ngs/ansi/color"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -54,40 +55,38 @@ func NewServiceController(manager *aws.AwsManager, projectDir string, targetReso
 func (self *ServiceController) searchServices(projectDir string) ([]Cluster, error) {
 
 	clusterDir := projectDir + "/service"
-	files, err := ioutil.ReadDir(clusterDir)
-
 	clusters := []Cluster{}
 
-	if err != nil {
-		return clusters, err
-	}
+	filePattern := regexp.MustCompile(`^.+\/(.+)\.yml$`)
 
-	filePattern := regexp.MustCompile("^(.+)\\.yml$")
-
-	for _, file := range files {
-		if !file.IsDir() && strings.HasSuffix(file.Name(), ".yml") {
-			content, err := ioutil.ReadFile(clusterDir + "/" + file.Name())
-			if err != nil {
-				return []Cluster{}, err
-			}
-
-			merged := util.MergeYamlWithParameters(content, self.params)
-
-			tokens := filePattern.FindStringSubmatch(file.Name())
-			clusterName := tokens[1]
-
-			serviceMap, err := CreateServiceMap(merged)
-			if err != nil {
-				return []Cluster{}, err
-			}
-			cluster := Cluster{
-				Name:     clusterName,
-				Services: serviceMap,
-			}
-
-			clusters = append(clusters, cluster)
+	filepath.Walk(clusterDir, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() || !strings.HasSuffix(path, ".yml") {
+			return nil
 		}
-	}
+
+		content, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		merged := util.MergeYamlWithParameters(content, self.params)
+		tokens := filePattern.FindStringSubmatch(path)
+
+		clusterName := tokens[1]
+
+		serviceMap, err := CreateServiceMap(merged)
+		if err != nil {
+			return err
+		}
+		cluster := Cluster{
+			Name:     clusterName,
+			Services: serviceMap,
+		}
+
+		clusters = append(clusters, cluster)
+
+		return nil
+	})
 
 	return clusters, nil
 }
@@ -99,6 +98,7 @@ func (self *ServiceController) GetClusters() []Cluster {
 func (self *ServiceController) CreateServiceUpdatePlans() ([]*ServiceUpdatePlan, error) {
 
 	plans := []*ServiceUpdatePlan{}
+
 	for _, cluster := range self.GetClusters() {
 		if len(self.TargetResource) == 0 || self.TargetResource == cluster.Name {
 			cp, err := self.CreateServiceUpdatePlan(cluster)
@@ -117,10 +117,10 @@ func (self *ServiceController) CreateServiceUpdatePlans() ([]*ServiceUpdatePlan,
 func (self *ServiceController) CreateServiceUpdatePlan(cluster Cluster) (*ServiceUpdatePlan, error) {
 
 	api := self.manager.EcsApi()
-	output, errdc := api.DescribeClusters([]*string{&cluster.Name})
+	output, err := api.DescribeClusters([]*string{&cluster.Name})
 
-	if errdc != nil {
-		return nil, errdc
+	if err != nil {
+		return nil, err
 	}
 
 	if len(output.Failures) > 0 {

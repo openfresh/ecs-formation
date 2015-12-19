@@ -10,6 +10,8 @@ import (
 	"github.com/str1ngs/ansi/color"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -49,36 +51,34 @@ func NewBlueGreenController(manager *aws.AwsManager, projectDir string, targetRe
 func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]*BlueGreen, error) {
 
 	clusterDir := projectDir + "/bluegreen"
-	files, err := ioutil.ReadDir(clusterDir)
+	bgmap := map[string]*BlueGreen{}
 
-	merged := map[string]*BlueGreen{}
+	filePattern := regexp.MustCompile(`^.+\/(.+)\.yml$`)
 
-	if err != nil {
-		return merged, err
-	}
-
-	filePattern := regexp.MustCompile("^(.+)\\.yml$")
-
-	for _, file := range files {
-		if !file.IsDir() && strings.HasSuffix(file.Name(), ".yml") {
-			content, err := ioutil.ReadFile(clusterDir + "/" + file.Name())
-			if err != nil {
-				return nil, err
-			}
-
-			mergedYaml := util.MergeYamlWithParameters(content, self.params)
-			tokens := filePattern.FindStringSubmatch(file.Name())
-			name := tokens[1]
-
-			bg, err := CreateBlueGreen(mergedYaml)
-			if err != nil {
-				return merged, err
-			}
-			merged[name] = bg
+	filepath.Walk(clusterDir, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() || !strings.HasSuffix(path, ".yml") {
+			return nil
 		}
-	}
 
-	return merged, nil
+		content, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		merged := util.MergeYamlWithParameters(content, self.params)
+		tokens := filePattern.FindStringSubmatch(path)
+		name := tokens[1]
+
+		bg, err := CreateBlueGreen(merged)
+		if err != nil {
+			return err
+		}
+		bgmap[name] = bg
+
+		return nil
+	})
+
+	return bgmap, nil
 }
 
 func CreateBlueGreen(data string) (*BlueGreen, error) {
