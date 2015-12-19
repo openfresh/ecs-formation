@@ -25,6 +25,7 @@ type ContainerDefinition struct {
 	EntryPoint        string            `yaml:"entry_point"`
 	Command           string            `yaml:"command"`
 	DisableNetworking bool              `yaml:"disable_networking"`
+	DnsSearchDomains  []string          `yaml:"dns_search_domains"`
 }
 
 func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, error) {

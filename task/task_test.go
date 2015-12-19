@@ -70,6 +70,9 @@ func TestCreateContainerDefinition(t *testing.T) {
 		EntryPoint:        "entrypoint value",
 		Command:           "command value",
 		DisableNetworking: true,
+		DnsSearchDomains: []string{
+			"test.dns.domain",
+		},
 	}
 
 	con, volumes, _ := createContainerDefinition(&input)
@@ -172,5 +175,13 @@ func TestCreateContainerDefinition(t *testing.T) {
 
 	if input.DisableNetworking != *con.DisableNetworking {
 		t.Errorf("DisableNetworking: expect = %v, but actual = %v", input.DisableNetworking, *con.DisableNetworking)
+	}
+
+	if 1 != len(con.DnsSearchDomains) {
+		t.Fatalf("len(DnsSearchDomains): expect = %v, but actual = %v", 1, len(con.DnsSearchDomains))
+	}
+
+	if input.DnsSearchDomains[0] != *con.DnsSearchDomains[0] {
+		t.Errorf("DnsSearchDomains[0]: expect = %v, but actual = %v", input.DnsSearchDomains[0], *con.DnsSearchDomains[0])
 	}
 }

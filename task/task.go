@@ -212,6 +212,7 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 		PortMappings:      portMappings,
 		VolumesFrom:       volumesFrom,
 		DisableNetworking: aws.Bool(con.DisableNetworking),
+		DnsSearchDomains:  util.ConvertPointerString(con.DnsSearchDomains),
 	}, volumes, nil
 }
 
