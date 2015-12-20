@@ -26,6 +26,7 @@ type ContainerDefinition struct {
 	Command           string            `yaml:"command"`
 	DisableNetworking bool              `yaml:"disable_networking"`
 	DnsSearchDomains  []string          `yaml:"dns_search_domains"`
+	DnsServers        []string          `yaml:"dns_servers"`
 }
 
 func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, error) {

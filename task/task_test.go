@@ -73,6 +73,9 @@ func TestCreateContainerDefinition(t *testing.T) {
 		DnsSearchDomains: []string{
 			"test.dns.domain",
 		},
+		DnsServers: []string{
+			"test.dns.server",
+		},
 	}
 
 	con, volumes, _ := createContainerDefinition(&input)
@@ -183,5 +186,13 @@ func TestCreateContainerDefinition(t *testing.T) {
 
 	if input.DnsSearchDomains[0] != *con.DnsSearchDomains[0] {
 		t.Errorf("DnsSearchDomains[0]: expect = %v, but actual = %v", input.DnsSearchDomains[0], *con.DnsSearchDomains[0])
+	}
+
+	if 1 != len(con.DnsServers) {
+		t.Fatalf("len(DnsServers): expect = %v, but actual = %v", 1, len(con.DnsServers))
+	}
+
+	if input.DnsServers[0] != *con.DnsServers[0] {
+		t.Errorf("DnsServers[0]: expect = %v, but actual = %v", input.DnsServers[0], *con.DnsServers[0])
 	}
 }
