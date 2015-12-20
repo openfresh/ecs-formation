@@ -33,6 +33,7 @@ type ContainerDefinition struct {
 	Hostname              string            `yaml:"hostname"`
 	LogDriver             string            `yaml:"log_driver"`
 	LogOpt                map[string]string `yaml:"log_opt"`
+	Privileged            bool              `yaml:"privileged"`
 }
 
 func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, error) {

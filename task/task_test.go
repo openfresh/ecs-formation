@@ -89,6 +89,7 @@ func TestCreateContainerDefinition(t *testing.T) {
 		LogOpt: map[string]string{
 			"syslog-address": "tcp://192.168.0.42:123",
 		},
+		Privileged: true,
 	}
 
 	con, volumes, _ := createContainerDefinition(&input)
@@ -255,6 +256,10 @@ func TestCreateContainerDefinition(t *testing.T) {
 		}
 	} else {
 		t.Errorf("LogConfiguration.Options.syslog-address: not found")
+	}
+
+	if input.Privileged != *con.Privileged {
+		t.Errorf("Privileged: expect = %v, but actual = %v", input.Privileged, *con.Privileged)
 	}
 
 }

@@ -228,6 +228,7 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 			LogDriver: aws.String(con.LogDriver),
 			Options:   aws.StringMap(con.LogOpt),
 		},
+		Privileged: aws.Bool(con.Privileged),
 	}, volumes, nil
 }
 
