@@ -216,6 +216,7 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 		DnsServers:            aws.StringSlice(con.DnsServers),
 		DockerLabels:          aws.StringMap(con.DockerLabels),
 		DockerSecurityOptions: aws.StringSlice(con.DockerSecurityOptions),
+		ExtraHosts:            parseHostEntry(con.ExtraHosts),
 	}, volumes, nil
 }
 
@@ -231,4 +232,17 @@ func parseEntrypoint(target string) ([]*string, error) {
 		result = append(result, &s)
 	}
 	return result, nil
+}
+
+func parseHostEntry(entries []HostEntry) []*ecs.HostEntry {
+
+	values := []*ecs.HostEntry{}
+	for _, e := range entries {
+		values = append(values, &ecs.HostEntry{
+			Hostname:  aws.String(e.Hostname),
+			IpAddress: aws.String(e.IpAddress),
+		})
+	}
+
+	return values
 }
