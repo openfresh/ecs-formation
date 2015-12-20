@@ -12,28 +12,29 @@ type TaskDefinition struct {
 }
 
 type ContainerDefinition struct {
-	Name                  string
-	Image                 string            `yaml:"image"`
-	Ports                 []string          `yaml:"ports"`
-	Environment           map[string]string `yaml:"environment"`
-	Links                 []string          `yaml:"links"`
-	Volumes               []string          `yaml:"volumes"`
-	VolumesFrom           []string          `yaml:"volumes_from"`
-	Memory                int64             `yaml:"memory"`
-	CpuUnits              int64             `yaml:"cpu_units"`
-	Essential             bool              `yaml:"essential"`
-	EntryPoint            string            `yaml:"entry_point"`
-	Command               string            `yaml:"command"`
-	DisableNetworking     bool              `yaml:"disable_networking"`
-	DnsSearchDomains      []string          `yaml:"dns_search"`
-	DnsServers            []string          `yaml:"dns"`
-	DockerLabels          map[string]string `yaml:"labels"`
-	DockerSecurityOptions []string          `yaml:"security_opt"`
-	ExtraHosts            []string          `yaml:"extra_hosts"`
-	Hostname              string            `yaml:"hostname"`
-	LogDriver             string            `yaml:"log_driver"`
-	LogOpt                map[string]string `yaml:"log_opt"`
-	Privileged            bool              `yaml:"privileged"`
+	Name                   string
+	Image                  string            `yaml:"image"`
+	Ports                  []string          `yaml:"ports"`
+	Environment            map[string]string `yaml:"environment"`
+	Links                  []string          `yaml:"links"`
+	Volumes                []string          `yaml:"volumes"`
+	VolumesFrom            []string          `yaml:"volumes_from"`
+	Memory                 int64             `yaml:"memory"`
+	CpuUnits               int64             `yaml:"cpu_units"`
+	Essential              bool              `yaml:"essential"`
+	EntryPoint             string            `yaml:"entry_point"`
+	Command                string            `yaml:"command"`
+	DisableNetworking      bool              `yaml:"disable_networking"`
+	DnsSearchDomains       []string          `yaml:"dns_search"`
+	DnsServers             []string          `yaml:"dns"`
+	DockerLabels           map[string]string `yaml:"labels"`
+	DockerSecurityOptions  []string          `yaml:"security_opt"`
+	ExtraHosts             []string          `yaml:"extra_hosts"`
+	Hostname               string            `yaml:"hostname"`
+	LogDriver              string            `yaml:"log_driver"`
+	LogOpt                 map[string]string `yaml:"log_opt"`
+	Privileged             bool              `yaml:"privileged"`
+	ReadonlyRootFilesystem bool              `yaml:"read_only"`
 }
 
 func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, error) {

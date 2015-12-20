@@ -89,7 +89,8 @@ func TestCreateContainerDefinition(t *testing.T) {
 		LogOpt: map[string]string{
 			"syslog-address": "tcp://192.168.0.42:123",
 		},
-		Privileged: true,
+		Privileged:             true,
+		ReadonlyRootFilesystem: true,
 	}
 
 	con, volumes, _ := createContainerDefinition(&input)
@@ -260,6 +261,10 @@ func TestCreateContainerDefinition(t *testing.T) {
 
 	if input.Privileged != *con.Privileged {
 		t.Errorf("Privileged: expect = %v, but actual = %v", input.Privileged, *con.Privileged)
+	}
+
+	if input.ReadonlyRootFilesystem != *con.ReadonlyRootFilesystem {
+		t.Errorf("ReadonlyRootFilesystem: expect = %v, but actual = %v", input.ReadonlyRootFilesystem, *con.ReadonlyRootFilesystem)
 	}
 
 }
