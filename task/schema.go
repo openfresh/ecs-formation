@@ -29,13 +29,8 @@ type ContainerDefinition struct {
 	DnsServers            []string          `yaml:"dns_servers"`
 	DockerLabels          map[string]string `yaml:"docker_labels"`
 	DockerSecurityOptions []string          `yaml:"docker_security_options"`
-	ExtraHosts            []HostEntry       `yaml:"extra_hosts"`
+	ExtraHosts            []string          `yaml:"extra_hosts"`
 	Hostname              string            `yaml:"hostname"`
-}
-
-type HostEntry struct {
-	Hostname  string `yaml:"hostname"`
-	IpAddress string `yaml:"ip_address"`
 }
 
 func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, error) {

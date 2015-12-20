@@ -1,6 +1,7 @@
 package task
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/mattn/go-shellwords"
@@ -198,6 +199,11 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 		return nil, []*ecs.Volume{}, err
 	}
 
+	extraHosts, err := toHostEntry(con.ExtraHosts)
+	if err != nil {
+		return nil, []*ecs.Volume{}, err
+	}
+
 	return &ecs.ContainerDefinition{
 		Cpu:                   aws.Int64(con.CpuUnits),
 		Command:               commands,
@@ -216,7 +222,7 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 		DnsServers:            aws.StringSlice(con.DnsServers),
 		DockerLabels:          aws.StringMap(con.DockerLabels),
 		DockerSecurityOptions: aws.StringSlice(con.DockerSecurityOptions),
-		ExtraHosts:            parseHostEntry(con.ExtraHosts),
+		ExtraHosts:            extraHosts,
 		Hostname:              aws.String(con.Hostname),
 	}, volumes, nil
 }
@@ -235,15 +241,20 @@ func parseEntrypoint(target string) ([]*string, error) {
 	return result, nil
 }
 
-func parseHostEntry(entries []HostEntry) []*ecs.HostEntry {
+func toHostEntry(entries []string) ([]*ecs.HostEntry, error) {
 
 	values := []*ecs.HostEntry{}
 	for _, e := range entries {
+		tokens := strings.Split(e, ":")
+		if len(tokens) != 2 {
+			return []*ecs.HostEntry{}, fmt.Errorf("'%v' is invalid extra_host definition.", e)
+		}
+
 		values = append(values, &ecs.HostEntry{
-			Hostname:  aws.String(e.Hostname),
-			IpAddress: aws.String(e.IpAddress),
+			Hostname:  aws.String(tokens[0]),
+			IpAddress: aws.String(tokens[1]),
 		})
 	}
 
-	return values
+	return values, nil
 }

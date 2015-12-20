@@ -82,11 +82,8 @@ func TestCreateContainerDefinition(t *testing.T) {
 		DockerSecurityOptions: []string{
 			"ECS_SELINUX_CAPABLE=true",
 		},
-		ExtraHosts: []HostEntry{
-			HostEntry{
-				Hostname:  "host1",
-				IpAddress: "192.168.1.100",
-			},
+		ExtraHosts: []string{
+			"host1:192.168.1.100",
 		},
 	}
 
@@ -232,12 +229,12 @@ func TestCreateContainerDefinition(t *testing.T) {
 		t.Fatalf("len(ExtraHosts): expect = %v, but actual = %v", len(input.ExtraHosts), len(con.ExtraHosts))
 	}
 
-	if input.ExtraHosts[0].Hostname != *con.ExtraHosts[0].Hostname {
-		t.Errorf("ExtraHosts[0].Hostname: expect = %v, but actual = %v", input.ExtraHosts[0].Hostname, *con.ExtraHosts[0].Hostname)
+	if "host1" != *con.ExtraHosts[0].Hostname {
+		t.Errorf("ExtraHosts[0].Hostname: expect = %v, but actual = %v", "host1", *con.ExtraHosts[0].Hostname)
 	}
 
-	if input.ExtraHosts[0].IpAddress != *con.ExtraHosts[0].IpAddress {
-		t.Errorf("ExtraHosts[0].IpAddress: expect = %v, but actual = %v", input.ExtraHosts[0].IpAddress, *con.ExtraHosts[0].IpAddress)
+	if "192.168.1.100" != *con.ExtraHosts[0].IpAddress {
+		t.Errorf("ExtraHosts[0].IpAddress: expect = %v, but actual = %v", "192.168.1.100", *con.ExtraHosts[0].IpAddress)
 	}
 
 	if input.Hostname != *con.Hostname {
