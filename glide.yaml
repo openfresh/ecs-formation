@@ -25,6 +25,8 @@ import:
   - service/ecs
   - service/elb
   - service/sns
+- package: github.com/codegangsta/cli
+  version: b5232bb2934f606f9f27a1305f1eea224e8e8b88
 - package: github.com/go-ini/ini
   version: 060d7da055ba6ec5ea7a31f116332fe5efa04ce0
 - package: github.com/Sirupsen/logrus
