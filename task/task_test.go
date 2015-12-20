@@ -91,6 +91,7 @@ func TestCreateContainerDefinition(t *testing.T) {
 		},
 		Privileged:             true,
 		ReadonlyRootFilesystem: true,
+		User: "hoge-user",
 	}
 
 	con, volumes, _ := createContainerDefinition(&input)
@@ -265,6 +266,10 @@ func TestCreateContainerDefinition(t *testing.T) {
 
 	if input.ReadonlyRootFilesystem != *con.ReadonlyRootFilesystem {
 		t.Errorf("ReadonlyRootFilesystem: expect = %v, but actual = %v", input.ReadonlyRootFilesystem, *con.ReadonlyRootFilesystem)
+	}
+
+	if input.User != *con.User {
+		t.Errorf("User: expect = %v, but actual = %v", input.User, *con.User)
 	}
 
 }

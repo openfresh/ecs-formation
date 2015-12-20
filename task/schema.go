@@ -35,6 +35,7 @@ type ContainerDefinition struct {
 	LogOpt                 map[string]string `yaml:"log_opt"`
 	Privileged             bool              `yaml:"privileged"`
 	ReadonlyRootFilesystem bool              `yaml:"read_only"`
+	User                   string            `yaml:"user"`
 }
 
 func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, error) {
