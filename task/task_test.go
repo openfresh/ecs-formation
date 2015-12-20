@@ -239,4 +239,8 @@ func TestCreateContainerDefinition(t *testing.T) {
 	if input.ExtraHosts[0].IpAddress != *con.ExtraHosts[0].IpAddress {
 		t.Errorf("ExtraHosts[0].IpAddress: expect = %v, but actual = %v", input.ExtraHosts[0].IpAddress, *con.ExtraHosts[0].IpAddress)
 	}
+
+	if input.Hostname != *con.Hostname {
+		t.Errorf("Hostname: expect = %v, but actual = %v", input.Hostname, *con.Hostname)
+	}
 }

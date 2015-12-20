@@ -30,6 +30,7 @@ type ContainerDefinition struct {
 	DockerLabels          map[string]string `yaml:"docker_labels"`
 	DockerSecurityOptions []string          `yaml:"docker_security_options"`
 	ExtraHosts            []HostEntry       `yaml:"extra_hosts"`
+	Hostname              string            `yaml:"hostname"`
 }
 
 type HostEntry struct {

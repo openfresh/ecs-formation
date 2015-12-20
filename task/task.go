@@ -217,6 +217,7 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 		DockerLabels:          aws.StringMap(con.DockerLabels),
 		DockerSecurityOptions: aws.StringSlice(con.DockerSecurityOptions),
 		ExtraHosts:            parseHostEntry(con.ExtraHosts),
+		Hostname:              aws.String(con.Hostname),
 	}, volumes, nil
 }
 
