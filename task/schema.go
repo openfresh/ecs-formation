@@ -31,6 +31,8 @@ type ContainerDefinition struct {
 	DockerSecurityOptions []string          `yaml:"security_opt"`
 	ExtraHosts            []string          `yaml:"extra_hosts"`
 	Hostname              string            `yaml:"hostname"`
+	LogDriver             string            `yaml:"log_driver"`
+	LogOpt                map[string]string `yaml:"log_opt"`
 }
 
 func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, error) {

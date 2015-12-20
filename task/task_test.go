@@ -85,6 +85,10 @@ func TestCreateContainerDefinition(t *testing.T) {
 		ExtraHosts: []string{
 			"host1:192.168.1.100",
 		},
+		LogDriver: "syslog",
+		LogOpt: map[string]string{
+			"syslog-address": "tcp://192.168.0.42:123",
+		},
 	}
 
 	con, volumes, _ := createContainerDefinition(&input)
@@ -240,4 +244,17 @@ func TestCreateContainerDefinition(t *testing.T) {
 	if input.Hostname != *con.Hostname {
 		t.Errorf("Hostname: expect = %v, but actual = %v", input.Hostname, *con.Hostname)
 	}
+
+	if input.LogDriver != *con.LogConfiguration.LogDriver {
+		t.Errorf("LogConfiguration.LogDriver: expect = %v, but actual = %v", input.LogDriver, *con.LogConfiguration.LogDriver)
+	}
+
+	if val, ok := con.LogConfiguration.Options["syslog-address"]; ok {
+		if "tcp://192.168.0.42:123" != *val {
+			t.Errorf("LogConfiguration.Options.syslog-address: expect = %v, but actual = %v", "tcp://192.168.0.42:123", val)
+		}
+	} else {
+		t.Errorf("LogConfiguration.Options.syslog-address: not found")
+	}
+
 }

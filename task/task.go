@@ -224,6 +224,10 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 		DockerSecurityOptions: aws.StringSlice(con.DockerSecurityOptions),
 		ExtraHosts:            extraHosts,
 		Hostname:              aws.String(con.Hostname),
+		LogConfiguration: &ecs.LogConfiguration{
+			LogDriver: aws.String(con.LogDriver),
+			Options:   aws.StringMap(con.LogOpt),
+		},
 	}, volumes, nil
 }
 
