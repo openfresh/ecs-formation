@@ -91,7 +91,8 @@ func TestCreateContainerDefinition(t *testing.T) {
 		},
 		Privileged:             true,
 		ReadonlyRootFilesystem: true,
-		User: "hoge-user",
+		User:             "hoge-user",
+		WorkingDirectory: "/hoge",
 	}
 
 	con, volumes, _ := createContainerDefinition(&input)
@@ -270,6 +271,10 @@ func TestCreateContainerDefinition(t *testing.T) {
 
 	if input.User != *con.User {
 		t.Errorf("User: expect = %v, but actual = %v", input.User, *con.User)
+	}
+
+	if input.WorkingDirectory != *con.WorkingDirectory {
+		t.Errorf("WorkingDirectory: expect = %v, but actual = %v", input.WorkingDirectory, *con.WorkingDirectory)
 	}
 
 }

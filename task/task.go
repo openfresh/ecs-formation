@@ -230,7 +230,8 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 		},
 		Privileged:             aws.Bool(con.Privileged),
 		ReadonlyRootFilesystem: aws.Bool(con.ReadonlyRootFilesystem),
-		User: aws.String(con.User),
+		User:             aws.String(con.User),
+		WorkingDirectory: aws.String(con.WorkingDirectory),
 	}, volumes, nil
 }
 

@@ -36,6 +36,7 @@ type ContainerDefinition struct {
 	Privileged             bool              `yaml:"privileged"`
 	ReadonlyRootFilesystem bool              `yaml:"read_only"`
 	User                   string            `yaml:"user"`
+	WorkingDirectory       string            `yaml:"working_dir"`
 }
 
 func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, error) {
