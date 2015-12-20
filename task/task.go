@@ -205,15 +205,15 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 		Environment:       toKeyValuePairs(con.Environment),
 		Essential:         aws.Bool(con.Essential),
 		Image:             aws.String(con.Image),
-		Links:             util.ConvertPointerString(con.Links),
+		Links:             aws.StringSlice(con.Links),
 		Memory:            aws.Int64(con.Memory),
 		MountPoints:       mountPoints,
 		Name:              aws.String(con.Name),
 		PortMappings:      portMappings,
 		VolumesFrom:       volumesFrom,
 		DisableNetworking: aws.Bool(con.DisableNetworking),
-		DnsSearchDomains:  util.ConvertPointerString(con.DnsSearchDomains),
-		DnsServers:        util.ConvertPointerString(con.DnsServers),
+		DnsSearchDomains:  aws.StringSlice(con.DnsSearchDomains),
+		DnsServers:        aws.StringSlice(con.DnsServers),
 		DockerLabels:      aws.StringMap(con.DockerLabels),
 	}, volumes, nil
 }
