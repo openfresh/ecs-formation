@@ -26,7 +26,6 @@ dependencies:
     # deps
     - make deps-test
 
-
 test:
   override:
     - make ci-test
