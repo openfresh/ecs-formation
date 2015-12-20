@@ -74,15 +74,41 @@ func createTaskPlans(controller *task.TaskDefinitionController, projectDir strin
 	plans := controller.CreateTaskUpdatePlans(taskDefs)
 
 	for _, plan := range plans {
-		logger.Main.Infof("Task Definition '%s'", plan.Name)
+		logger.Main.Infof("Task Definition '%v'", plan.Name)
 
 		for _, add := range plan.NewContainers {
-			util.PrintlnCyan(fmt.Sprintf("    (+) %s", add.Name))
-			util.PrintlnCyan(fmt.Sprintf("      image: %s", add.Image))
-			util.PrintlnCyan(fmt.Sprintf("      ports: %s", add.Ports))
-			util.PrintlnCyan(fmt.Sprintf("      environment:\n%s", util.StringValueWithIndent(add.Environment, 4)))
-			util.PrintlnCyan(fmt.Sprintf("      links: %s", add.Links))
-			util.PrintlnCyan(fmt.Sprintf("      volumes: %s", add.Volumes))
+			util.PrintlnCyan(fmt.Sprintf("    (+) %v", add.Name))
+			util.PrintlnCyan(fmt.Sprintf("      image: %v", add.Image))
+			util.PrintlnCyan(fmt.Sprintf("      ports: %v", add.Ports))
+			util.PrintlnCyan(fmt.Sprintf("      environment:\n%v", util.StringValueWithIndent(add.Environment, 4)))
+			util.PrintlnCyan(fmt.Sprintf("      links: %v", add.Links))
+			util.PrintlnCyan(fmt.Sprintf("      volumes: %v", add.Volumes))
+			util.PrintlnCyan(fmt.Sprintf("      volumes_from: %v", add.VolumesFrom))
+			util.PrintlnCyan(fmt.Sprintf("      memory: %v", add.Memory))
+			util.PrintlnCyan(fmt.Sprintf("      cpu_units: %v", add.CpuUnits))
+			util.PrintlnCyan(fmt.Sprintf("      essential: %v", add.Essential))
+			util.PrintlnCyan(fmt.Sprintf("      entry_point: %v", add.EntryPoint))
+			util.PrintlnCyan(fmt.Sprintf("      command: %v", add.Command))
+			util.PrintlnCyan(fmt.Sprintf("      disable_networking: %v", add.DisableNetworking))
+			util.PrintlnCyan(fmt.Sprintf("      dns_search: %v", add.DnsSearchDomains))
+			util.PrintlnCyan(fmt.Sprintf("      dns: %v", add.DnsServers))
+			if len(add.DockerLabels) > 0 {
+				util.PrintlnCyan(fmt.Sprintf("      labels: %v", util.StringValueWithIndent(add.DockerLabels, 4)))
+			}
+			util.PrintlnCyan(fmt.Sprintf("      security_opt: %v", add.DockerSecurityOptions))
+			util.PrintlnCyan(fmt.Sprintf("      extra_hosts: %v", add.ExtraHosts))
+			util.PrintlnCyan(fmt.Sprintf("      hostname: %v", add.Hostname))
+			util.PrintlnCyan(fmt.Sprintf("      log_driver: %v", add.LogDriver))
+			if len(add.LogOpt) > 0 {
+				util.PrintlnCyan(fmt.Sprintf("      log_opt: %v", util.StringValueWithIndent(add.LogOpt, 4)))
+			}
+			util.PrintlnCyan(fmt.Sprintf("      privileged: %v", add.Privileged))
+			util.PrintlnCyan(fmt.Sprintf("      read_only: %v", add.ReadonlyRootFilesystem))
+			if len(add.Ulimits) > 0 {
+				util.PrintlnCyan(fmt.Sprintf("      ulimits: %v", util.StringValueWithIndent(add.Ulimits, 4)))
+			}
+			util.PrintlnCyan(fmt.Sprintf("      user: %v", add.User))
+			util.PrintlnCyan(fmt.Sprintf("      working_dir: %v", add.WorkingDirectory))
 		}
 
 		util.Println()
