@@ -91,6 +91,12 @@ func TestCreateContainerDefinition(t *testing.T) {
 		},
 		Privileged:             true,
 		ReadonlyRootFilesystem: true,
+		Ulimits: map[string]Ulimit{
+			"nofile": Ulimit{
+				Soft: 20000,
+				Hard: 40000,
+			},
+		},
 		User:             "hoge-user",
 		WorkingDirectory: "/hoge",
 	}
@@ -267,6 +273,22 @@ func TestCreateContainerDefinition(t *testing.T) {
 
 	if input.ReadonlyRootFilesystem != *con.ReadonlyRootFilesystem {
 		t.Errorf("ReadonlyRootFilesystem: expect = %v, but actual = %v", input.ReadonlyRootFilesystem, *con.ReadonlyRootFilesystem)
+	}
+
+	if len(input.Ulimits) != len(con.Ulimits) {
+		t.Fatalf("len(Ulimits): expect = %v, but actual = %v", 1, len(con.Ulimits))
+	}
+
+	if "nofile" != *con.Ulimits[0].Name {
+		t.Errorf("Ulimits[0].Name: expect = %v, but actual = %v", "nofile", *con.Ulimits[0].Name)
+	}
+
+	if 20000 != *con.Ulimits[0].SoftLimit {
+		t.Errorf("Ulimits[0].SoftLimit: expect = %v, but actual = %v", 20000, *con.Ulimits[0].SoftLimit)
+	}
+
+	if 40000 != *con.Ulimits[0].HardLimit {
+		t.Errorf("Ulimits[0].HardLimit: expect = %v, but actual = %v", 40000, *con.Ulimits[0].HardLimit)
 	}
 
 	if input.User != *con.User {

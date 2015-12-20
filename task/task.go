@@ -230,8 +230,9 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 		},
 		Privileged:             aws.Bool(con.Privileged),
 		ReadonlyRootFilesystem: aws.Bool(con.ReadonlyRootFilesystem),
-		User:             aws.String(con.User),
-		WorkingDirectory: aws.String(con.WorkingDirectory),
+		Ulimits:                toUlimits(con.Ulimits),
+		User:                   aws.String(con.User),
+		WorkingDirectory:       aws.String(con.WorkingDirectory),
 	}, volumes, nil
 }
 
@@ -265,4 +266,18 @@ func toHostEntry(entries []string) ([]*ecs.HostEntry, error) {
 	}
 
 	return values, nil
+}
+
+func toUlimits(entries map[string]Ulimit) []*ecs.Ulimit {
+
+	values := []*ecs.Ulimit{}
+	for name, limit := range entries {
+		values = append(values, &ecs.Ulimit{
+			Name:      aws.String(name),
+			SoftLimit: aws.Int64(limit.Soft),
+			HardLimit: aws.Int64(limit.Hard),
+		})
+	}
+
+	return values
 }

@@ -35,8 +35,14 @@ type ContainerDefinition struct {
 	LogOpt                 map[string]string `yaml:"log_opt"`
 	Privileged             bool              `yaml:"privileged"`
 	ReadonlyRootFilesystem bool              `yaml:"read_only"`
+	Ulimits                map[string]Ulimit `yaml:"ulimits"`
 	User                   string            `yaml:"user"`
 	WorkingDirectory       string            `yaml:"working_dir"`
+}
+
+type Ulimit struct {
+	Soft int64 `yaml:"soft"`
+	Hard int64 `yaml:"hard"`
 }
 
 func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, error) {
