@@ -76,6 +76,9 @@ func TestCreateContainerDefinition(t *testing.T) {
 		DnsServers: []string{
 			"test.dns.server",
 		},
+		DockerLabels: map[string]string{
+			"LABEL1": "VALUE1",
+		},
 	}
 
 	con, volumes, _ := createContainerDefinition(&input)
@@ -194,5 +197,17 @@ func TestCreateContainerDefinition(t *testing.T) {
 
 	if input.DnsServers[0] != *con.DnsServers[0] {
 		t.Errorf("DnsServers[0]: expect = %v, but actual = %v", input.DnsServers[0], *con.DnsServers[0])
+	}
+
+	if len(input.DockerLabels) != len(con.DockerLabels) {
+		t.Fatalf("len(DockerLabels): expect = %v, but actual = %v", len(input.DockerLabels), len(con.DockerLabels))
+	}
+
+	if val, ok := con.DockerLabels["LABEL1"]; ok {
+		if "VALUE1" != *val {
+			t.Errorf("DockerLabels.LABEL1: expect = %v, but actual = %v", "VALUE1", val)
+		}
+	} else {
+		t.Errorf("DockerLabels.LABEL1: not found")
 	}
 }

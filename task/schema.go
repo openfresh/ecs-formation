@@ -27,6 +27,7 @@ type ContainerDefinition struct {
 	DisableNetworking bool              `yaml:"disable_networking"`
 	DnsSearchDomains  []string          `yaml:"dns_search_domains"`
 	DnsServers        []string          `yaml:"dns_servers"`
+	DockerLabels      map[string]string `yaml:"docker_labels"`
 }
 
 func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, error) {
