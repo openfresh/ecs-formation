@@ -3,7 +3,6 @@ package aws
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elb"
-	"github.com/stormcat24/ecs-formation/util"
 )
 
 type ElbApi struct {
@@ -13,7 +12,7 @@ type ElbApi struct {
 func (self *ElbApi) DescribeLoadBalancers(names []string) (*elb.DescribeLoadBalancersOutput, error) {
 
 	params := &elb.DescribeLoadBalancersInput{
-		LoadBalancerNames: util.ConvertPointerString(names),
+		LoadBalancerNames: aws.StringSlice(names),
 	}
 
 	result, err := self.service.DescribeLoadBalancers(params)

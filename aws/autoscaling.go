@@ -3,7 +3,6 @@ package aws
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
-	"github.com/stormcat24/ecs-formation/util"
 )
 
 type AutoscalingApi struct {
@@ -13,7 +12,7 @@ type AutoscalingApi struct {
 func (self *AutoscalingApi) DescribeAutoScalingGroups(groups []string) (map[string]*autoscaling.Group, error) {
 
 	params := &autoscaling.DescribeAutoScalingGroupsInput{
-		AutoScalingGroupNames: util.ConvertPointerString(groups),
+		AutoScalingGroupNames: aws.StringSlice(groups),
 	}
 
 	asgmap := map[string]*autoscaling.Group{}
@@ -60,7 +59,7 @@ func (self *AutoscalingApi) AttachLoadBalancers(group string, lb []string) (*aut
 
 	params := &autoscaling.AttachLoadBalancersInput{
 		AutoScalingGroupName: aws.String(group),
-		LoadBalancerNames:    util.ConvertPointerString(lb),
+		LoadBalancerNames:    aws.StringSlice(lb),
 	}
 
 	result, err := self.service.AttachLoadBalancers(params)
@@ -74,7 +73,7 @@ func (self *AutoscalingApi) DetachLoadBalancers(group string, lb []string) (*aut
 
 	params := &autoscaling.DetachLoadBalancersInput{
 		AutoScalingGroupName: aws.String(group),
-		LoadBalancerNames:    util.ConvertPointerString(lb),
+		LoadBalancerNames:    aws.StringSlice(lb),
 	}
 
 	result, err := self.service.DetachLoadBalancers(params)

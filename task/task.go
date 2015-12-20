@@ -1,6 +1,7 @@
 package task
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/mattn/go-shellwords"
@@ -9,6 +10,8 @@ import (
 	"github.com/stormcat24/ecs-formation/util"
 	"github.com/str1ngs/ansi/color"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -48,35 +51,33 @@ func (self *TaskDefinitionController) GetTaskDefinitionMap() map[string]*TaskDef
 func (self *TaskDefinitionController) searchTaskDefinitions(projectDir string) (map[string]*TaskDefinition, error) {
 
 	taskDir := projectDir + "/task"
-	files, err := ioutil.ReadDir(taskDir)
 
 	taskDefMap := map[string]*TaskDefinition{}
+	filePattern := regexp.MustCompile(`^.+\/(.+)\.yml$`)
 
-	if err != nil {
-		return taskDefMap, err
-	}
-
-	filePattern := regexp.MustCompile("^(.+)\\.yml$")
-
-	for _, file := range files {
-		if !file.IsDir() && strings.HasSuffix(file.Name(), ".yml") {
-			content, err := ioutil.ReadFile(taskDir + "/" + file.Name())
-			if err != nil {
-				return nil, err
-			}
-
-			merged := util.MergeYamlWithParameters(content, self.params)
-			tokens := filePattern.FindStringSubmatch(file.Name())
-			taskDefName := tokens[1]
-
-			taskDefinition, err := CreateTaskDefinition(taskDefName, merged)
-			if err != nil {
-				return nil, err
-			}
-
-			taskDefMap[taskDefName] = taskDefinition
+	filepath.Walk(taskDir, func(path string, info os.FileInfo, err error) error {
+		if info.IsDir() || !strings.HasSuffix(path, ".yml") {
+			return nil
 		}
-	}
+
+		content, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		merged := util.MergeYamlWithParameters(content, self.params)
+		tokens := filePattern.FindStringSubmatch(path)
+		taskDefName := tokens[1]
+
+		taskDefinition, err := CreateTaskDefinition(taskDefName, merged)
+		if err != nil {
+			return err
+		}
+
+		taskDefMap[taskDefName] = taskDefinition
+
+		return nil
+	})
 
 	return taskDefMap, nil
 }
@@ -139,68 +140,100 @@ func (self *TaskDefinitionController) ApplyTaskDefinitionPlan(task *TaskUpdatePl
 	volumes := []*ecs.Volume{}
 
 	for _, con := range containers {
-
-		var commands []*string
-		if len(con.Command) > 0 {
-			for _, token := range strings.Split(con.Command, " ") {
-				commands = append(commands, aws.String(token))
-			}
-		} else {
-			commands = nil
-		}
-
-		var entryPoints []*string
-		if len(con.EntryPoint) > 0 {
-			ep, err := parseEntrypoint(con.EntryPoint)
-			if err != nil {
-				return nil, err
-			}
-			entryPoints = ep
-		} else {
-			entryPoints = nil
-		}
-
-		portMappings, err := toPortMappings(con.Ports)
+		conDef, volumeItems, err := createContainerDefinition(con)
 		if err != nil {
-			return &ecs.RegisterTaskDefinitionOutput{}, err
+			return nil, err
 		}
-
-		volumeItems, err := CreateVolumeInfoItems(con.Volumes)
-		if err != nil {
-			return &ecs.RegisterTaskDefinitionOutput{}, err
-		}
-
-		mountPoints := []*ecs.MountPoint{}
-		for _, vp := range volumeItems {
-			volumes = append(volumes, vp.Volume)
-
-			mountPoints = append(mountPoints, vp.MountPoint)
-		}
-
-		volumesFrom, err := toVolumesFroms(con.VolumesFrom)
-		if err != nil {
-			return &ecs.RegisterTaskDefinitionOutput{}, err
-		}
-
-		conDef := &ecs.ContainerDefinition{
-			Cpu:          &con.CpuUnits,
-			Command:      commands,
-			EntryPoint:   entryPoints,
-			Environment:  toKeyValuePairs(con.Environment),
-			Essential:    &con.Essential,
-			Image:        aws.String(con.Image),
-			Links:        util.ConvertPointerString(con.Links),
-			Memory:       &con.Memory,
-			MountPoints:  mountPoints,
-			Name:         aws.String(con.Name),
-			PortMappings: portMappings,
-			VolumesFrom:  volumesFrom,
-		}
-
 		conDefs = append(conDefs, conDef)
+
+		for _, v := range volumeItems {
+			volumes = append(volumes, v)
+		}
 	}
 
 	return self.manager.EcsApi().RegisterTaskDefinition(task.Name, conDefs, volumes)
+}
+
+func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefinition, []*ecs.Volume, error) {
+
+	var commands []*string
+	if len(con.Command) > 0 {
+		for _, token := range strings.Split(con.Command, " ") {
+			commands = append(commands, aws.String(token))
+		}
+	} else {
+		commands = nil
+	}
+
+	var entryPoints []*string
+	if len(con.EntryPoint) > 0 {
+		ep, err := parseEntrypoint(con.EntryPoint)
+		if err != nil {
+			return nil, []*ecs.Volume{}, err
+		}
+		entryPoints = ep
+	} else {
+		entryPoints = nil
+	}
+
+	portMappings, err := toPortMappings(con.Ports)
+	if err != nil {
+		return nil, []*ecs.Volume{}, err
+	}
+
+	volumeItems, err := CreateVolumeInfoItems(con.Volumes)
+	if err != nil {
+		return nil, []*ecs.Volume{}, err
+	}
+
+	mountPoints := []*ecs.MountPoint{}
+	volumes := []*ecs.Volume{}
+	for _, vp := range volumeItems {
+		volumes = append(volumes, vp.Volume)
+
+		mountPoints = append(mountPoints, vp.MountPoint)
+	}
+
+	volumesFrom, err := toVolumesFroms(con.VolumesFrom)
+	if err != nil {
+		return nil, []*ecs.Volume{}, err
+	}
+
+	extraHosts, err := toHostEntry(con.ExtraHosts)
+	if err != nil {
+		return nil, []*ecs.Volume{}, err
+	}
+
+	return &ecs.ContainerDefinition{
+		Cpu:                   aws.Int64(con.CpuUnits),
+		Command:               commands,
+		EntryPoint:            entryPoints,
+		Environment:           toKeyValuePairs(con.Environment),
+		Essential:             aws.Bool(con.Essential),
+		Image:                 aws.String(con.Image),
+		Links:                 aws.StringSlice(con.Links),
+		Memory:                aws.Int64(con.Memory),
+		MountPoints:           mountPoints,
+		Name:                  aws.String(con.Name),
+		PortMappings:          portMappings,
+		VolumesFrom:           volumesFrom,
+		DisableNetworking:     aws.Bool(con.DisableNetworking),
+		DnsSearchDomains:      aws.StringSlice(con.DnsSearchDomains),
+		DnsServers:            aws.StringSlice(con.DnsServers),
+		DockerLabels:          aws.StringMap(con.DockerLabels),
+		DockerSecurityOptions: aws.StringSlice(con.DockerSecurityOptions),
+		ExtraHosts:            extraHosts,
+		Hostname:              aws.String(con.Hostname),
+		LogConfiguration: &ecs.LogConfiguration{
+			LogDriver: aws.String(con.LogDriver),
+			Options:   aws.StringMap(con.LogOpt),
+		},
+		Privileged:             aws.Bool(con.Privileged),
+		ReadonlyRootFilesystem: aws.Bool(con.ReadonlyRootFilesystem),
+		Ulimits:                toUlimits(con.Ulimits),
+		User:                   aws.String(con.User),
+		WorkingDirectory:       aws.String(con.WorkingDirectory),
+	}, volumes, nil
 }
 
 func parseEntrypoint(target string) ([]*string, error) {
@@ -215,4 +248,36 @@ func parseEntrypoint(target string) ([]*string, error) {
 		result = append(result, &s)
 	}
 	return result, nil
+}
+
+func toHostEntry(entries []string) ([]*ecs.HostEntry, error) {
+
+	values := []*ecs.HostEntry{}
+	for _, e := range entries {
+		tokens := strings.Split(e, ":")
+		if len(tokens) != 2 {
+			return []*ecs.HostEntry{}, fmt.Errorf("'%v' is invalid extra_host definition.", e)
+		}
+
+		values = append(values, &ecs.HostEntry{
+			Hostname:  aws.String(tokens[0]),
+			IpAddress: aws.String(tokens[1]),
+		})
+	}
+
+	return values, nil
+}
+
+func toUlimits(entries map[string]Ulimit) []*ecs.Ulimit {
+
+	values := []*ecs.Ulimit{}
+	for name, limit := range entries {
+		values = append(values, &ecs.Ulimit{
+			Name:      aws.String(name),
+			SoftLimit: aws.Int64(limit.Soft),
+			HardLimit: aws.Int64(limit.Hard),
+		})
+	}
+
+	return values
 }

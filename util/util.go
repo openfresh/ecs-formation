@@ -15,17 +15,6 @@ var (
 	variablePattern = regexp.MustCompile(`\$\{([\w_-]+)\}`)
 )
 
-func ConvertPointerString(values []string) []*string {
-
-	merged := make([]*string, len(values))
-
-	for i := 0; i < len(values); i++ {
-		merged[i] = &values[i]
-	}
-
-	return merged
-}
-
 func StringValueWithIndent(value interface{}, indent int) string {
 	sr := strings.NewReader(awsutil.Prettify(value))
 
