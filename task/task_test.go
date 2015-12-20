@@ -73,6 +73,32 @@ func TestCreateContainerDefinition(t *testing.T) {
 		DnsSearchDomains: []string{
 			"test.dns.domain",
 		},
+		DnsServers: []string{
+			"test.dns.server",
+		},
+		DockerLabels: map[string]string{
+			"LABEL1": "VALUE1",
+		},
+		DockerSecurityOptions: []string{
+			"ECS_SELINUX_CAPABLE=true",
+		},
+		ExtraHosts: []string{
+			"host1:192.168.1.100",
+		},
+		LogDriver: "syslog",
+		LogOpt: map[string]string{
+			"syslog-address": "tcp://192.168.0.42:123",
+		},
+		Privileged:             true,
+		ReadonlyRootFilesystem: true,
+		Ulimits: map[string]Ulimit{
+			"nofile": Ulimit{
+				Soft: 20000,
+				Hard: 40000,
+			},
+		},
+		User:             "hoge-user",
+		WorkingDirectory: "/hoge",
 	}
 
 	con, volumes, _ := createContainerDefinition(&input)
@@ -184,4 +210,93 @@ func TestCreateContainerDefinition(t *testing.T) {
 	if input.DnsSearchDomains[0] != *con.DnsSearchDomains[0] {
 		t.Errorf("DnsSearchDomains[0]: expect = %v, but actual = %v", input.DnsSearchDomains[0], *con.DnsSearchDomains[0])
 	}
+
+	if 1 != len(con.DnsServers) {
+		t.Fatalf("len(DnsServers): expect = %v, but actual = %v", 1, len(con.DnsServers))
+	}
+
+	if input.DnsServers[0] != *con.DnsServers[0] {
+		t.Errorf("DnsServers[0]: expect = %v, but actual = %v", input.DnsServers[0], *con.DnsServers[0])
+	}
+
+	if len(input.DockerLabels) != len(con.DockerLabels) {
+		t.Fatalf("len(DockerLabels): expect = %v, but actual = %v", len(input.DockerLabels), len(con.DockerLabels))
+	}
+
+	if val, ok := con.DockerLabels["LABEL1"]; ok {
+		if "VALUE1" != *val {
+			t.Errorf("DockerLabels.LABEL1: expect = %v, but actual = %v", "VALUE1", val)
+		}
+	} else {
+		t.Errorf("DockerLabels.LABEL1: not found")
+	}
+
+	if 1 != len(con.DockerSecurityOptions) {
+		t.Fatalf("len(DockerSecurityOptions): expect = %v, but actual = %v", 1, len(con.DockerSecurityOptions))
+	}
+
+	if input.DockerSecurityOptions[0] != *con.DockerSecurityOptions[0] {
+		t.Errorf("DockerSecurityOptions[0]: expect = %v, but actual = %v", input.DockerSecurityOptions[0], *con.DockerSecurityOptions[0])
+	}
+
+	if len(input.ExtraHosts) != len(con.ExtraHosts) {
+		t.Fatalf("len(ExtraHosts): expect = %v, but actual = %v", len(input.ExtraHosts), len(con.ExtraHosts))
+	}
+
+	if "host1" != *con.ExtraHosts[0].Hostname {
+		t.Errorf("ExtraHosts[0].Hostname: expect = %v, but actual = %v", "host1", *con.ExtraHosts[0].Hostname)
+	}
+
+	if "192.168.1.100" != *con.ExtraHosts[0].IpAddress {
+		t.Errorf("ExtraHosts[0].IpAddress: expect = %v, but actual = %v", "192.168.1.100", *con.ExtraHosts[0].IpAddress)
+	}
+
+	if input.Hostname != *con.Hostname {
+		t.Errorf("Hostname: expect = %v, but actual = %v", input.Hostname, *con.Hostname)
+	}
+
+	if input.LogDriver != *con.LogConfiguration.LogDriver {
+		t.Errorf("LogConfiguration.LogDriver: expect = %v, but actual = %v", input.LogDriver, *con.LogConfiguration.LogDriver)
+	}
+
+	if val, ok := con.LogConfiguration.Options["syslog-address"]; ok {
+		if "tcp://192.168.0.42:123" != *val {
+			t.Errorf("LogConfiguration.Options.syslog-address: expect = %v, but actual = %v", "tcp://192.168.0.42:123", val)
+		}
+	} else {
+		t.Errorf("LogConfiguration.Options.syslog-address: not found")
+	}
+
+	if input.Privileged != *con.Privileged {
+		t.Errorf("Privileged: expect = %v, but actual = %v", input.Privileged, *con.Privileged)
+	}
+
+	if input.ReadonlyRootFilesystem != *con.ReadonlyRootFilesystem {
+		t.Errorf("ReadonlyRootFilesystem: expect = %v, but actual = %v", input.ReadonlyRootFilesystem, *con.ReadonlyRootFilesystem)
+	}
+
+	if len(input.Ulimits) != len(con.Ulimits) {
+		t.Fatalf("len(Ulimits): expect = %v, but actual = %v", 1, len(con.Ulimits))
+	}
+
+	if "nofile" != *con.Ulimits[0].Name {
+		t.Errorf("Ulimits[0].Name: expect = %v, but actual = %v", "nofile", *con.Ulimits[0].Name)
+	}
+
+	if 20000 != *con.Ulimits[0].SoftLimit {
+		t.Errorf("Ulimits[0].SoftLimit: expect = %v, but actual = %v", 20000, *con.Ulimits[0].SoftLimit)
+	}
+
+	if 40000 != *con.Ulimits[0].HardLimit {
+		t.Errorf("Ulimits[0].HardLimit: expect = %v, but actual = %v", 40000, *con.Ulimits[0].HardLimit)
+	}
+
+	if input.User != *con.User {
+		t.Errorf("User: expect = %v, but actual = %v", input.User, *con.User)
+	}
+
+	if input.WorkingDirectory != *con.WorkingDirectory {
+		t.Errorf("WorkingDirectory: expect = %v, but actual = %v", input.WorkingDirectory, *con.WorkingDirectory)
+	}
+
 }

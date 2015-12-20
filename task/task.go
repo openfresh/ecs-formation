@@ -1,6 +1,7 @@
 package task
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/mattn/go-shellwords"
@@ -198,21 +199,40 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 		return nil, []*ecs.Volume{}, err
 	}
 
+	extraHosts, err := toHostEntry(con.ExtraHosts)
+	if err != nil {
+		return nil, []*ecs.Volume{}, err
+	}
+
 	return &ecs.ContainerDefinition{
-		Cpu:               aws.Int64(con.CpuUnits),
-		Command:           commands,
-		EntryPoint:        entryPoints,
-		Environment:       toKeyValuePairs(con.Environment),
-		Essential:         aws.Bool(con.Essential),
-		Image:             aws.String(con.Image),
-		Links:             util.ConvertPointerString(con.Links),
-		Memory:            aws.Int64(con.Memory),
-		MountPoints:       mountPoints,
-		Name:              aws.String(con.Name),
-		PortMappings:      portMappings,
-		VolumesFrom:       volumesFrom,
-		DisableNetworking: aws.Bool(con.DisableNetworking),
-		DnsSearchDomains:  util.ConvertPointerString(con.DnsSearchDomains),
+		Cpu:                   aws.Int64(con.CpuUnits),
+		Command:               commands,
+		EntryPoint:            entryPoints,
+		Environment:           toKeyValuePairs(con.Environment),
+		Essential:             aws.Bool(con.Essential),
+		Image:                 aws.String(con.Image),
+		Links:                 aws.StringSlice(con.Links),
+		Memory:                aws.Int64(con.Memory),
+		MountPoints:           mountPoints,
+		Name:                  aws.String(con.Name),
+		PortMappings:          portMappings,
+		VolumesFrom:           volumesFrom,
+		DisableNetworking:     aws.Bool(con.DisableNetworking),
+		DnsSearchDomains:      aws.StringSlice(con.DnsSearchDomains),
+		DnsServers:            aws.StringSlice(con.DnsServers),
+		DockerLabels:          aws.StringMap(con.DockerLabels),
+		DockerSecurityOptions: aws.StringSlice(con.DockerSecurityOptions),
+		ExtraHosts:            extraHosts,
+		Hostname:              aws.String(con.Hostname),
+		LogConfiguration: &ecs.LogConfiguration{
+			LogDriver: aws.String(con.LogDriver),
+			Options:   aws.StringMap(con.LogOpt),
+		},
+		Privileged:             aws.Bool(con.Privileged),
+		ReadonlyRootFilesystem: aws.Bool(con.ReadonlyRootFilesystem),
+		Ulimits:                toUlimits(con.Ulimits),
+		User:                   aws.String(con.User),
+		WorkingDirectory:       aws.String(con.WorkingDirectory),
 	}, volumes, nil
 }
 
@@ -228,4 +248,36 @@ func parseEntrypoint(target string) ([]*string, error) {
 		result = append(result, &s)
 	}
 	return result, nil
+}
+
+func toHostEntry(entries []string) ([]*ecs.HostEntry, error) {
+
+	values := []*ecs.HostEntry{}
+	for _, e := range entries {
+		tokens := strings.Split(e, ":")
+		if len(tokens) != 2 {
+			return []*ecs.HostEntry{}, fmt.Errorf("'%v' is invalid extra_host definition.", e)
+		}
+
+		values = append(values, &ecs.HostEntry{
+			Hostname:  aws.String(tokens[0]),
+			IpAddress: aws.String(tokens[1]),
+		})
+	}
+
+	return values, nil
+}
+
+func toUlimits(entries map[string]Ulimit) []*ecs.Ulimit {
+
+	values := []*ecs.Ulimit{}
+	for name, limit := range entries {
+		values = append(values, &ecs.Ulimit{
+			Name:      aws.String(name),
+			SoftLimit: aws.Int64(limit.Soft),
+			HardLimit: aws.Int64(limit.Hard),
+		})
+	}
+
+	return values
 }
