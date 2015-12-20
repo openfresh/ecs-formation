@@ -204,36 +204,45 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 		return nil, []*ecs.Volume{}, err
 	}
 
-	return &ecs.ContainerDefinition{
-		Cpu:                   aws.Int64(con.CpuUnits),
-		Command:               commands,
-		EntryPoint:            entryPoints,
-		Environment:           toKeyValuePairs(con.Environment),
-		Essential:             aws.Bool(con.Essential),
-		Image:                 aws.String(con.Image),
-		Links:                 aws.StringSlice(con.Links),
-		Memory:                aws.Int64(con.Memory),
-		MountPoints:           mountPoints,
-		Name:                  aws.String(con.Name),
-		PortMappings:          portMappings,
-		VolumesFrom:           volumesFrom,
-		DisableNetworking:     aws.Bool(con.DisableNetworking),
-		DnsSearchDomains:      aws.StringSlice(con.DnsSearchDomains),
-		DnsServers:            aws.StringSlice(con.DnsServers),
-		DockerLabels:          aws.StringMap(con.DockerLabels),
-		DockerSecurityOptions: aws.StringSlice(con.DockerSecurityOptions),
-		ExtraHosts:            extraHosts,
-		Hostname:              aws.String(con.Hostname),
-		LogConfiguration: &ecs.LogConfiguration{
-			LogDriver: aws.String(con.LogDriver),
-			Options:   aws.StringMap(con.LogOpt),
-		},
+	cd := &ecs.ContainerDefinition{
+		Cpu:                    aws.Int64(con.CpuUnits),
+		Command:                commands,
+		EntryPoint:             entryPoints,
+		Environment:            toKeyValuePairs(con.Environment),
+		Essential:              aws.Bool(con.Essential),
+		Image:                  aws.String(con.Image),
+		Links:                  aws.StringSlice(con.Links),
+		Memory:                 aws.Int64(con.Memory),
+		MountPoints:            mountPoints,
+		Name:                   aws.String(con.Name),
+		PortMappings:           portMappings,
+		VolumesFrom:            volumesFrom,
+		DisableNetworking:      aws.Bool(con.DisableNetworking),
+		DnsSearchDomains:       aws.StringSlice(con.DnsSearchDomains),
+		DnsServers:             aws.StringSlice(con.DnsServers),
+		DockerLabels:           aws.StringMap(con.DockerLabels),
+		DockerSecurityOptions:  aws.StringSlice(con.DockerSecurityOptions),
+		ExtraHosts:             extraHosts,
 		Privileged:             aws.Bool(con.Privileged),
 		ReadonlyRootFilesystem: aws.Bool(con.ReadonlyRootFilesystem),
 		Ulimits:                toUlimits(con.Ulimits),
-		User:                   aws.String(con.User),
 		WorkingDirectory:       aws.String(con.WorkingDirectory),
-	}, volumes, nil
+	}
+
+	if con.Hostname != "" {
+		cd.Hostname = aws.String(con.Hostname)
+	}
+	if con.LogDriver != "" {
+		cd.LogConfiguration = &ecs.LogConfiguration{
+			LogDriver: aws.String(con.LogDriver),
+			Options:   aws.StringMap(con.LogOpt),
+		}
+	}
+	if con.User != "" {
+		cd.User = aws.String(con.User)
+	}
+
+	return cd, volumes, nil
 }
 
 func parseEntrypoint(target string) ([]*string, error) {
