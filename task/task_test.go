@@ -79,6 +79,9 @@ func TestCreateContainerDefinition(t *testing.T) {
 		DockerLabels: map[string]string{
 			"LABEL1": "VALUE1",
 		},
+		DockerSecurityOptions: []string{
+			"ECS_SELINUX_CAPABLE=true",
+		},
 	}
 
 	con, volumes, _ := createContainerDefinition(&input)
@@ -209,5 +212,13 @@ func TestCreateContainerDefinition(t *testing.T) {
 		}
 	} else {
 		t.Errorf("DockerLabels.LABEL1: not found")
+	}
+
+	if 1 != len(con.DockerSecurityOptions) {
+		t.Fatalf("len(DockerSecurityOptions): expect = %v, but actual = %v", 1, len(con.DockerSecurityOptions))
+	}
+
+	if input.DockerSecurityOptions[0] != *con.DockerSecurityOptions[0] {
+		t.Errorf("DockerSecurityOptions[0]: expect = %v, but actual = %v", input.DockerSecurityOptions[0], *con.DockerSecurityOptions[0])
 	}
 }

@@ -12,22 +12,23 @@ type TaskDefinition struct {
 }
 
 type ContainerDefinition struct {
-	Name              string
-	Image             string            `yaml:"image"`
-	Ports             []string          `yaml:"ports"`
-	Environment       map[string]string `yaml:"environment"`
-	Links             []string          `yaml:"links"`
-	Volumes           []string          `yaml:"volumes"`
-	VolumesFrom       []string          `yaml:"volumes_from"`
-	Memory            int64             `yaml:"memory"`
-	CpuUnits          int64             `yaml:"cpu_units"`
-	Essential         bool              `yaml:"essential"`
-	EntryPoint        string            `yaml:"entry_point"`
-	Command           string            `yaml:"command"`
-	DisableNetworking bool              `yaml:"disable_networking"`
-	DnsSearchDomains  []string          `yaml:"dns_search_domains"`
-	DnsServers        []string          `yaml:"dns_servers"`
-	DockerLabels      map[string]string `yaml:"docker_labels"`
+	Name                  string
+	Image                 string            `yaml:"image"`
+	Ports                 []string          `yaml:"ports"`
+	Environment           map[string]string `yaml:"environment"`
+	Links                 []string          `yaml:"links"`
+	Volumes               []string          `yaml:"volumes"`
+	VolumesFrom           []string          `yaml:"volumes_from"`
+	Memory                int64             `yaml:"memory"`
+	CpuUnits              int64             `yaml:"cpu_units"`
+	Essential             bool              `yaml:"essential"`
+	EntryPoint            string            `yaml:"entry_point"`
+	Command               string            `yaml:"command"`
+	DisableNetworking     bool              `yaml:"disable_networking"`
+	DnsSearchDomains      []string          `yaml:"dns_search_domains"`
+	DnsServers            []string          `yaml:"dns_servers"`
+	DockerLabels          map[string]string `yaml:"docker_labels"`
+	DockerSecurityOptions []string          `yaml:"docker_security_options"`
 }
 
 func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, error) {
