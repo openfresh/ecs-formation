@@ -25,10 +25,10 @@ type ContainerDefinition struct {
 	EntryPoint            string            `yaml:"entry_point"`
 	Command               string            `yaml:"command"`
 	DisableNetworking     bool              `yaml:"disable_networking"`
-	DnsSearchDomains      []string          `yaml:"dns_search_domains"`
-	DnsServers            []string          `yaml:"dns_servers"`
-	DockerLabels          map[string]string `yaml:"docker_labels"`
-	DockerSecurityOptions []string          `yaml:"docker_security_options"`
+	DnsSearchDomains      []string          `yaml:"dns_search"`
+	DnsServers            []string          `yaml:"dns"`
+	DockerLabels          map[string]string `yaml:"labels"`
+	DockerSecurityOptions []string          `yaml:"security_opt"`
 	ExtraHosts            []string          `yaml:"extra_hosts"`
 	Hostname              string            `yaml:"hostname"`
 }
