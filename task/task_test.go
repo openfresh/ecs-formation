@@ -1,6 +1,9 @@
 package task
 
 import (
+	"fmt"
+	"io/ioutil"
+	"path/filepath"
 	"testing"
 )
 
@@ -298,6 +301,122 @@ func TestCreateContainerDefinition(t *testing.T) {
 
 	if input.WorkingDirectory != *con.WorkingDirectory {
 		t.Errorf("WorkingDirectory: expect = %v, but actual = %v", input.WorkingDirectory, *con.WorkingDirectory)
+	}
+
+}
+
+func TestReadEnvFileEnvFormat(t *testing.T) {
+
+	f, _ := ioutil.TempFile("", "TestReadEnvFileEnvFormat.env")
+	f.WriteString(`
+PARAM1=VALUE1_env
+PARAM2=VALUE2_env
+	`)
+	defer f.Close()
+
+	actual, err := readEnvFile(f.Name())
+	if err != nil {
+		t.Fatalf("cannot open file.")
+	}
+
+	if 2 != len(actual) {
+		t.Fatalf("len: expect = %v, but actual = %v", 2, len(actual))
+	}
+
+	if val, ok := actual["PARAM1"]; ok {
+		if "VALUE1_env" != val {
+			t.Errorf("actual[PARAM1]: expect = %v, but actual = %v", "VALUE1_env", val)
+		}
+	} else {
+		t.Errorf("actual[PARAM1]: not found")
+	}
+
+}
+
+func TestReadEnvFileYamlFormat(t *testing.T) {
+
+	f, _ := ioutil.TempFile("", "TestReadEnvFileYamlFormat.env")
+	f.WriteString(`
+PARAM1: VALUE1_env
+PARAM2: VALUE2_env
+	`)
+	defer f.Close()
+
+	actual, err := readEnvFile(f.Name())
+	if err != nil {
+		t.Fatalf("cannot open file.")
+	}
+
+	if 2 != len(actual) {
+		t.Fatalf("len: expect = %v, but actual = %v", 2, len(actual))
+	}
+
+	if val, ok := actual["PARAM1"]; ok {
+		if "VALUE1_env" != val {
+			t.Errorf("actual[PARAM1]: expect = %v, but actual = %v", "VALUE1_env", val)
+		}
+	} else {
+		t.Errorf("actual[PARAM1]: not found")
+	}
+
+}
+
+func TestCreateTaskDefinition(t *testing.T) {
+
+	f, _ := ioutil.TempFile("", "TestCreateTaskDefinition.env")
+	f.WriteString(`
+PARAM2: VALUE2_env
+PARAM3: VALUE3_env
+	`)
+	defer f.Close()
+
+	yaml := fmt.Sprintf(`
+nginx:
+  image: nginx:latest
+  ports:
+    - 80:80
+  env_file:
+    - %s
+  environment:
+    PARAM1: un_override_value
+    PARAM2: override_value
+  memory: 1024
+  cpu_units: 1024
+  essential: true
+`, f.Name())
+
+	taskdef, err := CreateTaskDefinition("test-web", yaml, filepath.Dir(f.Name()))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if "test-web" != taskdef.Name {
+		t.Errorf("Name: expect = %v, but actual = %v", "test-web", taskdef.Name)
+	}
+
+	if con, ok := taskdef.ContainerDefinitions["nginx"]; ok {
+		if "nginx" != con.Name {
+			t.Errorf("Name: expect = %v, but actual = %v", "nginx", con.Name)
+		}
+
+		value1, _ := con.Environment["PARAM1"]
+		value2, _ := con.Environment["PARAM2"]
+		value3, _ := con.Environment["PARAM3"]
+
+		if "un_override_value" != value1 {
+			t.Errorf("con.Environment[%v]: expect = %v, but actual = %v", "PARAM1", "un_override_value", value1)
+		}
+
+		if "override_value" != value2 {
+			t.Errorf("con.Environment[%v]: expect = %v, but actual = %v", "PARAM2", "override_value", value2)
+		}
+
+		if "VALUE3_env" != value3 {
+			t.Errorf("con.Environment[%v]: expect = %v, but actual = %v", "PARAM3", "override_value", value3)
+		}
+
+	} else {
+		t.Errorf("ContainerDefinitions[nginx]: not found")
 	}
 
 }

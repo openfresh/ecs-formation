@@ -55,7 +55,7 @@ func (self *TaskDefinitionController) searchTaskDefinitions(projectDir string) (
 	taskDefMap := map[string]*TaskDefinition{}
 	filePattern := regexp.MustCompile(`^.+\/(.+)\.yml$`)
 
-	filepath.Walk(taskDir, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(taskDir, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() || !strings.HasSuffix(path, ".yml") {
 			return nil
 		}
@@ -69,7 +69,7 @@ func (self *TaskDefinitionController) searchTaskDefinitions(projectDir string) (
 		tokens := filePattern.FindStringSubmatch(path)
 		taskDefName := tokens[1]
 
-		taskDefinition, err := CreateTaskDefinition(taskDefName, merged)
+		taskDefinition, err := CreateTaskDefinition(taskDefName, merged, filepath.Dir(path))
 		if err != nil {
 			return err
 		}
@@ -78,6 +78,10 @@ func (self *TaskDefinitionController) searchTaskDefinitions(projectDir string) (
 
 		return nil
 	})
+
+	if err != nil {
+		return taskDefMap, err
+	}
 
 	return taskDefMap, nil
 }
