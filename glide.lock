@@ -1,8 +1,8 @@
 hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-updated: 2015-12-21T02:53:18.665578098+09:00
+updated: 2015-12-28T10:23:07.087460087+09:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 18177cad2597e3cac4173b4f267b784abdb3c854
+  version: bf2f8fe7f45e68017086d069498638893feddf64
   subpackages:
   - aws
   - private/endpoints
@@ -52,7 +52,7 @@ imports:
   version: f18420efc3b4f8e9f3d51f6bd2476e92c46260e9
   repo: https://golang.org/x/crypto
 - name: golang.org/x/net
-  version: 68a055e15f0ce90989da5564fd947fb72ce67513
+  version: 5d0a0f8cd486626821d2ba44d471ab1c9271d38f
 - name: golang.org/x/sys
   version: 833a04a10549a95dc34458c195cbad61bbb6cb4d
   subpackages:
@@ -61,7 +61,7 @@ imports:
   version: cf4986612c83df6c55578ba198316d1684a9a287
   repo: https://golang.org/x/text
 - name: golang.org/x/tools
-  version: fa833fdef560f0fe9b40dbb37fd03030ac3d514b
+  version: d6e83e534da905609e21e4086a0fbaed33f88d07
 - name: google.golang.org/appengine
   version: 58c0e2a2044a8d1abd8dd1d97939cd74497d0806
   repo: https://google.golang.org/appengine

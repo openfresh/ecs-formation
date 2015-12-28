@@ -85,6 +85,7 @@ func TestCreateContainerDefinition(t *testing.T) {
 		ExtraHosts: []string{
 			"host1:192.168.1.100",
 		},
+		Hostname:  "example.com",
 		LogDriver: "syslog",
 		LogOpt: map[string]string{
 			"syslog-address": "tcp://192.168.0.42:123",
