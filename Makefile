@@ -19,6 +19,10 @@ deps-test:
 	go get github.com/golang/lint/golint
 	go get github.com/jstemmer/go-junit-report
 
+update:
+	rm -rf ./vendor
+	GO15VENDOREXPERIMENT=1 glide update --cache
+
 build:
 	GO15VENDOREXPERIMENT=1 go build -o bin/ecs-formation main.go
 

@@ -3,7 +3,9 @@ package task
 import (
 	"errors"
 	"fmt"
+	"github.com/joho/godotenv"
 	"gopkg.in/yaml.v2"
+	"path/filepath"
 )
 
 type TaskDefinition struct {
@@ -16,6 +18,7 @@ type ContainerDefinition struct {
 	Image                  string            `yaml:"image"`
 	Ports                  []string          `yaml:"ports"`
 	Environment            map[string]string `yaml:"environment"`
+	EnvFiles               []string          `yaml:"env_file"`
 	Links                  []string          `yaml:"links"`
 	Volumes                []string          `yaml:"volumes"`
 	VolumesFrom            []string          `yaml:"volumes_from"`
@@ -45,7 +48,7 @@ type Ulimit struct {
 	Hard int64 `yaml:"hard"`
 }
 
-func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, error) {
+func CreateTaskDefinition(taskDefName string, data string, basedir string) (*TaskDefinition, error) {
 
 	containerMap := map[string]ContainerDefinition{}
 	if err := yaml.Unmarshal([]byte(data), &containerMap); err != nil {
@@ -56,6 +59,33 @@ func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, err
 	for name, container := range containerMap {
 		con := container
 		con.Name = name
+
+		environment := map[string]string{}
+		if len(container.EnvFiles) > 0 {
+			for _, envfile := range container.EnvFiles {
+				var path string
+				if filepath.IsAbs(envfile) {
+					path = envfile
+				} else {
+					path = fmt.Sprintf("%s/%s", basedir, envfile)
+				}
+
+				envmap, err := readEnvFile(path)
+				if err != nil {
+					return nil, err
+				}
+
+				for key, value := range envmap {
+					environment[key] = value
+				}
+			}
+		}
+
+		for key, value := range container.Environment {
+			environment[key] = value
+		}
+
+		con.Environment = environment
 		containers[name] = &con
 	}
 
@@ -65,4 +95,14 @@ func CreateTaskDefinition(taskDefName string, data string) (*TaskDefinition, err
 	}
 
 	return &taskDef, nil
+}
+
+func readEnvFile(envpath string) (map[string]string, error) {
+
+	envmap, err := godotenv.Read(envpath)
+	if err != nil {
+		return map[string]string{}, err
+	}
+
+	return envmap, nil
 }
