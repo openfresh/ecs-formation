@@ -1,5 +1,5 @@
-hash: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
-updated: 2015-12-28T10:23:07.087460087+09:00
+hash: d3a36753aff53f2cef70fe8433d23b3c58f925e4ec59eb1b59959b8ff3f7a15d
+updated: 2015-12-28T16:38:18.864668709+09:00
 imports:
 - name: github.com/aws/aws-sdk-go
   version: bf2f8fe7f45e68017086d069498638893feddf64
@@ -27,6 +27,8 @@ imports:
   version: 68415e7123da32b07eab49c96d2c4d6158360e9b
 - name: github.com/jmespath/go-jmespath
   version: 53d419364047eb08a64c29471db23c60ea585b85
+- name: github.com/joho/godotenv
+  version: 4ed13390c0acd2ff4e371e64d8b97c8954138243
 - name: github.com/lsegal/gucumber
   version: e8116c9c66e641e9f81fc0a79fac923dfc646378
 - name: github.com/mattn/go-shellwords
@@ -45,12 +47,10 @@ imports:
   - color
 - name: github.com/stretchr/objx
   version: 1a9d0bb9f541897e62256577b352fdbc1fb4fd94
-  repo: https://github.com/stretchr/objx
 - name: github.com/stretchr/testify
   version: e3a8ff8ce36581f87a15341206f205b1da467059
 - name: golang.org/x/crypto
   version: f18420efc3b4f8e9f3d51f6bd2476e92c46260e9
-  repo: https://golang.org/x/crypto
 - name: golang.org/x/net
   version: 5d0a0f8cd486626821d2ba44d471ab1c9271d38f
 - name: golang.org/x/sys
@@ -59,17 +59,14 @@ imports:
   - unix
 - name: golang.org/x/text
   version: cf4986612c83df6c55578ba198316d1684a9a287
-  repo: https://golang.org/x/text
 - name: golang.org/x/tools
   version: d6e83e534da905609e21e4086a0fbaed33f88d07
 - name: google.golang.org/appengine
   version: 58c0e2a2044a8d1abd8dd1d97939cd74497d0806
-  repo: https://google.golang.org/appengine
 - name: gopkg.in/airbrake/gobrake.v2
   version: c9d51adc624b5cc4c1bf8de730a09af4878ffe2d
 - name: gopkg.in/gemnasium/logrus-airbrake-hook.v2
   version: 31e6fd4bd5a98d8ee7673d24bc54ec73c31810dd
-  repo: https://gopkg.in/gemnasium/logrus-airbrake-hook.v2
 - name: gopkg.in/yaml.v2
   version: 7ad95dd0798a40da1ccdff6dff35fd177b5edf40
 devImports: []

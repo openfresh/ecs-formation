@@ -11,13 +11,17 @@ TEST_TARGETS=$(addprefix test-,$(PACKAGES))
 
 deps:
 	go get github.com/Masterminds/glide
-	GO15VENDOREXPERIMENT=1 glide update --cache
+	GO15VENDOREXPERIMENT=1 glide install --cache
 
 deps-test:
 	go get github.com/Masterminds/glide
-	GO15VENDOREXPERIMENT=1 glide update --cache
+	GO15VENDOREXPERIMENT=1 glide install --cache
 	go get github.com/golang/lint/golint
 	go get github.com/jstemmer/go-junit-report
+
+update:
+	rm -rf ./vendor
+	GO15VENDOREXPERIMENT=1 glide update --cache
 
 build:
 	GO15VENDOREXPERIMENT=1 go build -o bin/ecs-formation main.go
