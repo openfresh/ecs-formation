@@ -11,11 +11,11 @@ TEST_TARGETS=$(addprefix test-,$(PACKAGES))
 
 deps:
 	go get github.com/Masterminds/glide
-	GO15VENDOREXPERIMENT=1 glide install --cache
+	GO15VENDOREXPERIMENT=1 glide update --cache
 
 deps-test:
 	go get github.com/Masterminds/glide
-	GO15VENDOREXPERIMENT=1 glide install --cache
+	GO15VENDOREXPERIMENT=1 glide update --cache
 	go get github.com/golang/lint/golint
 	go get github.com/jstemmer/go-junit-report
 
