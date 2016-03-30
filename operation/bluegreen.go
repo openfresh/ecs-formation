@@ -194,6 +194,7 @@ func createBlueGreenPlans(controller *bluegreen.BlueGreenController, jsonOutput 
 			StandbyElb: bgplan.StandbyElb,
 			Active:     active,
 		})
+
 	}
 
 	if jsonOutput {

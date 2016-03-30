@@ -25,17 +25,18 @@ const (
 )
 
 type ServiceController struct {
-	manager        *aws.AwsManager
-	TargetResource string
-	clusters       []Cluster
-	params         map[string]string
+	manager         *aws.AwsManager
+	targetResources []string
+	clusters        []Cluster
+	params          map[string]string
 }
 
-func NewServiceController(manager *aws.AwsManager, projectDir string, targetResource string, params map[string]string) (*ServiceController, error) {
+func NewServiceController(manager *aws.AwsManager, projectDir string, targetResources []string, params map[string]string) (*ServiceController, error) {
 
 	con := &ServiceController{
-		manager: manager,
-		params:  params,
+		manager:         manager,
+		params:          params,
+		targetResources: targetResources,
 	}
 
 	clusters, err := con.searchServices(projectDir)
@@ -44,10 +45,6 @@ func NewServiceController(manager *aws.AwsManager, projectDir string, targetReso
 	}
 
 	con.clusters = clusters
-
-	if targetResource != "" {
-		con.TargetResource = targetResource
-	}
 
 	return con, nil
 }
@@ -62,6 +59,20 @@ func (self *ServiceController) searchServices(projectDir string) ([]Cluster, err
 	filepath.Walk(clusterDir, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() || !strings.HasSuffix(path, ".yml") {
 			return nil
+		}
+
+		if len(self.targetResources) > 0 {
+
+			flg := false
+			for _, res := range self.targetResources {
+				if strings.HasSuffix(path, fmt.Sprintf("%s.yml", res)) {
+					flg = true
+				}
+			}
+
+			if !flg {
+				return nil
+			}
 		}
 
 		content, err := ioutil.ReadFile(path)
@@ -100,15 +111,13 @@ func (self *ServiceController) CreateServiceUpdatePlans() ([]*ServiceUpdatePlan,
 	plans := []*ServiceUpdatePlan{}
 
 	for _, cluster := range self.GetClusters() {
-		if len(self.TargetResource) == 0 || self.TargetResource == cluster.Name {
-			cp, err := self.CreateServiceUpdatePlan(cluster)
-			if err != nil {
-				return plans, err
-			}
+		cp, err := self.CreateServiceUpdatePlan(cluster)
+		if err != nil {
+			return plans, err
+		}
 
-			if cp != nil {
-				plans = append(plans, cp)
-			}
+		if cp != nil {
+			plans = append(plans, cp)
 		}
 	}
 	return plans, nil
@@ -125,6 +134,8 @@ func (self *ServiceController) CreateServiceUpdatePlan(cluster Cluster) (*Servic
 
 	if len(output.Failures) > 0 {
 		return nil, errors.New(fmt.Sprintf("Cluster '%s' not found", cluster.Name))
+	} else {
+		logger.Main.Infof("Cluster '%v' is found.", cluster.Name)
 	}
 
 	rlci, errlci := api.ListContainerInstances(cluster.Name)
