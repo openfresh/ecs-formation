@@ -10,7 +10,7 @@ import:
 - package: gopkg.in/yaml.v2
   version: 7ad95dd0798a40da1ccdff6dff35fd177b5edf40
 - package: github.com/aws/aws-sdk-go
-  ref: v1.0.7
+  ref: v1.1.15
   subpackages:
   - aws
   - private/endpoints

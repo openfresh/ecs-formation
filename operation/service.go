@@ -51,7 +51,7 @@ func doService(c *cli.Context) {
 	}
 
 	jsonOutput := c.Bool("json-output")
-	clusterController, err := service.NewServiceController(awsManager, projectDir, operation.TargetResource, operation.Params)
+	clusterController, err := service.NewServiceController(awsManager, projectDir, []string{operation.TargetResource}, operation.Params)
 	if err != nil {
 		logger.Main.Error(color.Red(err.Error()))
 		os.Exit(1)

@@ -21,13 +21,19 @@ type BlueGreenController struct {
 	manager           *aws.AwsManager
 	ClusterController *service.ServiceController
 	blueGreenMap      map[string]*BlueGreen
-	TargetResource    string
+	targetResource    string
 	params            map[string]string
 }
 
 func NewBlueGreenController(manager *aws.AwsManager, projectDir string, targetResource string, params map[string]string) (*BlueGreenController, error) {
 
-	ccon, err := service.NewServiceController(manager, projectDir, "", params)
+	targetResources := make([]string, 0)
+	if targetResource != "" {
+		targetResources = append(targetResources, fmt.Sprintf("%s-blue", targetResource))
+		targetResources = append(targetResources, fmt.Sprintf("%s-green", targetResource))
+	}
+
+	ccon, err := service.NewServiceController(manager, projectDir, targetResources, params)
 	if err != nil {
 		return nil, err
 	}
@@ -35,7 +41,7 @@ func NewBlueGreenController(manager *aws.AwsManager, projectDir string, targetRe
 	con := &BlueGreenController{
 		manager:           manager,
 		ClusterController: ccon,
-		TargetResource:    targetResource,
+		targetResource:    targetResource,
 		params:            params,
 	}
 
@@ -57,6 +63,10 @@ func (self *BlueGreenController) searchBlueGreen(projectDir string) (map[string]
 
 	filepath.Walk(clusterDir, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() || !strings.HasSuffix(path, ".yml") {
+			return nil
+		}
+
+		if self.targetResource != "" && !strings.HasSuffix(path, fmt.Sprintf("%s.yml", self.targetResource)) {
 			return nil
 		}
 
@@ -101,7 +111,7 @@ func (self *BlueGreenController) CreateBlueGreenPlans(bgmap map[string]*BlueGree
 
 	for name, bg := range bgmap {
 
-		if len(self.TargetResource) == 0 || self.TargetResource == name {
+		if len(self.targetResource) == 0 || self.targetResource == name {
 
 			bgplan, err := self.CreateBlueGreenPlan(bg, cplans)
 			if err != nil {
