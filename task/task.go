@@ -230,7 +230,6 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 		Privileged:             aws.Bool(con.Privileged),
 		ReadonlyRootFilesystem: aws.Bool(con.ReadonlyRootFilesystem),
 		Ulimits:                toUlimits(con.Ulimits),
-		WorkingDirectory:       aws.String(con.WorkingDirectory),
 	}
 
 	if con.Hostname != "" {
@@ -244,6 +243,9 @@ func createContainerDefinition(con *ContainerDefinition) (*ecs.ContainerDefiniti
 	}
 	if con.User != "" {
 		cd.User = aws.String(con.User)
+	}
+	if con.WorkingDirectory != "" {
+		cd.WorkingDirectory = aws.String(con.WorkingDirectory)
 	}
 
 	return cd, volumes, nil
