@@ -27,22 +27,10 @@ type BlueGreenController struct {
 
 func NewBlueGreenController(manager *aws.AwsManager, projectDir string, targetResource string, params map[string]string) (*BlueGreenController, error) {
 
-	targetResources := make([]string, 0)
-	if targetResource != "" {
-		targetResources = append(targetResources, fmt.Sprintf("%s-blue", targetResource))
-		targetResources = append(targetResources, fmt.Sprintf("%s-green", targetResource))
-	}
-
-	ccon, err := service.NewServiceController(manager, projectDir, targetResources, params)
-	if err != nil {
-		return nil, err
-	}
-
 	con := &BlueGreenController{
-		manager:           manager,
-		ClusterController: ccon,
-		targetResource:    targetResource,
-		params:            params,
+		manager:        manager,
+		targetResource: targetResource,
+		params:         params,
 	}
 
 	defs, errs := con.searchBlueGreen(projectDir)
@@ -50,6 +38,23 @@ func NewBlueGreenController(manager *aws.AwsManager, projectDir string, targetRe
 		return nil, errs
 	}
 
+	bgdef, ok := defs[targetResource]
+	if !ok {
+		return nil, fmt.Errorf("BlueGreen '%v' is not defined.", targetResource)
+	}
+
+	targetResources := make([]string, 0)
+	if targetResource != "" {
+		targetResources = append(targetResources, bgdef.Blue.Cluster)
+		targetResources = append(targetResources, bgdef.Green.Cluster)
+	}
+
+	ccon, err := service.NewServiceController(manager, projectDir, targetResources, params)
+	if err != nil {
+		return nil, err
+	}
+
+	con.ClusterController = ccon
 	con.blueGreenMap = defs
 	return con, nil
 }
