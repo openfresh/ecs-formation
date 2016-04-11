@@ -38,15 +38,15 @@ func NewBlueGreenController(manager *aws.AwsManager, projectDir string, targetRe
 		return nil, errs
 	}
 
-	bgdef, ok := defs[targetResource]
-	if !ok {
-		return nil, fmt.Errorf("BlueGreen '%v' is not defined.", targetResource)
-	}
-
 	targetResources := make([]string, 0)
 	if targetResource != "" {
-		targetResources = append(targetResources, bgdef.Blue.Cluster)
-		targetResources = append(targetResources, bgdef.Green.Cluster)
+		targetResources = append(targetResources, targetResource)
+
+		bgdef, ok := defs[targetResource]
+		if ok {
+			targetResources = append(targetResources, bgdef.Blue.Cluster)
+			targetResources = append(targetResources, bgdef.Green.Cluster)
+		}
 	}
 
 	ccon, err := service.NewServiceController(manager, projectDir, targetResources, params)
