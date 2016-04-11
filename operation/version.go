@@ -1,3 +1,3 @@
 package operation
 
-const Version string = "0.2.0-RC5"
+const Version string = "0.2.0-RC6"
