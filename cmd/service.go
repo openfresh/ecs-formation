@@ -23,16 +23,11 @@ import (
 // serviceCmd represents the service command
 var serviceCmd = &cobra.Command{
 	Use:   "service",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Short: "Manage service on Amazon ECS cluster",
+	RunE: func(cmd *cobra.Command, args []string) error {
 		// TODO: Work your own magic here
 		fmt.Println("service called")
+		return nil
 	},
 }
 
