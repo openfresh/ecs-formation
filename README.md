@@ -6,6 +6,9 @@ ecs-formation
 [![issues](https://img.shields.io/github/issues/stormcat24/ecs-formation.svg?style=flat)](https://github.com/stormcat24/ecs-formation/issues?state=open)
 [![License: MIT](http://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 
+# Caution
+Rescratching ecs-formation now for v1.0.0.
+
 ecs-formation is a tool for defining several Docker continers and clusters on [Amazon EC2 Container Service(ECS)](https://aws.amazon.com/ecs/).
 
 # Features
