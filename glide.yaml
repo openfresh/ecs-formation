@@ -1,43 +1,23 @@
-parent: null
-package: main
+package: github.com/stormcat24/ecs-formation
 import:
-- package: github.com/jmespath/go-jmespath
-  version: 53d419364047eb08a64c29471db23c60ea585b85
-- package: github.com/str1ngs/ansi
-  version: 5dc1bc5ac1f5bcbf5bd4818dd27ef912beb4bb7c
-  subpackages:
-  - color
-- package: gopkg.in/yaml.v2
-  version: 7ad95dd0798a40da1ccdff6dff35fd177b5edf40
+- package: github.com/apex/log
+  version: c20bfcdb771b706fdd57a954ee9da2d0ff97b02d
 - package: github.com/aws/aws-sdk-go
-  ref: v1.1.15
+  version: v1.1.26
   subpackages:
-  - aws
-  - private/endpoints
-  - private/protocol/json/jsonutil
-  - private/protocol/jsonrpc
-  - private/protocol/query
-  - private/protocol/rest
-  - private/protocol/xml/xmlutil
-  - private/signer/v4
-  - private/waiter
+  - /aws
+  - aws/awsutil
+  - aws/credentials
+  - aws/credentials/ec2rolecreds
+  - aws/session
   - service/autoscaling
   - service/ecs
   - service/elb
   - service/sns
-- package: github.com/codegangsta/cli
-  version: b5232bb2934f606f9f27a1305f1eea224e8e8b88
-- package: github.com/go-ini/ini
-  version: 060d7da055ba6ec5ea7a31f116332fe5efa04ce0
-- package: github.com/Sirupsen/logrus
-  version: 446d1c146faa8ed3f4218f056fcd165f6bcfda81
-- package: golang.org/x/sys
-  version: 833a04a10549a95dc34458c195cbad61bbb6cb4d
-  subpackages:
-  - unix
+- package: github.com/spf13/cobra
+  version: 0f866a6211e33cde2091d9290c08f6afd6c9ebbc
 - package: github.com/mattn/go-shellwords
-  version: f4e566c536cf69158e808ec28ef4182a37fdc981
-- package: github.com/naoina/go-stringutil
-  version: 360db0db4b01d34e12a2ec042c09e7d37fece761
-- package: github.com/joho/godotenv
-  version: 4ed13390c0acd2ff4e371e64d8b97c8954138243
+- package: github.com/fatih/color
+  version: 533cd7fd8a85905f67a1753afb4deddc85ea174f
+- package: gopkg.in/yaml.v2
+- package: github.com/stretchr/testify
