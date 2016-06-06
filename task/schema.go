@@ -3,9 +3,15 @@ package task
 import (
 	"errors"
 	"fmt"
-	"github.com/joho/godotenv"
-	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"net/url"
+	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/joho/godotenv"
+	"github.com/stormcat24/ecs-formation/aws"
+	"gopkg.in/yaml.v2"
 )
 
 type TaskDefinition struct {
@@ -48,7 +54,7 @@ type Ulimit struct {
 	Hard int64 `yaml:"hard"`
 }
 
-func CreateTaskDefinition(taskDefName string, data string, basedir string) (*TaskDefinition, error) {
+func CreateTaskDefinition(taskDefName string, data string, basedir string, manager *aws.AwsManager) (*TaskDefinition, error) {
 
 	containerMap := map[string]ContainerDefinition{}
 	if err := yaml.Unmarshal([]byte(data), &containerMap); err != nil {
@@ -64,7 +70,10 @@ func CreateTaskDefinition(taskDefName string, data string, basedir string) (*Tas
 		if len(container.EnvFiles) > 0 {
 			for _, envfile := range container.EnvFiles {
 				var path string
-				if filepath.IsAbs(envfile) {
+				if envfile[0:10] == "https://s3" {
+					path = downloadS3(manager, envfile)
+					defer os.Remove(path)
+				} else if filepath.IsAbs(envfile) {
 					path = envfile
 				} else {
 					path = fmt.Sprintf("%s/%s", basedir, envfile)
@@ -106,3 +115,28 @@ func readEnvFile(envpath string) (map[string]string, error) {
 
 	return envmap, nil
 }
+
+func downloadS3(manager *aws.AwsManager, filename string) string {
+	u, err := url.Parse(filename)
+	if err != nil {
+		// something
+		fmt.Println(err)
+	}
+	ps := strings.Split(u.Path, "/")
+	bucket := ps[:2][1]
+	key := strings.Join(ps[2:], "/")
+	api := manager.S3Api()
+	obj, err := api.GetObject(bucket, key)
+	if err != nil {
+		// something
+		fmt.Println(err)
+	}
+	b, _ := ioutil.ReadAll(obj.Body)
+	tempfile, err := ioutil.TempFile("", "ecs-formation")
+	if err != nil {
+		fmt.Println(err)
+	}
+	tempfile.Write(b)
+	return tempfile.Name()
+}
+
