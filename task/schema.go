@@ -71,7 +71,10 @@ func CreateTaskDefinition(taskDefName string, data string, basedir string, manag
 			for _, envfile := range container.EnvFiles {
 				var path string
 				if envfile[0:10] == "https://s3" {
-					path = downloadS3(manager, envfile)
+					path, err := downloadS3(manager, envfile)
+					if err != nil {
+						return nil, err
+					}
 					defer os.Remove(path)
 				} else if filepath.IsAbs(envfile) {
 					path = envfile
@@ -116,27 +119,31 @@ func readEnvFile(envpath string) (map[string]string, error) {
 	return envmap, nil
 }
 
-func downloadS3(manager *aws.AwsManager, filename string) string {
+func downloadS3(manager *aws.AwsManager, filename string) (string, error) {
 	u, err := url.Parse(filename)
 	if err != nil {
-		// something
-		fmt.Println(err)
+		return "", err
 	}
 	ps := strings.Split(u.Path, "/")
 	bucket := ps[:2][1]
 	key := strings.Join(ps[2:], "/")
 	api := manager.S3Api()
+
 	obj, err := api.GetObject(bucket, key)
 	if err != nil {
-		// something
-		fmt.Println(err)
+		return "", err
 	}
-	b, _ := ioutil.ReadAll(obj.Body)
+
+	b, err := ioutil.ReadAll(obj.Body)
+	if err != nil {
+		return "", err
+	}
+
 	tempfile, err := ioutil.TempFile("", "ecs-formation")
 	if err != nil {
-		fmt.Println(err)
+		return "", err
 	}
+	defer tempfile.Close()
 	tempfile.Write(b)
-	return tempfile.Name()
+	return tempfile.Name(), nil
 }
-

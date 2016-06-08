@@ -1,13 +1,14 @@
 package task
 
 import (
-	"github.com/aws/aws-sdk-go/service/ecs"
-	"strings"
-	"strconv"
-	"github.com/aws/aws-sdk-go/aws"
-	"regexp"
 	"errors"
 	"fmt"
+	"regexp"
+	"strconv"
+	"strings"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/service/ecs"
 )
 
 var portPattern = regexp.MustCompile(`^(\d+)\/(tcp|udp)$`)
@@ -18,7 +19,7 @@ func toKeyValuePairs(values map[string]string) []*ecs.KeyValuePair {
 	for key, value := range values {
 
 		pair := ecs.KeyValuePair{
-			Name: aws.String(key),
+			Name:  aws.String(key),
 			Value: aws.String(value),
 		}
 		pairs = append(pairs, &pair)
@@ -38,7 +39,7 @@ func toPortMappings(values []string) ([]*ecs.PortMapping, error) {
 			return []*ecs.PortMapping{}, err
 		}
 
-		mappings = append(mappings, mp);
+		mappings = append(mappings, mp)
 	}
 
 	return mappings, nil
@@ -59,9 +60,9 @@ func toPortMapping(value string) (*ecs.PortMapping, error) {
 		port, _ := strconv.ParseInt(tokens[0], 10, 64)
 
 		return &ecs.PortMapping{
-			HostPort: &port,
+			HostPort:      &port,
 			ContainerPort: &port,
-			Protocol: aws.String("tcp"),
+			Protocol:      aws.String("tcp"),
 		}, nil
 
 	} else if length == 2 {
@@ -87,9 +88,9 @@ func toPortMapping(value string) (*ecs.PortMapping, error) {
 		}
 
 		return &ecs.PortMapping{
-			HostPort: &hPort,
+			HostPort:      &hPort,
 			ContainerPort: &cPort,
-			Protocol: aws.String(protocol),
+			Protocol:      aws.String(protocol),
 		}, nil
 
 	} else {
@@ -108,7 +109,7 @@ func toVolumesFroms(values []string) ([]*ecs.VolumeFrom, error) {
 			return []*ecs.VolumeFrom{}, err
 		}
 
-		volumes = append(volumes, vf);
+		volumes = append(volumes, vf)
 	}
 
 	return volumes, nil
@@ -126,13 +127,13 @@ func toVolumesFrom(value string) (*ecs.VolumeFrom, error) {
 
 		return &ecs.VolumeFrom{
 			SourceContainer: aws.String(tokens[0]),
-			ReadOnly: &readOnly,
+			ReadOnly:        &readOnly,
 		}, nil
 	} else if length == 1 {
 		readOnly = false
 		return &ecs.VolumeFrom{
 			SourceContainer: aws.String(tokens[0]),
-			ReadOnly: &readOnly,
+			ReadOnly:        &readOnly,
 		}, nil
 	} else {
 		return &ecs.VolumeFrom{}, errors.New(fmt.Sprintf("Invalid port mapping value '%s'", value))

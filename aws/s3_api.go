@@ -16,7 +16,7 @@ func (self *S3Api) GetObject(bucket string, key string) (*s3.GetObjectOutput, er
 	}
 	result, err := self.service.GetObject(params)
 	if err != nil {
-		// something
+		return nil, err
 	}
-	return result, err
+	return result, nil
 }
