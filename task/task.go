@@ -69,7 +69,7 @@ func (self *TaskDefinitionController) searchTaskDefinitions(projectDir string) (
 		tokens := filePattern.FindStringSubmatch(path)
 		taskDefName := tokens[1]
 
-		taskDefinition, err := CreateTaskDefinition(taskDefName, merged, filepath.Dir(path))
+		taskDefinition, err := CreateTaskDefinition(taskDefName, merged, filepath.Dir(path), self.manager)
 		if err != nil {
 			return err
 		}

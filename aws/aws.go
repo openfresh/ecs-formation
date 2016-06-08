@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/sns"
 )
 
@@ -53,5 +54,11 @@ func (self *AwsManager) AutoscalingApi() *AutoscalingApi {
 func (self *AwsManager) SnsApi() *SnsApi {
 	return &SnsApi{
 		service: sns.New(self.session),
+	}
+}
+
+func (self *AwsManager) S3Api() *S3Api {
+	return &S3Api{
+		service: s3.New(self.session),
 	}
 }
