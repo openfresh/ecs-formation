@@ -3,7 +3,7 @@ general:
 
 machine:
   environment:
-    GO_VERSION: 1.5.2
+    GO_VERSION: 1.6.2
 
   post:
     - rm -rf ".go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
@@ -16,7 +16,6 @@ dependencies:
     - "~/.glide"
 
   override:
-    # go1.5
     - curl -L -O https://storage.googleapis.com/golang/go$GO_VERSION.linux-amd64.tar.gz > /dev/null
     - tar xzf go$GO_VERSION.linux-amd64.tar.gz
     - sudo rm -rf /usr/local/go
