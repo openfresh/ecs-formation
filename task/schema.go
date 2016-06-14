@@ -71,11 +71,12 @@ func CreateTaskDefinition(taskDefName string, data string, basedir string, manag
 			for _, envfile := range container.EnvFiles {
 				var path string
 				if envfile[0:10] == "https://s3" {
-					path, err := downloadS3(manager, envfile)
+					_path, err := downloadS3(manager, envfile)
 					if err != nil {
 						return nil, err
 					}
-					defer os.Remove(path)
+					path = _path
+					defer os.Remove(_path)
 				} else if filepath.IsAbs(envfile) {
 					path = envfile
 				} else {
