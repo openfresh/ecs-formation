@@ -1,8 +1,8 @@
-package ecs
+package s3
 
 import (
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 type Config struct {
@@ -17,6 +17,6 @@ func NewClient(ses *session.Session, conf *Config) Client {
 	}
 
 	return &DefaultClient{
-		service: ecs.New(ses),
+		service: s3.New(ses),
 	}
 }
