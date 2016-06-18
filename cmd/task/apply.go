@@ -11,6 +11,7 @@ var applyCmd = &cobra.Command{
 	Short: "Update task definiton",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// TODO: Work your own magic here
+
 		fmt.Println("apply called")
 		return nil
 	},

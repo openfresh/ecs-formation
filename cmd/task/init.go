@@ -1,10 +1,6 @@
 package task
 
-import (
-	"fmt"
-
-	"github.com/spf13/cobra"
-)
+import "github.com/spf13/cobra"
 
 var (
 	taskDefinition string
@@ -14,9 +10,12 @@ var (
 var TaskCmd = &cobra.Command{
 	Use:   "task",
 	Short: "Manage task definition and control running task on Amazon ECS",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		// TODO: Work your own magic here
-		fmt.Println("task called")
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		td, err := cmd.Flags().GetString("task-definition")
+		if err != nil {
+			return err
+		}
+		taskDefinition = td
 		return nil
 	},
 }
