@@ -85,3 +85,36 @@ func TestMergeYamlWithParameters(t *testing.T) {
 	}
 
 }
+
+func TestMergeYamlWithDefaultParameters(t *testing.T) {
+
+	yaml := `
+	nginx:
+		image: stormcat24/nginx:${NGINX_VERSION|feature}
+		ports:
+			- 80:${NGINX_PORT|80}
+		environment:
+			PARAM: "${PARAM}"
+	`
+
+	expect := `
+	nginx:
+		image: stormcat24/nginx:feature
+		ports:
+			- 80:8080
+		environment:
+			PARAM: "hogehoge"
+	`
+
+	params := map[string]string{
+		"NGINX_PORT": "8080",
+		"PARAM":      "hogehoge",
+	}
+
+	actual := MergeYamlWithParameters([]byte(yaml), params)
+
+	if expect != actual {
+		t.Errorf("actula merged string is %v", actual)
+	}
+
+}

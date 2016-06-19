@@ -4,15 +4,17 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws/awsutil"
 	"io"
 	"regexp"
 	"strings"
+
+	"github.com/aws/aws-sdk-go/aws/awsutil"
 )
 
 var (
-	keyValuePattern = regexp.MustCompile(`^\s*(.+)\s*=\s*(.+)\s*$`)
-	variablePattern = regexp.MustCompile(`\$\{([\w_-]+)\}`)
+	keyValuePattern        = regexp.MustCompile(`^\s*(.+)\s*=\s*(.+)\s*$`)
+	variablePattern        = regexp.MustCompile(`\$\{([\w_-]+)\}`)
+	defaultVariablePattern = regexp.MustCompile(`\$\{([\w_-]+)\s*\|\s*([\w_-]+)\}`)
 )
 
 func StringValueWithIndent(value interface{}, indent int) string {
@@ -68,8 +70,20 @@ func ParseKeyValues(slice []string) map[string]string {
 func MergeYamlWithParameters(content []byte, params map[string]string) string {
 
 	s := string(content)
-	matched := variablePattern.FindAllStringSubmatch(s, -1)
 
+	defMatched := defaultVariablePattern.FindAllStringSubmatch(s, -1)
+	for _, tokens := range defMatched {
+		key := tokens[1]
+		defVal := tokens[2]
+
+		if value, ok := params[key]; ok {
+			s = strings.Replace(s, tokens[0], value, -1)
+		} else {
+			s = strings.Replace(s, tokens[0], defVal, -1)
+		}
+	}
+
+	matched := variablePattern.FindAllStringSubmatch(s, -1)
 	for _, tokens := range matched {
 		key := tokens[1]
 

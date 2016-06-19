@@ -234,6 +234,15 @@ You can set value for these parameters by using `-p` option.
 ecs-formation task -p NGINX_VERSION=1.0 -p NGINX_PORT=80 plan your-web-task
 ```
 
+Also, support default parameter value.
+
+```Ruby
+nginx:
+    image: stormcat24/nginx:${NGINX_VERSION|latest}
+    ports:
+        - 80:${NGINX_PORT|80}
+```
+
 #### env_file
 
 You can use `env_file` like docker-compose. https://docs.docker.com/compose/compose-file/#env-file
