@@ -19,10 +19,10 @@ var (
 )
 
 type AWSClient struct {
-	ECS         *ecs.Client
-	S3          *s3.Client
-	Autoscaling *autoscaling.Client
-	ELB         *elb.ELB
+	ECS         ecs.Client
+	S3          s3.Client
+	Autoscaling autoscaling.Client
+	ELB         elb.Client
 }
 
 func Init(region string, isMock bool) {
@@ -40,22 +40,22 @@ func Init(region string, isMock bool) {
 	ses.Config.Credentials = cred
 	ses.Config.WithMaxRetries(aws.UseServiceDefaultRetries).WithRegion(region)
 
-	ecsCli := ecs.NewClient(&ecs.Config{
+	ecsCli := ecs.NewClient(ses, &ecs.Config{
 		IsMock: isMock,
 		Region: region,
 	})
 
-	s3Cli := s3.NewClient(&s3.Config{
+	s3Cli := s3.NewClient(ses, &s3.Config{
 		IsMock: isMock,
 		Region: region,
 	})
 
-	autoscalingCli := autoscaling.NewClient(&autoscaling.Config{
+	autoscalingCli := autoscaling.NewClient(ses, &autoscaling.Config{
 		IsMock: isMock,
 		Region: region,
 	})
 
-	elbCli := elb.NewClient(&elb.Config{
+	elbCli := elb.NewClient(ses, &elb.Config{
 		IsMock: isMock,
 		Region: region,
 	})

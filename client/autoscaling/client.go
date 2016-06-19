@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/autoscaling"
 
-	"github.com/stormcat24/ecs-formation/client"
+	"github.com/stormcat24/ecs-formation/client/util"
 )
 
 type Client interface {
@@ -26,7 +26,7 @@ func (c DefaultClient) DescribeAutoScalingGroups(groups []string) (map[string]*a
 
 	asgmap := make(map[string]*autoscaling.Group, 0)
 	result, err := c.service.DescribeAutoScalingGroups(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.DescribeAutoScalingGroups(groups)
 	}
 
@@ -49,7 +49,7 @@ func (c DefaultClient) DescribeLoadBalancerState(group string) (map[string]*auto
 
 	lbmap := map[string]*autoscaling.LoadBalancerState{}
 	result, err := c.service.DescribeLoadBalancers(&params)
-	if isRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.DescribeLoadBalancerState(group)
 	}
 
@@ -71,8 +71,8 @@ func (c DefaultClient) AttachLoadBalancers(group string, lb []string) error {
 		LoadBalancerNames:    aws.StringSlice(lb),
 	}
 
-	result, err := c.service.AttachLoadBalancers(&params)
-	if isRateExceeded(err) {
+	_, err := c.service.AttachLoadBalancers(&params)
+	if util.IsRateExceeded(err) {
 		return c.AttachLoadBalancers(group, lb)
 	}
 
@@ -86,8 +86,8 @@ func (c DefaultClient) DetachLoadBalancers(group string, lb []string) error {
 		LoadBalancerNames:    aws.StringSlice(lb),
 	}
 
-	result, err := c.service.DetachLoadBalancers(&params)
-	if client.IsRateExceeded(err) {
+	_, err := c.service.DetachLoadBalancers(&params)
+	if util.IsRateExceeded(err) {
 		return c.DetachLoadBalancers(group, lb)
 	}
 

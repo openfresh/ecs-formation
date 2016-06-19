@@ -3,8 +3,7 @@ package ecs
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
-
-	"github.com/stormcat24/ecs-formation/client"
+	"github.com/stormcat24/ecs-formation/client/util"
 )
 
 type Client interface {
@@ -37,7 +36,7 @@ func (c DefaultClient) CreateCluster(cluster string) (*ecs.Cluster, error) {
 	}
 
 	result, err := c.service.CreateCluster(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.CreateCluster(cluster)
 	}
 	return result.Cluster, err
@@ -50,7 +49,7 @@ func (c DefaultClient) DeleteCluster(cluster string) (*ecs.Cluster, error) {
 	}
 
 	result, err := c.service.DeleteCluster(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.DeleteCluster(cluster)
 	}
 
@@ -64,7 +63,7 @@ func (c DefaultClient) DescribeClusters(clusters []*string) (*ecs.DescribeCluste
 	}
 
 	result, err := c.service.DescribeClusters(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.DescribeClusters(clusters)
 	}
 
@@ -78,7 +77,7 @@ func (c DefaultClient) ListClusters(maxResult int) (*ecs.ListClustersOutput, err
 	}
 
 	result, err := c.service.ListClusters(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.ListClusters(maxResult)
 	}
 
@@ -92,7 +91,7 @@ func (c DefaultClient) ListContainerInstances(cluster string) (*ecs.ListContaine
 	}
 
 	result, err := c.service.ListContainerInstances(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.ListContainerInstances(cluster)
 	}
 
@@ -102,7 +101,7 @@ func (c DefaultClient) ListContainerInstances(cluster string) (*ecs.ListContaine
 func (c DefaultClient) CreateService(params *ecs.CreateServiceInput) (*ecs.Service, error) {
 
 	result, err := c.service.CreateService(params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.CreateService(params)
 	}
 
@@ -119,7 +118,7 @@ func (c DefaultClient) UpdateService(cluster string, service string, desiredCoun
 	}
 
 	result, err := c.service.UpdateService(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.UpdateService(cluster, service, desiredCount, taskDef)
 	}
 
@@ -134,7 +133,7 @@ func (c DefaultClient) DescribeService(cluster string, services []*string) (*ecs
 	}
 
 	result, err := c.service.DescribeServices(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.DescribeService(cluster, services)
 	}
 
@@ -149,7 +148,7 @@ func (c DefaultClient) DeleteService(cluster string, service string) (*ecs.Servi
 	}
 
 	result, err := c.service.DeleteService(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.DeleteService(cluster, service)
 	}
 
@@ -163,7 +162,7 @@ func (c DefaultClient) ListServices(cluster string) (*ecs.ListServicesOutput, er
 	}
 
 	result, err := c.service.ListServices(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.ListServices(cluster)
 	}
 
@@ -177,7 +176,7 @@ func (c DefaultClient) DescribeTaskDefinition(td string) (*ecs.TaskDefinition, e
 	}
 
 	result, err := c.service.DescribeTaskDefinition(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.DescribeTaskDefinition(td)
 	}
 
@@ -192,7 +191,7 @@ func (c DefaultClient) RegisterTaskDefinition(taskName string, containers []*ecs
 	}
 
 	result, err := c.service.RegisterTaskDefinition(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.RegisterTaskDefinition(taskName, containers, volumes)
 	}
 	return result.TaskDefinition, err
@@ -205,7 +204,7 @@ func (c DefaultClient) DeregisterTaskDefinition(taskName string) (*ecs.TaskDefin
 	}
 
 	result, err := c.service.DeregisterTaskDefinition(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.DeregisterTaskDefinition(taskName)
 	}
 	return result.TaskDefinition, err
@@ -219,7 +218,7 @@ func (c DefaultClient) ListTasks(cluster string, service string) (*ecs.ListTasks
 	}
 
 	result, err := c.service.ListTasks(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.ListTasks(cluster, service)
 	}
 
@@ -234,7 +233,7 @@ func (c DefaultClient) DescribeTasks(cluster string, tasks []*string) (*ecs.Desc
 	}
 
 	result, err := c.service.DescribeTasks(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.DescribeTasks(cluster, tasks)
 	}
 
@@ -249,7 +248,7 @@ func (c DefaultClient) StopTask(cluster string, task string) (*ecs.Task, error) 
 	}
 
 	result, err := c.service.StopTask(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.StopTask(cluster, task)
 	}
 	return result.Task, err
