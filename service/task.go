@@ -1,31 +1,31 @@
 package service
 
 import (
-	"errors"
-	"fmt"
 	"io/ioutil"
-	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
-	"gopkg.in/yaml.v2"
-
-	"github.com/joho/godotenv"
+	awsecs "github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/stormcat24/ecs-formation/client"
 	"github.com/stormcat24/ecs-formation/client/ecs"
 	"github.com/stormcat24/ecs-formation/client/s3"
 	"github.com/stormcat24/ecs-formation/logger"
+	"github.com/stormcat24/ecs-formation/service/types"
 	"github.com/stormcat24/ecs-formation/util"
+	"github.com/str1ngs/ansi/color"
 )
 
 type TaskService interface {
-	SearchTaskDefinitions() (map[string]*TaskDefinition, error)
-	CreateTaskPlans() []*TaskUpdatePlan
-	CreateTaskUpdatePlans(tasks map[string]*TaskDefinition) []*TaskUpdatePlan
-	CreateTaskUpdatePlan(task *TaskDefinition) *TaskUpdatePlan
-	GetTaskDefinitions() map[string]*TaskDefinition
+	SearchTaskDefinitions() (map[string]*types.TaskDefinition, error)
+	CreateTaskPlans() []*types.TaskUpdatePlan
+	CreateTaskUpdatePlans(tasks map[string]*types.TaskDefinition) []*types.TaskUpdatePlan
+	CreateTaskUpdatePlan(task *types.TaskDefinition) *types.TaskUpdatePlan
+	GetTaskDefinitions() map[string]*types.TaskDefinition
+	ApplyTaskDefinitionPlans(plans []*types.TaskUpdatePlan) ([]*awsecs.TaskDefinition, error)
+	ApplyTaskDefinitionPlan(task *types.TaskUpdatePlan) (*awsecs.TaskDefinition, error)
 }
 
 type ConcreteTaskService struct {
@@ -34,7 +34,7 @@ type ConcreteTaskService struct {
 	projectDir string
 	target     string
 	params     map[string]string
-	taskDefs   map[string]*TaskDefinition
+	taskDefs   map[string]*types.TaskDefinition
 }
 
 func NewTaskService(projectDir string, target string, params map[string]string) (TaskService, error) {
@@ -56,10 +56,10 @@ func NewTaskService(projectDir string, target string, params map[string]string) 
 	return &service, nil
 }
 
-func (s ConcreteTaskService) SearchTaskDefinitions() (map[string]*TaskDefinition, error) {
+func (s ConcreteTaskService) SearchTaskDefinitions() (map[string]*types.TaskDefinition, error) {
 
 	taskDir := s.projectDir + "/task"
-	taskDefMap := map[string]*TaskDefinition{}
+	taskDefMap := map[string]*types.TaskDefinition{}
 	filePattern := regexp.MustCompile(`^.+\/(.+)\.yml$`)
 
 	err := filepath.Walk(taskDir, func(path string, info os.FileInfo, err error) error {
@@ -76,7 +76,7 @@ func (s ConcreteTaskService) SearchTaskDefinitions() (map[string]*TaskDefinition
 		tokens := filePattern.FindStringSubmatch(path)
 		taskDefName := tokens[1]
 
-		taskDefinition, err := s.createTaskDefinition(taskDefName, merged, filepath.Dir(path))
+		taskDefinition, err := types.CreateTaskDefinition(taskDefName, merged, filepath.Dir(path), s.s3Cli)
 		if err != nil {
 			return err
 		}
@@ -93,7 +93,7 @@ func (s ConcreteTaskService) SearchTaskDefinitions() (map[string]*TaskDefinition
 	return taskDefMap, nil
 }
 
-func (s ConcreteTaskService) CreateTaskPlans() []*TaskUpdatePlan {
+func (s ConcreteTaskService) CreateTaskPlans() []*types.TaskUpdatePlan {
 
 	plans := s.CreateTaskUpdatePlans(s.taskDefs)
 
@@ -104,8 +104,8 @@ func (s ConcreteTaskService) CreateTaskPlans() []*TaskUpdatePlan {
 	return plans
 }
 
-func (s ConcreteTaskService) CreateTaskUpdatePlans(tasks map[string]*TaskDefinition) []*TaskUpdatePlan {
-	plans := []*TaskUpdatePlan{}
+func (s ConcreteTaskService) CreateTaskUpdatePlans(tasks map[string]*types.TaskDefinition) []*types.TaskUpdatePlan {
+	plans := []*types.TaskUpdatePlan{}
 	for _, task := range tasks {
 		if len(s.target) == 0 || s.target == task.Name {
 			plans = append(plans, s.CreateTaskUpdatePlan(task))
@@ -115,113 +115,65 @@ func (s ConcreteTaskService) CreateTaskUpdatePlans(tasks map[string]*TaskDefinit
 	return plans
 }
 
-func (s ConcreteTaskService) CreateTaskUpdatePlan(task *TaskDefinition) *TaskUpdatePlan {
-	newContainers := map[string]*ContainerDefinition{}
+func (s ConcreteTaskService) CreateTaskUpdatePlan(task *types.TaskDefinition) *types.TaskUpdatePlan {
+	newContainers := map[string]*types.ContainerDefinition{}
 
 	for _, con := range task.ContainerDefinitions {
 		newContainers[con.Name] = con
 	}
 
-	return &TaskUpdatePlan{
+	return &types.TaskUpdatePlan{
 		Name:          task.Name,
 		NewContainers: newContainers,
 	}
 }
 
-func (s ConcreteTaskService) GetTaskDefinitions() map[string]*TaskDefinition {
+func (s ConcreteTaskService) GetTaskDefinitions() map[string]*types.TaskDefinition {
 	return s.taskDefs
 }
 
-func (s ConcreteTaskService) createTaskDefinition(taskDefName string, data string, basedir string) (*TaskDefinition, error) {
+func (s ConcreteTaskService) ApplyTaskDefinitionPlans(plans []*types.TaskUpdatePlan) ([]*awsecs.TaskDefinition, error) {
 
-	containerMap := map[string]ContainerDefinition{}
-	if err := yaml.Unmarshal([]byte(data), &containerMap); err != nil {
-		return nil, errors.New(fmt.Sprintf("%v\n\n%v", err.Error(), data))
-	}
+	logger.Main.Info("Start apply Task definitions...")
 
-	containers := map[string]*ContainerDefinition{}
-	for name, container := range containerMap {
-		con := container
-		con.Name = name
+	outputs := []*awsecs.TaskDefinition{}
+	for _, plan := range plans {
 
-		environment := map[string]string{}
-		if len(container.EnvFiles) > 0 {
-			for _, envfile := range container.EnvFiles {
-				var path string
-				if envfile[0:10] == "https://s3" {
-					_path, err := s.downloadS3(envfile)
-					if err != nil {
-						return nil, err
-					}
-					path = _path
-					defer os.Remove(_path)
-				} else if filepath.IsAbs(envfile) {
-					path = envfile
-				} else {
-					path = fmt.Sprintf("%s/%s", basedir, envfile)
-				}
+		result, err := s.ApplyTaskDefinitionPlan(plan)
 
-				envmap, err := s.readEnvFile(path)
-				if err != nil {
-					return nil, err
-				}
-
-				for key, value := range envmap {
-					environment[key] = value
-				}
-			}
+		if err != nil {
+			logger.Main.Errorf("Register Task Definition '%s' is error.", plan.Name)
+			return []*awsecs.TaskDefinition{}, err
 		}
-
-		for key, value := range container.Environment {
-			environment[key] = value
-		}
-
-		con.Environment = environment
-		containers[name] = &con
+		logger.Main.Infof("Register Task Definition '%s' is success.", color.Cyan(plan.Name))
+		time.Sleep(1 * time.Second)
+		outputs = append(outputs, result)
 	}
 
-	taskDef := TaskDefinition{
-		Name:                 taskDefName,
-		ContainerDefinitions: containers,
-	}
-
-	return &taskDef, nil
+	return outputs, nil
 }
 
-func (s ConcreteTaskService) downloadS3(path string) (string, error) {
-	u, err := url.Parse(path)
-	if err != nil {
-		return "", err
-	}
-	ps := strings.Split(u.Path, "/")
-	bucket := ps[:2][1]
-	key := strings.Join(ps[2:], "/")
+func (s ConcreteTaskService) ApplyTaskDefinitionPlan(task *types.TaskUpdatePlan) (*awsecs.TaskDefinition, error) {
 
-	obj, err := s.s3Cli.GetObject(bucket, key)
-	if err != nil {
-		return "", err
+	containers := []*types.ContainerDefinition{}
+	for _, con := range task.NewContainers {
+		containers = append(containers, con)
 	}
 
-	b, err := ioutil.ReadAll(obj.Body)
-	if err != nil {
-		return "", err
+	conDefs := []*awsecs.ContainerDefinition{}
+	volumes := []*awsecs.Volume{}
+
+	for _, con := range containers {
+		conDef, volumeItems, err := types.CreateContainerDefinition(con)
+		if err != nil {
+			return nil, err
+		}
+		conDefs = append(conDefs, conDef)
+
+		for _, v := range volumeItems {
+			volumes = append(volumes, v)
+		}
 	}
 
-	tempfile, err := ioutil.TempFile("", "ecs-formation")
-	if err != nil {
-		return "", err
-	}
-	defer tempfile.Close()
-	tempfile.Write(b)
-	return tempfile.Name(), nil
-}
-
-func (s ConcreteTaskService) readEnvFile(envpath string) (map[string]string, error) {
-
-	envmap, err := godotenv.Read(envpath)
-	if err != nil {
-		return map[string]string{}, err
-	}
-
-	return envmap, nil
+	return s.ecsCli.RegisterTaskDefinition(task.Name, conDefs, volumes)
 }

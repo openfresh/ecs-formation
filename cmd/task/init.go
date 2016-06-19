@@ -5,7 +5,9 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/stormcat24/ecs-formation/client"
 	"github.com/stormcat24/ecs-formation/service"
+	"github.com/stormcat24/ecs-formation/service/types"
 	"github.com/stormcat24/ecs-formation/util"
 )
 
@@ -20,6 +22,10 @@ var TaskCmd = &cobra.Command{
 	Use:   "task",
 	Short: "Manage task definition and control running task on Amazon ECS",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+
+		// TODO region
+		client.Init("ap-northeast-1", false)
+
 		wd, err := cmd.Flags().GetString("working-dir")
 		if err != nil {
 			return err
@@ -61,7 +67,7 @@ func init() {
 
 }
 
-func createTaskPlans(srv service.TaskService) []*service.TaskUpdatePlan {
+func createTaskPlans(srv service.TaskService) []*types.TaskUpdatePlan {
 
 	taskDefs := srv.GetTaskDefinitions()
 	plans := srv.CreateTaskUpdatePlans(taskDefs)
