@@ -1,8 +1,6 @@
 package task
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 
 	"github.com/stormcat24/ecs-formation/service"
@@ -15,7 +13,6 @@ var planCmd = &cobra.Command{
 
 		ts, err := service.NewTaskService(projectDir, taskDefinition, parameters)
 		if err != nil {
-			fmt.Println("*********")
 			return err
 		}
 

@@ -1,4 +1,8 @@
-package service
+package types
+
+import (
+	"github.com/aws/aws-sdk-go/service/ecs"
+)
 
 type TaskDefinition struct {
 	Name                 string
@@ -43,4 +47,9 @@ type Ulimit struct {
 type TaskUpdatePlan struct {
 	Name          string
 	NewContainers map[string]*ContainerDefinition
+}
+
+type VolumeInfo struct {
+	Volume     *ecs.Volume
+	MountPoint *ecs.MountPoint
 }
