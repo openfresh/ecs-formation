@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elb"
 
-	"github.com/stormcat24/ecs-formation/client"
+	"github.com/stormcat24/ecs-formation/client/util"
 )
 
 type Client interface {
@@ -23,8 +23,8 @@ func (c DefaultClient) DescribeLoadBalancers(names []string) (*elb.DescribeLoadB
 		LoadBalancerNames: aws.StringSlice(names),
 	}
 
-	result, err := c.service.DescribeLoadBalancers(&names)
-	if client.IsRateExceeded(err) {
+	result, err := c.service.DescribeLoadBalancers(&params)
+	if util.IsRateExceeded(err) {
 		return c.DescribeLoadBalancers(names)
 	}
 
@@ -39,7 +39,7 @@ func (c DefaultClient) RegisterInstancesWithLoadBalancer(name string, instances 
 	}
 
 	result, err := c.service.RegisterInstancesWithLoadBalancer(&params)
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.RegisterInstancesWithLoadBalancer(name, instances)
 	}
 
@@ -55,9 +55,9 @@ func (c DefaultClient) DeregisterInstancesFromLoadBalancer(lb string, instances 
 
 	result, err := c.service.DeregisterInstancesFromLoadBalancer(&params)
 
-	if client.IsRateExceeded(err) {
+	if util.IsRateExceeded(err) {
 		return c.DeregisterInstancesFromLoadBalancer(lb, instances)
 	}
 
-	return result, err
+	return result.Instances, err
 }
