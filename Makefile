@@ -38,7 +38,7 @@ $(TEST_TARGETS): test-%:
 		GO15VENDOREXPERIMENT=1 go test -v -covermode=atomic -coverprofile=coverage.out $(GOTEST_FLAGS) $(BASE_PACKAGE)/$(*)
 		GO15VENDOREXPERIMENT=1 go test -v -run=nonthing -benchmem -bench=".*" $(GOTEST_FLAGS) $(BASE_PACKAGE)/$(*)
 
-ci-test: $(CI_TEST_TARGETS)
+ci-test: $(TEST_TARGETS)
 
 $(CI_TEST_TARGETS): ci-test-%:
 		@echo "**********************************************************"
