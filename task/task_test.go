@@ -385,7 +385,7 @@ nginx:
   essential: true
 `, f.Name())
 
-	taskdef, err := CreateTaskDefinition("test-web", yaml, filepath.Dir(f.Name()))
+	taskdef, err := CreateTaskDefinition("test-web", yaml, filepath.Dir(f.Name()), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
