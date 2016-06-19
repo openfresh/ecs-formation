@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/stormcat24/ecs-formation/client/autoscaling"
 	"github.com/stormcat24/ecs-formation/client/ecs"
+	"github.com/stormcat24/ecs-formation/client/elb"
 	"github.com/stormcat24/ecs-formation/client/s3"
 )
 
@@ -21,6 +22,7 @@ type AWSClient struct {
 	ECS         *ecs.Client
 	S3          *s3.Client
 	Autoscaling *autoscaling.Client
+	ELB         *elb.ELB
 }
 
 func Init(region string, isMock bool) {
@@ -53,9 +55,15 @@ func Init(region string, isMock bool) {
 		Region: region,
 	})
 
+	elbCli := elb.NewClient(&elb.Config{
+		IsMock: isMock,
+		Region: region,
+	})
+
 	AWSCli = AWSClient{
 		ECS:         ecsCli,
 		S3:          s3Cli,
 		Autoscaling: autoscalingCli,
+		ELB:         elbCli,
 	}
 }
