@@ -3,17 +3,22 @@ package service
 import (
 	"errors"
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/stormcat24/ecs-formation/aws"
-	"github.com/stormcat24/ecs-formation/logger"
-	"github.com/stormcat24/ecs-formation/util"
-	"github.com/str1ngs/ansi/color"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/stormcat24/ecs-formation/aws"
+	"github.com/stormcat24/ecs-formation/client"
+	"github.com/stormcat24/ecs-formation/logger"
+	"github.com/stormcat24/ecs-formation/service/types"
+	"github.com/stormcat24/ecs-formation/util"
+	"github.com/str1ngs/ansi/color"
+
+	ecscli "github.com/stormcat24/ecs-formation/client/ecs"
 )
 
 type TaskWatchStatus int
@@ -475,4 +480,79 @@ func (self *ServiceController) RoundColorStatus(status string) *color.Escape {
 	} else {
 		return color.Magenta(status)
 	}
+}
+
+//// scratch start
+type ServiceService interface {
+	SearchServices() error
+}
+
+type ConcreteServiceService struct {
+	ecsCli     ecscli.Client
+	projectDir string
+	target     string
+	params     map[string]string
+	taskDefs   map[string]*types.TaskDefinition
+}
+
+func NewServiceService(projectDir string, target string, params map[string]string) (ServiceService, error) {
+	s := ConcreteServiceService{
+		ecsCli: client.AWSCli.ECS,
+	}
+	return nil, nil
+}
+
+func (s ServiceService) SearchServices() error {
+
+	clusterDir := s.projectDir + "/service"
+	// clusters := []Cluster{}
+
+	// filePattern := regexp.MustCompile(`^.+\/(.+)\.yml$`)
+
+	// filepath.Walk(clusterDir, func(path string, info os.FileInfo, err error) error {
+	// 	if info.IsDir() || !strings.HasSuffix(path, ".yml") {
+	// 		return nil
+	// 	}
+
+	// 	if len(self.targetResources) > 0 {
+
+	// 		flg := false
+	// 		for _, res := range self.targetResources {
+	// 			if strings.HasSuffix(path, fmt.Sprintf("%s.yml", res)) {
+	// 				flg = true
+	// 			}
+	// 		}
+
+	// 		if !flg {
+	// 			return nil
+	// 		}
+	// 	}
+
+	// 	content, err := ioutil.ReadFile(path)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+
+	// 	merged := util.MergeYamlWithParameters(content, self.params)
+	// 	tokens := filePattern.FindStringSubmatch(path)
+
+	// 	clusterName := tokens[1]
+
+	// 	serviceMap, err := CreateServiceMap(merged)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	cluster := Cluster{
+	// 		Name:     clusterName,
+	// 		Services: serviceMap,
+	// 	}
+
+	// 	clusters = append(clusters, cluster)
+
+	// 	return nil
+	// })
+
+	// return clusters, nil
+
+	return nil
 }
