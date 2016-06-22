@@ -23,6 +23,11 @@ var TaskCmd = &cobra.Command{
 	Short: "Manage task definition and control running task on Amazon ECS",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
+		pd, err := cmd.PersistentFlags().GetString("project_dir")
+		if err != nil {
+			return err
+		}
+
 		// TODO region
 		client.Init("ap-northeast-1", false)
 

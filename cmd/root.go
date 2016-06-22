@@ -74,5 +74,8 @@ func initConfig() {
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
+
+		pd := viper.GetString("project_dir")
+		fmt.Printf("pd=%v\n", pd)
 	}
 }
