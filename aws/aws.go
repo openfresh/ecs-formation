@@ -20,10 +20,14 @@ type AwsManager struct {
 
 func NewAwsManager(region string) *AwsManager {
 
+	sess := session.New()
 	cred := credentials.NewChainCredentials([]credentials.Provider{
 		&credentials.EnvProvider{},
 		&credentials.SharedCredentialsProvider{Filename: "", Profile: ""},
-		&ec2rolecreds.EC2RoleProvider{ExpiryWindow: 5 * time.Minute},
+		&ec2rolecreds.EC2RoleProvider{
+			Client:       ec2metadata.New(sess),
+			ExpiryWindow: 5 * time.Minute,
+		},
 	})
 
 	conf := aws.NewConfig().WithCredentials(cred).WithMaxRetries(aws.UseServiceDefaultRetries).WithRegion(region)
