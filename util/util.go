@@ -14,7 +14,7 @@ import (
 var (
 	keyValuePattern        = regexp.MustCompile(`^\s*(.+)\s*=\s*(.+)\s*$`)
 	variablePattern        = regexp.MustCompile(`\$\{([\w_-]+)\}`)
-	defaultVariablePattern = regexp.MustCompile(`\$\{([\w_-]+)\s*\|\s*([\w_-]+)\}`)
+	defaultVariablePattern = regexp.MustCompile(`\$\{([\w_-]+)\s*\|\s*([\w._-]+)\}`)
 )
 
 func StringValueWithIndent(value interface{}, indent int) string {
