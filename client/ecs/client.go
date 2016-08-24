@@ -3,6 +3,7 @@ package ecs
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/pkg/errors"
 	"github.com/stormcat24/ecs-formation/client/util"
 )
 
@@ -180,7 +181,11 @@ func (c DefaultClient) DescribeTaskDefinition(td string) (*ecs.TaskDefinition, e
 		return c.DescribeTaskDefinition(td)
 	}
 
-	return result.TaskDefinition, err
+	if err != nil {
+		return nil, errors.Wrapf(err, "Describe ECS Cluster '%s' is failed", td)
+	}
+
+	return result.TaskDefinition, nil
 }
 
 func (c DefaultClient) RegisterTaskDefinition(taskName string, containers []*ecs.ContainerDefinition, volumes []*ecs.Volume) (*ecs.TaskDefinition, error) {

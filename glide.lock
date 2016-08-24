@@ -1,5 +1,5 @@
-hash: 8dc14eb2a9b00eed4d871c4b4ea8699d7b6852197062a862071ba71df22821a2
-updated: 2016-08-24T15:46:07.365681501+09:00
+hash: d43c9b53248e5b1063b8684225d6d2f6810b0c1dcba009805b6bc7072f8578ab
+updated: 2016-08-24T16:56:03.58450007+09:00
 imports:
 - name: github.com/apex/log
   version: 8eba30e442954605fd2e1a542912d5b5e16cab13
@@ -65,6 +65,10 @@ imports:
   version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
 - name: github.com/magiconair/properties
   version: 61b492c03cf472e0c6419be5899b8e0dc28b1b88
+- name: github.com/mattn/go-colorable
+  version: ed8eb9e318d7a84ce5915b495b7d35e0cfe7b5a8
+- name: github.com/mattn/go-isatty
+  version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
 - name: github.com/mattn/go-shellwords
   version: 525bedee691b5a8df547cb5cf9f86b7fb1883e24
 - name: github.com/mitchellh/mapstructure

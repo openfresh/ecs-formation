@@ -21,6 +21,7 @@ import:
 - package: github.com/fatih/color
   version: v1.0.0
 - package: gopkg.in/yaml.v2
+- package: github.com/pkg/errors
 testImport:
 - package: github.com/stretchr/testify
   subpackages:
