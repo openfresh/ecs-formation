@@ -3,17 +3,18 @@ package service
 import (
 	"errors"
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/ecs"
-	"github.com/stormcat24/ecs-formation/aws"
-	"github.com/stormcat24/ecs-formation/logger"
-	"github.com/stormcat24/ecs-formation/util"
-	"github.com/str1ngs/ansi/color"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/stormcat24/ecs-formation/aws"
+	"github.com/stormcat24/ecs-formation/logger"
+	"github.com/stormcat24/ecs-formation/util"
+	"github.com/str1ngs/ansi/color"
 )
 
 type TaskWatchStatus int

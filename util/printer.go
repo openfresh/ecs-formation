@@ -19,16 +19,30 @@ func Println(a ...interface{}) (int, error) {
 	}
 }
 
-func PrintlnCyan(a ...interface{}) {
-	color.Cyan(fmt.Sprint(a...))
+func Print(a ...interface{}) (int, error) {
+	if Output {
+		return fmt.Print(a...)
+	} else {
+		return 0, nil
+	}
 }
 
-func PrintlnGreen(a ...interface{}) {
-	color.Green(fmt.Sprint(a...))
+func PrintlnCyan(format string, a ...interface{}) {
+	if Output {
+		color.Cyan(format, a...)
+	}
 }
 
-func PrintlnYellow(a ...interface{}) {
-	color.Yellow(fmt.Sprint(a...))
+func PrintlnGreen(format string, a ...interface{}) {
+	if Output {
+		color.Green(format, a...)
+	}
+}
+
+func PrintlnYellow(format string, a ...interface{}) {
+	if Output {
+		color.Yellow(format, a...)
+	}
 }
 
 func Infoln(a ...interface{}) {
