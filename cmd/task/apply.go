@@ -1,6 +1,8 @@
 package task
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/stormcat24/ecs-formation/service"
@@ -12,6 +14,7 @@ var applyCmd = &cobra.Command{
 	Use:   "apply",
 	Short: "Update task definiton",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		fmt.Println(projectDir)
 		ts, err := service.NewTaskService(projectDir, taskDefinition, parameters)
 		if err != nil {
 			return err
