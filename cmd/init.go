@@ -15,9 +15,10 @@
 package cmd
 
 import (
+	"github.com/stormcat24/ecs-formation/cmd/service"
 	"github.com/stormcat24/ecs-formation/cmd/task"
 )
 
 func init() {
-	RootCmd.AddCommand(task.TaskCmd)
+	RootCmd.AddCommand(task.TaskCmd, service.ServiceCmd)
 }

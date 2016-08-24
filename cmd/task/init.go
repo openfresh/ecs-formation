@@ -1,8 +1,6 @@
 package task
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stormcat24/ecs-formation/client"
@@ -66,38 +64,38 @@ func createTaskPlans(srv service.TaskService) []*types.TaskUpdatePlan {
 
 	for _, plan := range plans {
 		for _, add := range plan.NewContainers {
-			util.PrintlnCyan(fmt.Sprintf("    (+) %v", add.Name))
-			util.PrintlnCyan(fmt.Sprintf("      image: %v", add.Image))
-			util.PrintlnCyan(fmt.Sprintf("      ports: %v", add.Ports))
-			util.PrintlnCyan(fmt.Sprintf("      environment:\n%v", util.StringValueWithIndent(add.Environment, 4)))
-			util.PrintlnCyan(fmt.Sprintf("      links: %v", add.Links))
-			util.PrintlnCyan(fmt.Sprintf("      volumes: %v", add.Volumes))
-			util.PrintlnCyan(fmt.Sprintf("      volumes_from: %v", add.VolumesFrom))
-			util.PrintlnCyan(fmt.Sprintf("      memory: %v", add.Memory))
-			util.PrintlnCyan(fmt.Sprintf("      cpu_units: %v", add.CPUUnits))
-			util.PrintlnCyan(fmt.Sprintf("      essential: %v", add.Essential))
-			util.PrintlnCyan(fmt.Sprintf("      entry_point: %v", add.EntryPoint))
-			util.PrintlnCyan(fmt.Sprintf("      command: %v", add.Command))
-			util.PrintlnCyan(fmt.Sprintf("      disable_networking: %v", add.DisableNetworking))
-			util.PrintlnCyan(fmt.Sprintf("      dns_search: %v", add.DNSSearchDomains))
-			util.PrintlnCyan(fmt.Sprintf("      dns: %v", add.DNSServers))
+			util.PrintlnCyan("    (+) %v", add.Name)
+			util.PrintlnCyan("      image: %v", add.Image)
+			util.PrintlnCyan("      ports: %v", add.Ports)
+			util.PrintlnCyan("      environment:\n%v", util.StringValueWithIndent(add.Environment, 4))
+			util.PrintlnCyan("      links: %v", add.Links)
+			util.PrintlnCyan("      volumes: %v", add.Volumes)
+			util.PrintlnCyan("      volumes_from: %v", add.VolumesFrom)
+			util.PrintlnCyan("      memory: %v", add.Memory)
+			util.PrintlnCyan("      cpu_units: %v", add.CPUUnits)
+			util.PrintlnCyan("      essential: %v", add.Essential)
+			util.PrintlnCyan("      entry_point: %v", add.EntryPoint)
+			util.PrintlnCyan("      command: %v", add.Command)
+			util.PrintlnCyan("      disable_networking: %v", add.DisableNetworking)
+			util.PrintlnCyan("      dns_search: %v", add.DNSSearchDomains)
+			util.PrintlnCyan("      dns: %v", add.DNSServers)
 			if len(add.DockerLabels) > 0 {
-				util.PrintlnCyan(fmt.Sprintf("      labels: %v", util.StringValueWithIndent(add.DockerLabels, 4)))
+				util.PrintlnCyan("      labels: %v", util.StringValueWithIndent(add.DockerLabels, 4))
 			}
-			util.PrintlnCyan(fmt.Sprintf("      security_opt: %v", add.DockerSecurityOptions))
-			util.PrintlnCyan(fmt.Sprintf("      extra_hosts: %v", add.ExtraHosts))
-			util.PrintlnCyan(fmt.Sprintf("      hostname: %v", add.Hostname))
-			util.PrintlnCyan(fmt.Sprintf("      log_driver: %v", add.LogDriver))
+			util.PrintlnCyan("      security_opt: %v", add.DockerSecurityOptions)
+			util.PrintlnCyan("      extra_hosts: %v", add.ExtraHosts)
+			util.PrintlnCyan("      hostname: %v", add.Hostname)
+			util.PrintlnCyan("      log_driver: %v", add.LogDriver)
 			if len(add.LogOpt) > 0 {
-				util.PrintlnCyan(fmt.Sprintf("      log_opt: %v", util.StringValueWithIndent(add.LogOpt, 4)))
+				util.PrintlnCyan("      log_opt: %v", util.StringValueWithIndent(add.LogOpt, 4))
 			}
-			util.PrintlnCyan(fmt.Sprintf("      privileged: %v", add.Privileged))
-			util.PrintlnCyan(fmt.Sprintf("      read_only: %v", add.ReadonlyRootFilesystem))
+			util.PrintlnCyan("      privileged: %v", add.Privileged)
+			util.PrintlnCyan("      read_only: %v", add.ReadonlyRootFilesystem)
 			if len(add.Ulimits) > 0 {
-				util.PrintlnCyan(fmt.Sprintf("      ulimits: %v", util.StringValueWithIndent(add.Ulimits, 4)))
+				util.PrintlnCyan("      ulimits: %v", util.StringValueWithIndent(add.Ulimits, 4))
 			}
-			util.PrintlnCyan(fmt.Sprintf("      user: %v", add.User))
-			util.PrintlnCyan(fmt.Sprintf("      working_dir: %v", add.WorkingDirectory))
+			util.PrintlnCyan("      user: %v", add.User)
+			util.PrintlnCyan("      working_dir: %v", add.WorkingDirectory)
 		}
 
 		util.Println()
