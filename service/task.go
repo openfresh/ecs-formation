@@ -26,6 +26,7 @@ type TaskService interface {
 	GetTaskDefinitions() map[string]*types.TaskDefinition
 	ApplyTaskDefinitionPlans(plans []*types.TaskUpdatePlan) ([]*awsecs.TaskDefinition, error)
 	ApplyTaskDefinitionPlan(task *types.TaskUpdatePlan) (*awsecs.TaskDefinition, error)
+	GetCurrentRevision(td string) (int64, error)
 }
 
 type ConcreteTaskService struct {
@@ -176,4 +177,14 @@ func (s ConcreteTaskService) ApplyTaskDefinitionPlan(task *types.TaskUpdatePlan)
 	}
 
 	return s.ecsCli.RegisterTaskDefinition(task.Name, conDefs, volumes)
+}
+
+func (s ConcreteTaskService) GetCurrentRevision(td string) (int64, error) {
+
+	result, err := s.ecsCli.DescribeTaskDefinition(td)
+	if err != nil {
+		return 0, err
+	}
+
+	return *result.Revision, nil
 }
