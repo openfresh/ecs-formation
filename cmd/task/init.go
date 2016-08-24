@@ -2,10 +2,11 @@ package task
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"github.com/stormcat24/ecs-formation/client"
+	cmdutil "github.com/stormcat24/ecs-formation/cmd/util"
 	"github.com/stormcat24/ecs-formation/service"
 	"github.com/stormcat24/ecs-formation/service/types"
 	"github.com/stormcat24/ecs-formation/util"
@@ -23,22 +24,14 @@ var TaskCmd = &cobra.Command{
 	Short: "Manage task definition and control running task on Amazon ECS",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
-		// TODO region
-		client.Init("ap-northeast-1", false)
-
-		wd, err := cmd.Flags().GetString("working-dir")
+		pd, err := cmdutil.GetProjectDir()
 		if err != nil {
 			return err
 		}
-		if wd == "" {
-			pd, err := os.Getwd()
-			if err != nil {
-				return err
-			}
-			projectDir = pd
-		} else {
-			projectDir = wd
-		}
+		projectDir = pd
+
+		region := viper.GetString("aws_region")
+		client.Init(region, false)
 
 		td, err := cmd.Flags().GetString("task-definition")
 		if err != nil {
@@ -61,7 +54,6 @@ func init() {
 	TaskCmd.AddCommand(revisionCmd)
 	TaskCmd.AddCommand(runCmd)
 
-	TaskCmd.PersistentFlags().StringP("working-dir", "d", "", "working directory")
 	TaskCmd.PersistentFlags().StringP("task-definition", "t", "", "Task Definition")
 	TaskCmd.PersistentFlags().StringSliceP("parameter", "p", make([]string, 0), "parameter 'key=value'")
 
