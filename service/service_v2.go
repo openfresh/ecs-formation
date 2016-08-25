@@ -24,22 +24,23 @@ type ServiceService interface {
 	SearchClusters() ([]types.Cluster, error)
 	CreateServiceUpdatePlans() ([]*types.ServiceUpdatePlan, error)
 	ApplyServicePlans(plans []*types.ServiceUpdatePlan) error
+	ApplyServicePlan(plan *types.ServiceUpdatePlan) error
 }
 
 type ConcreteServiceService struct {
 	ecsCli        ecs.Client
 	projectDir    string
-	cluster       string
+	clusters      []string
 	targetService string
 	params        map[string]string
 }
 
-func NewServiceService(projectDir string, cluster string, targetService string, params map[string]string) (ServiceService, error) {
+func NewServiceService(projectDir string, clusters []string, targetService string, params map[string]string) (ServiceService, error) {
 
 	service := ConcreteServiceService{
 		ecsCli:        client.AWSCli.ECS,
 		projectDir:    projectDir,
-		cluster:       cluster,
+		clusters:      clusters,
 		targetService: targetService,
 		params:        params,
 	}
@@ -58,7 +59,14 @@ func (s ConcreteServiceService) SearchClusters() ([]types.Cluster, error) {
 			return nil
 		}
 
-		if s.cluster != "" && !strings.HasSuffix(path, fmt.Sprintf("%s.yml", s.cluster)) {
+		flg := false
+		for _, cluster := range s.clusters {
+			if strings.HasSuffix(path, fmt.Sprintf("%s.yml", cluster)) {
+				flg = true
+			}
+		}
+
+		if !flg {
 			return nil
 		}
 
@@ -184,7 +192,7 @@ func (s ConcreteServiceService) ApplyServicePlans(plans []*types.ServiceUpdatePl
 	logger.Main.Info("Start apply serivces...")
 
 	for _, plan := range plans {
-		if err := s.applyServicePlan(plan); err != nil {
+		if err := s.ApplyServicePlan(plan); err != nil {
 			logger.Main.Error(color.RedString(err.Error()))
 			return err
 		}
@@ -192,7 +200,7 @@ func (s ConcreteServiceService) ApplyServicePlans(plans []*types.ServiceUpdatePl
 	return nil
 }
 
-func (s ConcreteServiceService) applyServicePlan(plan *types.ServiceUpdatePlan) error {
+func (s ConcreteServiceService) ApplyServicePlan(plan *types.ServiceUpdatePlan) error {
 
 	// currentにあってnewにない（削除）
 	for _, current := range plan.CurrentServices {
