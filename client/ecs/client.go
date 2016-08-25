@@ -14,7 +14,7 @@ type Client interface {
 	ListClusters(maxResult int) (*ecs.ListClustersOutput, error)
 	ListContainerInstances(cluster string) (*ecs.ListContainerInstancesOutput, error)
 	CreateService(params *ecs.CreateServiceInput) (*ecs.Service, error)
-	UpdateService(cluster string, service string, desiredCount int, taskDef string) (*ecs.Service, error)
+	UpdateService(params *ecs.UpdateServiceInput) (*ecs.Service, error)
 	DescribeService(cluster string, services []*string) (*ecs.DescribeServicesOutput, error)
 	DeleteService(cluster string, service string) (*ecs.Service, error)
 	ListServices(cluster string) (*ecs.ListServicesOutput, error)
@@ -109,18 +109,11 @@ func (c DefaultClient) CreateService(params *ecs.CreateServiceInput) (*ecs.Servi
 	return result.Service, err
 }
 
-func (c DefaultClient) UpdateService(cluster string, service string, desiredCount int, taskDef string) (*ecs.Service, error) {
+func (c DefaultClient) UpdateService(params *ecs.UpdateServiceInput) (*ecs.Service, error) {
 
-	params := ecs.UpdateServiceInput{
-		Cluster:        aws.String(cluster),
-		Service:        aws.String(service),
-		DesiredCount:   aws.Int64(int64(desiredCount)),
-		TaskDefinition: aws.String(taskDef),
-	}
-
-	result, err := c.service.UpdateService(&params)
+	result, err := c.service.UpdateService(params)
 	if util.IsRateExceeded(err) {
-		return c.UpdateService(cluster, service, desiredCount, taskDef)
+		return c.UpdateService(params)
 	}
 
 	return result.Service, err

@@ -208,7 +208,13 @@ func (s ConcreteClusterService) ApplyServicePlan(plan *types.ServiceUpdatePlan) 
 			logger.Main.Infof("Delating '%s' service on '%s' ...", *current.ServiceName, plan.Name)
 
 			// set desired_count = 0
-			if _, err := s.ecsCli.UpdateService(plan.Name, *current.ServiceName, 0, *current.TaskDefinition); err != nil {
+			params := awsecs.UpdateServiceInput{
+				Cluster:        aws.String(plan.Name),
+				Service:        current.ServiceName,
+				DesiredCount:   aws.Int64(0),
+				TaskDefinition: current.TaskDefinition,
+			}
+			if _, err := s.ecsCli.UpdateService(&params); err != nil {
 				return err
 			}
 			logger.Main.Infof("Updated desired count = 0 of '%s' service on '%s' ...", *current.ServiceName, plan.Name)
@@ -279,7 +285,18 @@ func (s ConcreteClusterService) ApplyServicePlan(plan *types.ServiceUpdatePlan) 
 				logger.Main.Infof("Next DesiredCount = %d at '%s'", nextDesiredCount, add.Name)
 			}
 
-			svc, err := s.ecsCli.UpdateService(plan.Name, add.Name, int(nextDesiredCount), add.TaskDefinition)
+			params := awsecs.UpdateServiceInput{
+				Cluster:        aws.String(plan.Name),
+				Service:        aws.String(add.Name),
+				DesiredCount:   aws.Int64(nextDesiredCount),
+				TaskDefinition: aws.String(add.TaskDefinition),
+				DeploymentConfiguration: &awsecs.DeploymentConfiguration{
+					MinimumHealthyPercent: add.MinimumHealthyPercent,
+					MaximumPercent:        add.MaximumPercent,
+				},
+			}
+
+			svc, err := s.ecsCli.UpdateService(&params)
 			if err != nil {
 				return err
 			}
