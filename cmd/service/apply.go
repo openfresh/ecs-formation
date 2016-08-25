@@ -10,7 +10,7 @@ var applyCmd = &cobra.Command{
 	Short: "Update ecs service on target cluster",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		srv, err := service.NewServiceService(projectDir, []string{cluster}, serviceName, parameters)
+		srv, err := service.NewClusterService(projectDir, []string{cluster}, serviceName, parameters)
 		if err != nil {
 			return err
 		}

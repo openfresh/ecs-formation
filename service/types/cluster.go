@@ -2,6 +2,14 @@ package types
 
 import "github.com/aws/aws-sdk-go/service/ecs"
 
+type TaskWatchStatus int
+
+const (
+	WatchContinue TaskWatchStatus = iota
+	WatchFinish
+	WatchTerminate
+)
+
 type Cluster struct {
 	Name     string
 	Services map[string]Service

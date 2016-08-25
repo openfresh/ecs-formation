@@ -20,14 +20,14 @@ import (
 	"github.com/stormcat24/ecs-formation/util"
 )
 
-type ServiceService interface {
+type ClusterService interface {
 	SearchClusters() ([]types.Cluster, error)
 	CreateServiceUpdatePlans() ([]*types.ServiceUpdatePlan, error)
 	ApplyServicePlans(plans []*types.ServiceUpdatePlan) error
 	ApplyServicePlan(plan *types.ServiceUpdatePlan) error
 }
 
-type ConcreteServiceService struct {
+type ConcreteClusterService struct {
 	ecsCli        ecs.Client
 	projectDir    string
 	clusters      []string
@@ -35,9 +35,9 @@ type ConcreteServiceService struct {
 	params        map[string]string
 }
 
-func NewServiceService(projectDir string, clusters []string, targetService string, params map[string]string) (ServiceService, error) {
+func NewClusterService(projectDir string, clusters []string, targetService string, params map[string]string) (ClusterService, error) {
 
-	service := ConcreteServiceService{
+	service := ConcreteClusterService{
 		ecsCli:        client.AWSCli.ECS,
 		projectDir:    projectDir,
 		clusters:      clusters,
@@ -48,7 +48,7 @@ func NewServiceService(projectDir string, clusters []string, targetService strin
 	return &service, nil
 }
 
-func (s ConcreteServiceService) SearchClusters() ([]types.Cluster, error) {
+func (s ConcreteClusterService) SearchClusters() ([]types.Cluster, error) {
 
 	clusterDir := s.projectDir + "/service"
 	clusters := []types.Cluster{}
@@ -97,7 +97,7 @@ func (s ConcreteServiceService) SearchClusters() ([]types.Cluster, error) {
 	return clusters, nil
 }
 
-func (s ConcreteServiceService) CreateServiceUpdatePlans() ([]*types.ServiceUpdatePlan, error) {
+func (s ConcreteClusterService) CreateServiceUpdatePlans() ([]*types.ServiceUpdatePlan, error) {
 
 	plans := []*types.ServiceUpdatePlan{}
 
@@ -120,7 +120,7 @@ func (s ConcreteServiceService) CreateServiceUpdatePlans() ([]*types.ServiceUpda
 	return plans, nil
 }
 
-func (s ConcreteServiceService) createServiceUpdatePlan(cluster types.Cluster) (*types.ServiceUpdatePlan, error) {
+func (s ConcreteClusterService) createServiceUpdatePlan(cluster types.Cluster) (*types.ServiceUpdatePlan, error) {
 
 	output, err := s.ecsCli.DescribeClusters([]*string{
 		aws.String(cluster.Name),
@@ -188,7 +188,7 @@ func (s ConcreteServiceService) createServiceUpdatePlan(cluster types.Cluster) (
 	}
 }
 
-func (s ConcreteServiceService) ApplyServicePlans(plans []*types.ServiceUpdatePlan) error {
+func (s ConcreteClusterService) ApplyServicePlans(plans []*types.ServiceUpdatePlan) error {
 	logger.Main.Info("Start apply serivces...")
 
 	for _, plan := range plans {
@@ -200,7 +200,7 @@ func (s ConcreteServiceService) ApplyServicePlans(plans []*types.ServiceUpdatePl
 	return nil
 }
 
-func (s ConcreteServiceService) ApplyServicePlan(plan *types.ServiceUpdatePlan) error {
+func (s ConcreteClusterService) ApplyServicePlan(plan *types.ServiceUpdatePlan) error {
 
 	// currentにあってnewにない（削除）
 	for _, current := range plan.CurrentServices {
@@ -337,7 +337,7 @@ func (s ConcreteServiceService) ApplyServicePlan(plan *types.ServiceUpdatePlan) 
 	return nil
 }
 
-func (s ConcreteServiceService) waitStoppingService(cluster string, service string) error {
+func (s ConcreteClusterService) waitStoppingService(cluster string, service string) error {
 
 	for {
 		time.Sleep(10 * time.Second)
@@ -362,7 +362,7 @@ func (s ConcreteServiceService) waitStoppingService(cluster string, service stri
 	}
 }
 
-func (s ConcreteServiceService) waitActiveService(cluster string, service string) error {
+func (s ConcreteClusterService) waitActiveService(cluster string, service string) error {
 
 	var flag = false
 	var taskARNs []*string
@@ -410,10 +410,10 @@ func (s ConcreteServiceService) waitActiveService(cluster string, service string
 			}
 
 			watchStatus := s.checkRunningTask(resdt)
-			if watchStatus == WatchFinish {
+			if watchStatus == types.WatchFinish {
 				logger.Main.Info("At least one of task has started successfully.")
 				return nil
-			} else if watchStatus == WatchTerminate {
+			} else if watchStatus == types.WatchTerminate {
 				logger.Main.Error("Stopped watching task, because task has stopped.")
 				return errors.New("Task has been stopped for some reason.")
 			}
@@ -422,7 +422,7 @@ func (s ConcreteServiceService) waitActiveService(cluster string, service string
 	}
 }
 
-func (s ConcreteServiceService) checkRunningTask(dto *awsecs.DescribeTasksOutput) TaskWatchStatus {
+func (s ConcreteClusterService) checkRunningTask(dto *awsecs.DescribeTasksOutput) types.TaskWatchStatus {
 
 	logger.Main.Info("Current task conditions as follows:")
 
@@ -445,16 +445,16 @@ func (s ConcreteServiceService) checkRunningTask(dto *awsecs.DescribeTasksOutput
 	// if RUNNING at least one, ecs-formation deals with ok.
 	for _, s := range status {
 		if s == "RUNNING" {
-			return WatchFinish
+			return types.WatchFinish
 		} else if s == "STOPPED" {
-			return WatchTerminate
+			return types.WatchTerminate
 		}
 	}
 
-	return WatchContinue
+	return types.WatchContinue
 }
 
-func (s ConcreteServiceService) roundColorStatus(status string) string {
+func (s ConcreteClusterService) roundColorStatus(status string) string {
 
 	if status == "RUNNING" {
 		return color.GreenString(status)

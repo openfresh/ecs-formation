@@ -13,18 +13,18 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/fatih/color"
 	"github.com/stormcat24/ecs-formation/client"
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/stormcat24/ecs-formation/service/types"
 	"github.com/stormcat24/ecs-formation/util"
-	"github.com/str1ngs/ansi/color"
 )
 
 type BlueGreenService interface {
 	GetBlueGreenMap() map[string]*types.BlueGreen
 	CreateBlueGreenPlans(bgmap map[string]*types.BlueGreen, cplans []*types.ServiceUpdatePlan) ([]*types.BlueGreenPlan, error)
-	CreateClusterService() (ServiceService, error)
-	ApplyBlueGreenDeploys(clusterService ServiceService, plans []*types.BlueGreenPlan, nodeploy bool) error
+	CreateClusterService() (ClusterService, error)
+	ApplyBlueGreenDeploys(clusterService ClusterService, plans []*types.BlueGreenPlan, nodeploy bool) error
 }
 
 type ConcreteBlueGreenService struct {
@@ -206,7 +206,7 @@ func (s ConcreteBlueGreenService) createBlueGreenPlan(bluegreen *types.BlueGreen
 	return &bgPlan, nil
 }
 
-func (s ConcreteBlueGreenService) CreateClusterService() (ServiceService, error) {
+func (s ConcreteBlueGreenService) CreateClusterService() (ClusterService, error) {
 
 	bg, _ := s.blueGreenMap[s.blueGreenName]
 	if bg == nil {
@@ -218,10 +218,10 @@ func (s ConcreteBlueGreenService) CreateClusterService() (ServiceService, error)
 		bg.Green.Cluster,
 	}
 	// TODO service名渡すか？ bluegreenコマンドでもserviceを渡せるようにする必要あり
-	return NewServiceService(s.projectDir, clusters, "", s.params)
+	return NewClusterService(s.projectDir, clusters, "", s.params)
 }
 
-func (s ConcreteBlueGreenService) ApplyBlueGreenDeploys(clusterService ServiceService, plans []*types.BlueGreenPlan, nodeploy bool) error {
+func (s ConcreteBlueGreenService) ApplyBlueGreenDeploys(clusterService ClusterService, plans []*types.BlueGreenPlan, nodeploy bool) error {
 
 	for _, plan := range plans {
 		if err := s.applyBlueGreenDeploy(clusterService, plan, nodeploy); err != nil {
@@ -232,12 +232,12 @@ func (s ConcreteBlueGreenService) ApplyBlueGreenDeploys(clusterService ServiceSe
 	return nil
 }
 
-func (s ConcreteBlueGreenService) applyBlueGreenDeploy(clusterService ServiceService, bgplan *types.BlueGreenPlan, nodeploy bool) error {
+func (s ConcreteBlueGreenService) applyBlueGreenDeploy(clusterService ClusterService, bgplan *types.BlueGreenPlan, nodeploy bool) error {
 
 	targetGreen := bgplan.IsBlueWithPrimaryElb()
 
-	var currentLabel *color.Escape
-	var nextLabel *color.Escape
+	var currentLabel string
+	var nextLabel string
 	var current *types.ServiceSet
 	var next *types.ServiceSet
 	primaryLb := bgplan.PrimaryElb
@@ -245,13 +245,13 @@ func (s ConcreteBlueGreenService) applyBlueGreenDeploy(clusterService ServiceSer
 	if targetGreen {
 		current = bgplan.Blue
 		next = bgplan.Green
-		currentLabel = color.Cyan("blue")
-		nextLabel = color.Green("green")
+		currentLabel = color.CyanString("blue")
+		nextLabel = color.GreenString("green")
 	} else {
 		current = bgplan.Green
 		next = bgplan.Blue
-		currentLabel = color.Green("green")
-		nextLabel = color.Cyan("blue")
+		currentLabel = color.GreenString("green")
+		nextLabel = color.CyanString("blue")
 	}
 
 	primaryGroup := []string{primaryLb}
