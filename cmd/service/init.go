@@ -73,7 +73,7 @@ func init() {
 	ServiceCmd.PersistentFlags().BoolP("json-output", "j", false, "Print json format")
 }
 
-func createClusterPlans(srv service.ServiceService) ([]*types.ServiceUpdatePlan, error) {
+func createClusterPlans(srv service.ClusterService) ([]*types.ServiceUpdatePlan, error) {
 
 	if jsonOutput {
 		util.Output = false

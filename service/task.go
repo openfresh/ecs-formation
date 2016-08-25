@@ -9,13 +9,13 @@ import (
 	"time"
 
 	awsecs "github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/fatih/color"
 	"github.com/stormcat24/ecs-formation/client"
 	"github.com/stormcat24/ecs-formation/client/ecs"
 	"github.com/stormcat24/ecs-formation/client/s3"
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/stormcat24/ecs-formation/service/types"
 	"github.com/stormcat24/ecs-formation/util"
-	"github.com/str1ngs/ansi/color"
 )
 
 type TaskService interface {
@@ -146,7 +146,7 @@ func (s ConcreteTaskService) ApplyTaskDefinitionPlans(plans []*types.TaskUpdateP
 			logger.Main.Errorf("Register Task Definition '%s' is error.", plan.Name)
 			return []*awsecs.TaskDefinition{}, err
 		}
-		logger.Main.Infof("Register Task Definition '%s' is success.", color.Cyan(plan.Name))
+		logger.Main.Infof("Register Task Definition '%s' is success.", color.CyanString(plan.Name))
 		time.Sleep(1 * time.Second)
 		outputs = append(outputs, result)
 	}

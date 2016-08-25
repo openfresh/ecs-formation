@@ -92,7 +92,7 @@ func init() {
 	BlueGreenCmd.PersistentFlags().BoolP("json-output", "j", false, "Print json format")
 }
 
-func createBlueGreenPlans(bgsrv service.BlueGreenService, csrv service.ServiceService) ([]*types.BlueGreenPlan, error) {
+func createBlueGreenPlans(bgsrv service.BlueGreenService, csrv service.ClusterService) ([]*types.BlueGreenPlan, error) {
 	if jsonOutput {
 		util.Output = false
 		defer func() {
