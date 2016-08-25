@@ -340,6 +340,4 @@ func (s ConcreteBlueGreenService) waitLoadBalancer(group string, lb string) erro
 
 	}
 
-	return nil
-
 }
