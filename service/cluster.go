@@ -245,6 +245,10 @@ func (s ConcreteClusterService) ApplyServicePlan(plan *types.ServiceUpdatePlan) 
 				LoadBalancers:  toLoadBalancersNew(add.LoadBalancers),
 				Role:           aws.String(add.Role),
 				TaskDefinition: aws.String(add.TaskDefinition),
+				DeploymentConfiguration: &awsecs.DeploymentConfiguration{
+					MinimumHealthyPercent: add.MinimumHealthyPercent,
+					MaximumPercent:        add.MaximumPercent,
+				},
 			}
 
 			csrv, err := s.ecsCli.CreateService(&p)
