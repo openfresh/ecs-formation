@@ -10,7 +10,7 @@ var planCmd = &cobra.Command{
 	Short: "Show plan to update ECS service",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		srv, err := service.NewServiceService(projectDir, cluster, serviceName, parameters)
+		srv, err := service.NewServiceService(projectDir, []string{cluster}, serviceName, parameters)
 		if err != nil {
 			return err
 		}
