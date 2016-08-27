@@ -11,6 +11,7 @@ import:
   - aws/credentials/ec2rolecreds
   - aws/session
   - service/autoscaling
+  - service/applicationautoscaling
   - service/ecs
   - service/elb
   - service/elbv2

@@ -1,5 +1,5 @@
-hash: d43c9b53248e5b1063b8684225d6d2f6810b0c1dcba009805b6bc7072f8578ab
-updated: 2016-08-24T16:56:03.58450007+09:00
+hash: 5db48cac807c51b2daa6e4d0be15df8617d14568177767d724c53b699e2da26d
+updated: 2016-08-26T19:32:17.581002593+09:00
 imports:
 - name: github.com/apex/log
   version: 8eba30e442954605fd2e1a542912d5b5e16cab13
@@ -12,6 +12,7 @@ imports:
   - aws/credentials/ec2rolecreds
   - aws/session
   - service/autoscaling
+  - service/applicationautoscaling
   - service/ecs
   - service/elb
   - service/elbv2
@@ -27,10 +28,10 @@ imports:
   - aws/defaults
   - private/endpoints
   - aws/signer/v4
-  - private/protocol
   - private/protocol/query
-  - private/waiter
   - private/protocol/jsonrpc
+  - private/protocol
+  - private/waiter
   - private/protocol/restxml
   - service/sts
   - aws/credentials/endpointcreds
@@ -38,8 +39,6 @@ imports:
   - private/protocol/query/queryutil
   - private/protocol/xml/xmlutil
   - private/protocol/json/jsonutil
-- name: github.com/codegangsta/cli
-  version: 05fe449c81eb7305a34e9253c321c960a1c5e057
 - name: github.com/fatih/color
   version: 87d4004f2ab62d0d255e0a38f1680aa534549fe3
 - name: github.com/fsnotify/fsnotify
@@ -105,7 +104,7 @@ imports:
   subpackages:
   - color
 - name: golang.org/x/crypto
-  version: b35ccbc95a0eaae49fb65c5d627cb7149ed8d1ab
+  version: 351dc6a5bf92a5f2ae22fadeee08eb6a45aa2d93
   subpackages:
   - ssh
   - curve25519
