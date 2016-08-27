@@ -110,6 +110,10 @@ func createClusterPlans(srv service.ClusterService) ([]*types.ServiceUpdatePlan,
 			util.PrintlnYellow("        DesiredCount = %d", *cs.DesiredCount)
 			util.PrintlnYellow("        PendingCount = %d", *cs.PendingCount)
 			util.PrintlnYellow("        RunningCount = %d", *cs.RunningCount)
+			if cs.DeploymentConfiguration != nil {
+				util.PrintlnYellow("        MinimumHealthyPercent = %d", cs.DeploymentConfiguration.MinimumHealthyPercent)
+				util.PrintlnYellow("        MaximumPercent = %d", cs.DeploymentConfiguration.MaximumPercent)
+			}
 			for _, lb := range cs.LoadBalancers {
 				util.PrintlnYellow("        ELB = %s:", *lb.LoadBalancerName)
 				util.PrintlnYellow("            ContainerName = %s", *lb.ContainerName)
@@ -128,6 +132,8 @@ func createClusterPlans(srv service.ClusterService) ([]*types.ServiceUpdatePlan,
 			util.PrintlnYellow("        TaskDefinition = %s", add.TaskDefinition)
 			util.PrintlnYellow("        DesiredCount = %d", add.DesiredCount)
 			util.PrintlnYellow("        KeepDesiredCount = %t", add.KeepDesiredCount)
+			util.PrintlnYellow("        MinimumHealthyPercent = %v", add.MinimumHealthyPercent)
+			util.PrintlnYellow("        MaximumPercent = %v", add.MaximumPercent)
 			for _, lb := range add.LoadBalancers {
 				util.PrintlnYellow("        ELB:%s", lb.Name)
 			}

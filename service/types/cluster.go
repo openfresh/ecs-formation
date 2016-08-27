@@ -16,12 +16,14 @@ type Cluster struct {
 }
 
 type Service struct {
-	Name             string
-	TaskDefinition   string         `yaml:"task_definition"`
-	DesiredCount     int64          `yaml:"desired_count"`
-	KeepDesiredCount bool           `yaml:"keep_desired_count"`
-	LoadBalancers    []LoadBalancer `yaml:"load_balancers"`
-	Role             string         `yaml:"role"`
+	Name                  string
+	TaskDefinition        string         `yaml:"task_definition"`
+	DesiredCount          int64          `yaml:"desired_count"`
+	KeepDesiredCount      bool           `yaml:"keep_desired_count"`
+	LoadBalancers         []LoadBalancer `yaml:"load_balancers"`
+	MinimumHealthyPercent *int64         `yaml:"minimum_healthy_percent"`
+	MaximumPercent        *int64         `yaml:"maximum_percent"`
+	Role                  string         `yaml:"role"`
 }
 
 type LoadBalancer struct {

@@ -29,7 +29,7 @@ func (c MockClient) CreateService(params *ecs.CreateServiceInput) (*ecs.Service,
 	return nil, nil
 }
 
-func (c MockClient) UpdateService(cluster string, service string, desiredCount int, taskDef string) (*ecs.Service, error) {
+func (c MockClient) UpdateService(params *ecs.UpdateServiceInput) (*ecs.Service, error) {
 	return nil, nil
 }
 
