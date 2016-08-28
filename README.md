@@ -8,6 +8,10 @@ ecs-formation
 
 ecs-formation is a tool for defining several Docker continers and clusters on [Amazon EC2 Container Service(ECS)](https://aws.amazon.com/ecs/).
 
+# Attention!
+
+Now, `v0.2.7` is stable on master branch. `v1.x.x` is beta phase on [v1.0.0-dev](https://github.com/stormcat24/ecs-formation/tree/1.0.0-dev) branch.
+
 # Features
 
 * Define services on ECS cluster, and Task Definitions.
