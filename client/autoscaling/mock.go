@@ -26,3 +26,18 @@ func (c MockClient) DetachLoadBalancers(group string, lb []string) error {
 
 	return nil
 }
+
+func (c MockClient) AttachLoadBalancerTargetGroups(group string, targetGroupARNs []*string) error {
+
+	return nil
+}
+
+func (c MockClient) DetachLoadBalancerTargetGroups(group string, targetGroupARNs []*string) error {
+
+	return nil
+}
+
+func (c MockClient) DescribeLoadBalancerTargetGroups(group string) ([]*autoscaling.LoadBalancerTargetGroupState, error) {
+
+	return []*autoscaling.LoadBalancerTargetGroupState{}, nil
+}

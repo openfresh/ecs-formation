@@ -15,7 +15,7 @@ type Client interface {
 	ModifyRule(params *elbv2.ModifyRuleInput) ([]*elbv2.Rule, error)
 	CreateTargetGroup(params *elbv2.CreateTargetGroupInput) ([]*elbv2.TargetGroup, error)
 	DeleteTargetGroup(targetGroupArn string) error
-	DescribeTargetGroup(params *elbv2.DescribeTargetGroupsInput) ([]*elbv2.TargetGroup, error)
+	DescribeTargetGroup(groupNames []string) (map[string]*elbv2.TargetGroup, error)
 	ModifyTargetGroup(params *elbv2.ModifyTargetGroupInput) ([]*elbv2.TargetGroup, error)
 }
 
@@ -105,14 +105,28 @@ func (c DefaultClient) DeleteTargetGroup(targetGroupArn string) error {
 	return err
 }
 
-func (c DefaultClient) DescribeTargetGroup(params *elbv2.DescribeTargetGroupsInput) ([]*elbv2.TargetGroup, error) {
+func (c DefaultClient) DescribeTargetGroup(groupNames []string) (map[string]*elbv2.TargetGroup, error) {
 
-	result, err := c.service.DescribeTargetGroups(params)
-	if util.IsRateExceeded(err) {
-		return c.DescribeTargetGroup(params)
+	params := elbv2.DescribeTargetGroupsInput{
+		Names: aws.StringSlice(groupNames),
 	}
 
-	return result.TargetGroups, err
+	tgmap := map[string]*elbv2.TargetGroup{}
+
+	result, err := c.service.DescribeTargetGroups(&params)
+	if util.IsRateExceeded(err) {
+		return c.DescribeTargetGroup(groupNames)
+	}
+
+	if err != nil {
+		return tgmap, err
+	}
+
+	for _, tg := range result.TargetGroups {
+		tgmap[*tg.TargetGroupName] = tg
+	}
+
+	return tgmap, nil
 }
 
 func (c DefaultClient) ModifyTargetGroup(params *elbv2.ModifyTargetGroupInput) ([]*elbv2.TargetGroup, error) {
