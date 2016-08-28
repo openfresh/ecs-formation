@@ -8,14 +8,11 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 
 	"gopkg.in/yaml.v2"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/fatih/color"
 	"github.com/stormcat24/ecs-formation/client"
-	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/stormcat24/ecs-formation/service/types"
 	"github.com/stormcat24/ecs-formation/util"
 )
@@ -105,7 +102,7 @@ func (s ConcreteBlueGreenService) CreateBlueGreenPlans(bgmap map[string]*types.B
 	bgPlans := []*types.BlueGreenPlan{}
 
 	for name, bg := range bgmap {
-		if len(s.blueGreenName) == 0 || s.blueGreenName == name {
+		if s.blueGreenName == "" || s.blueGreenName == name {
 			bgplan, err := s.createBlueGreenPlan(bg, cplans)
 			if err != nil {
 				return bgPlans, err
@@ -162,6 +159,7 @@ func (s ConcreteBlueGreenService) createBlueGreenPlan(bluegreen *types.BlueGreen
 		PrimaryElb: bluegreen.PrimaryElb,
 		StandbyElb: bluegreen.StandbyElb,
 		ChainElb:   bluegreen.ChainElb,
+		ElbV2:      bluegreen.ElbV2,
 	}
 
 	// describe services
@@ -234,110 +232,6 @@ func (s ConcreteBlueGreenService) ApplyBlueGreenDeploys(clusterService ClusterSe
 
 func (s ConcreteBlueGreenService) applyBlueGreenDeploy(clusterService ClusterService, bgplan *types.BlueGreenPlan, nodeploy bool) error {
 
-	targetGreen := bgplan.IsBlueWithPrimaryElb()
-
-	var currentLabel string
-	var nextLabel string
-	var current *types.ServiceSet
-	var next *types.ServiceSet
-	primaryLb := bgplan.PrimaryElb
-	standbyLb := bgplan.StandbyElb
-	if targetGreen {
-		current = bgplan.Blue
-		next = bgplan.Green
-		currentLabel = color.CyanString("blue")
-		nextLabel = color.GreenString("green")
-	} else {
-		current = bgplan.Green
-		next = bgplan.Blue
-		currentLabel = color.GreenString("green")
-		nextLabel = color.CyanString("blue")
-	}
-
-	primaryGroup := []string{primaryLb}
-	standbyGroup := []string{standbyLb}
-	for _, entry := range bgplan.ChainElb {
-		primaryGroup = append(primaryGroup, entry.PrimaryElb)
-		standbyGroup = append(standbyGroup, entry.StandbyElb)
-	}
-
-	logger.Main.Infof("Current status is '%s'", currentLabel)
-	logger.Main.Infof("Start Blue-Green Deployment: %s to %s ...", currentLabel, nextLabel)
-	if nodeploy {
-		logger.Main.Infof("Without deployment. It only replaces load balancers.")
-	} else {
-		// deploy service
-		logger.Main.Infof("Updating %s@%s service at %s ...", next.NewService.Service, next.NewService.Cluster, nextLabel)
-		if err := clusterService.ApplyServicePlan(next.ClusterUpdatePlan); err != nil {
-			return err
-		}
-	}
-
-	// attach next group to primary lb
-	if err := s.awsCli.Autoscaling.AttachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, primaryGroup); err != nil {
-		return err
-	}
-	for _, e := range primaryGroup {
-		logger.Main.Infof("Attached to attach %s group to %s(primary).", nextLabel, e)
-	}
-
-	if err := s.waitLoadBalancer(*next.AutoScalingGroup.AutoScalingGroupName, primaryLb); err != nil {
-		return err
-	}
-	logger.Main.Infof("Added %s group to primary", nextLabel)
-
-	// detach current group from primary lb
-	if err := s.awsCli.Autoscaling.DetachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, primaryGroup); err != nil {
-		return err
-	}
-	for _, e := range primaryGroup {
-		logger.Main.Infof("Detached %s group from %s(primary).", currentLabel, e)
-	}
-
-	// detach next group from standby lb
-	if err := s.awsCli.Autoscaling.DetachLoadBalancers(*next.AutoScalingGroup.AutoScalingGroupName, standbyGroup); err != nil {
-		return err
-	}
-	for _, e := range standbyGroup {
-		logger.Main.Infof("Detached %s group from %s(standby).", nextLabel, e)
-	}
-
-	// attach current group to standby lb
-	if err := s.awsCli.Autoscaling.AttachLoadBalancers(*current.AutoScalingGroup.AutoScalingGroupName, standbyGroup); err != nil {
-		return err
-	}
-	for _, e := range standbyGroup {
-		logger.Main.Infof("Attached %s group to %s(standby).", currentLabel, e)
-	}
-
-	return nil
-}
-
-func (s ConcreteBlueGreenService) waitLoadBalancer(group string, lb string) error {
-
-	for {
-		time.Sleep(5 * time.Second)
-
-		result, err := s.awsCli.Autoscaling.DescribeLoadBalancerState(group)
-		if err != nil {
-			return err
-		}
-
-		if lbs, ok := result[lb]; ok {
-
-			// *** LoadbalancerState
-			// Adding - The instances in the group are being registered with the load balancer.
-			// Added - All instances in the group are registered with the load balancer.
-			// InService - At least one instance in the group passed an ELB health check.
-			// Removing - The instances are being deregistered from the load balancer. If connection draining is enabled, Elastic Load Balancing waits for in-flight requests to complete before deregistering the instances.
-			if *lbs.State == "Added" || *lbs.State == "InService" {
-				return nil
-			}
-
-		} else {
-			return fmt.Errorf("cannot get load balanracer '%s'", lb)
-		}
-
-	}
-
+	switcher := NewELBSwitcher(s.awsCli, bgplan)
+	return switcher.Apply(clusterService, bgplan, nodeploy)
 }

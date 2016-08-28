@@ -12,6 +12,9 @@ type Client interface {
 	DescribeLoadBalancerState(group string) (map[string]*autoscaling.LoadBalancerState, error)
 	AttachLoadBalancers(group string, lb []string) error
 	DetachLoadBalancers(group string, lb []string) error
+	AttachLoadBalancerTargetGroups(group string, targetGroupARNs []*string) error
+	DetachLoadBalancerTargetGroups(group string, targetGroupARNs []*string) error
+	DescribeLoadBalancerTargetGroups(group string) ([]*autoscaling.LoadBalancerTargetGroupState, error)
 }
 
 type DefaultClient struct {
@@ -92,4 +95,47 @@ func (c DefaultClient) DetachLoadBalancers(group string, lb []string) error {
 	}
 
 	return err
+}
+
+func (c DefaultClient) AttachLoadBalancerTargetGroups(group string, targetGroupARNs []*string) error {
+
+	params := autoscaling.AttachLoadBalancerTargetGroupsInput{
+		AutoScalingGroupName: aws.String(group),
+		TargetGroupARNs:      targetGroupARNs,
+	}
+
+	_, err := c.service.AttachLoadBalancerTargetGroups(&params)
+	if util.IsRateExceeded(err) {
+		return c.AttachLoadBalancerTargetGroups(group, targetGroupARNs)
+	}
+
+	return err
+}
+
+func (c DefaultClient) DetachLoadBalancerTargetGroups(group string, targetGroupARNs []*string) error {
+
+	params := autoscaling.DetachLoadBalancerTargetGroupsInput{
+		AutoScalingGroupName: aws.String(group),
+		TargetGroupARNs:      targetGroupARNs,
+	}
+
+	_, err := c.service.DetachLoadBalancerTargetGroups(&params)
+	if util.IsRateExceeded(err) {
+		return c.DetachLoadBalancerTargetGroups(group, targetGroupARNs)
+	}
+
+	return err
+}
+
+func (c DefaultClient) DescribeLoadBalancerTargetGroups(group string) ([]*autoscaling.LoadBalancerTargetGroupState, error) {
+	params := autoscaling.DescribeLoadBalancerTargetGroupsInput{
+		AutoScalingGroupName: aws.String(group),
+	}
+
+	result, err := c.service.DescribeLoadBalancerTargetGroups(&params)
+	if util.IsRateExceeded(err) {
+		return c.DescribeLoadBalancerTargetGroups(group)
+	}
+
+	return result.LoadBalancerTargetGroups, err
 }
