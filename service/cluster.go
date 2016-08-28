@@ -239,14 +239,18 @@ func (s ConcreteClusterService) ApplyServicePlan(plan *types.ServiceUpdatePlan) 
 			logger.Main.Infof("Deleted service '%s' completely.", *dsrv.ServiceArn)
 		}
 	}
-
-	// newにあってcurrentにない（新規追加）
+	// only new registration
 	for _, add := range plan.NewServices {
+		if s.targetService != "" && s.targetService != add.Name {
+			continue
+		}
+
 		if _, ok := plan.CurrentServices[add.Name]; !ok {
 			logger.Main.Infof("Creating '%s' service on '%s' ...", add.Name, plan.Name)
 
 			p := awsecs.CreateServiceInput{
 				Cluster:        aws.String(plan.Name),
+				ServiceName:    aws.String(add.Name),
 				DesiredCount:   aws.Int64(add.DesiredCount),
 				LoadBalancers:  toLoadBalancersNew(add.LoadBalancers),
 				Role:           aws.String(add.Role),
