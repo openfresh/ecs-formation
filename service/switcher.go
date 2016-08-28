@@ -285,7 +285,7 @@ func (s ELBV2Switcher) waitTargetGroup(group string, tg string) error {
 		//    Removed - All Auto Scaling instances are deregistered from the target group.
 
 		if len(targetGroups) == 0 {
-			return fmt.Errorf("cannot get target group %s at ", tg, group)
+			return fmt.Errorf("cannot get target group %s at %s", tg, group)
 		}
 
 		for _, targetGroup := range targetGroups {
