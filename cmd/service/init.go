@@ -2,6 +2,7 @@ package service
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -39,6 +40,10 @@ var ServiceCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		if cl == "" {
+			return errors.New("-c (--cluster) is required")
+		}
+
 		cluster = cl
 
 		sv, err := cmd.Flags().GetString("service")
