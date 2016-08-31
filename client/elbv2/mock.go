@@ -47,3 +47,8 @@ func (c MockClient) ModifyTargetGroup(params *elbv2.ModifyTargetGroupInput) ([]*
 
 	return []*elbv2.TargetGroup{}, nil
 }
+
+func (c MockClient) DescribeTargetHealth(targetGroupArn string) ([]*elbv2.TargetHealthDescription, error) {
+
+	return []*elbv2.TargetHealthDescription{}, nil
+}
