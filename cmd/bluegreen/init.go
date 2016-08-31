@@ -2,6 +2,7 @@ package bluegreen
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/autoscaling"
@@ -57,6 +58,9 @@ var BlueGreenCmd = &cobra.Command{
 		bg, err := cmd.Flags().GetString("group")
 		if err != nil {
 			return err
+		}
+		if bg == "" {
+			return errors.New("-g (--group) is required")
 		}
 		bluegreenName = bg
 
