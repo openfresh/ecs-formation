@@ -93,6 +93,7 @@ func (s ELBV1Switcher) Apply(clusterService ClusterService, bgplan *types.BlueGr
 	if err := s.waitLoadBalancer(*next.AutoScalingGroup.AutoScalingGroupName, primaryLb); err != nil {
 		return err
 	}
+	time.Sleep(5 * time.Second)
 	logger.Main.Infof("Added %s group to primary", nextLabel)
 
 	// detach current group from primary lb
@@ -291,12 +292,13 @@ func (s ELBV2Switcher) waitTargetGroup(group string, tg string) error {
 		for _, targetGroup := range targetGroups {
 			if strings.Contains(*targetGroup.LoadBalancerTargetGroupARN, tg) {
 				state := *targetGroup.State
+
 				if state == "Added" || state == "InService" {
+					logger.Main.Infof("%s: TargetGroup %s to %s", color.GreenString(state), tg, group)
 					return nil
 				}
+				logger.Main.Infof("%s: TargetGroup %s to %s", color.YellowString(state), tg, group)
 			}
 		}
-
-		return nil
 	}
 }

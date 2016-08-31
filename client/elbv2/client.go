@@ -17,6 +17,7 @@ type Client interface {
 	DeleteTargetGroup(targetGroupArn string) error
 	DescribeTargetGroup(groupNames []string) (map[string]*elbv2.TargetGroup, error)
 	ModifyTargetGroup(params *elbv2.ModifyTargetGroupInput) ([]*elbv2.TargetGroup, error)
+	DescribeTargetHealth(targetGroupArn string) ([]*elbv2.TargetHealthDescription, error)
 }
 
 type DefaultClient struct {
@@ -137,4 +138,18 @@ func (c DefaultClient) ModifyTargetGroup(params *elbv2.ModifyTargetGroupInput) (
 	}
 
 	return result.TargetGroups, err
+}
+
+func (c DefaultClient) DescribeTargetHealth(targetGroupArn string) ([]*elbv2.TargetHealthDescription, error) {
+
+	params := elbv2.DescribeTargetHealthInput{
+		TargetGroupArn: aws.String(targetGroupArn),
+	}
+
+	result, err := c.service.DescribeTargetHealth(&params)
+	if util.IsRateExceeded(err) {
+		return c.DescribeTargetHealth(targetGroupArn)
+	}
+
+	return result.TargetHealthDescriptions, nil
 }
