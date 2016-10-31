@@ -134,10 +134,16 @@ Show update plan.
 (path-to-path/test-ecs-formation $ ecs-formation task plan
 ```
 
-Apply definition.
+Apply all definition.
 
 ```bash
 (path-to-path/test-ecs-formation $ ecs-formation task apply
+```
+
+Specify Task Definition.
+
+```bash
+(path-to-path/test-ecs-formation $ ecs-formation task apply -t test_definition
 ```
 
 #### Manage Services on Cluster
@@ -148,10 +154,22 @@ Show update plan.
 (path-to-path/test-ecs-formation $ ecs-formation service plan
 ```
 
-Apply definition.
+Apply all services.
 
 ```bash
 (path-to-path/test-ecs-formation $ ecs-formation service apply
+```
+
+Specify cluster.
+
+```bash
+(path-to-path/test-ecs-formation $ ecs-formation service apply -c test-cluster
+```
+
+Specify cluster and service.
+
+```bash
+(path-to-path/test-ecs-formation $ ecs-formation service apply -c test-cluster -s test-service
 ```
 
 ### Blue Green Deployment
@@ -191,16 +209,16 @@ Show blue green deployment plan.
 Apply blue green deployment.
 
 ```bash
-(path-to-path/test-ecs-formation $ ecs-formation bluegreen apply
+(path-to-path/test-ecs-formation $ ecs-formation bluegreen apply -g test-bluegreen
 ```
 
 if with `--nodeploy` option, not update services. Only swap ELB on blue and green groups.
 
 ```bash
-(path-to-path/test-ecs-formation $ ecs-formation bluegreen apply --nodeploy
+(path-to-path/test-ecs-formation $ ecs-formation bluegreen apply --nodeploy -g test-bluegreen
 ```
 
-If autoscaling group have several different ELB, you should specify array property of `chain_elb`. ecs-formation can swap `chain_elb` ELB group with main ELB group at the same time.
+If autoscaling group have several different classic ELB, you should specify array property of `chain_elb`. ecs-formation can swap `chain_elb` ELB group with main ELB group at the same time.
 
 ```Ruby
 (path-to-path/test-ecs-formation/bluegreen) $ vim test-bluegreen.yml
@@ -219,6 +237,24 @@ chain_elb:
     standby_elb: test-internal-elb-standby
 ```
 
+In case of ALB(Application Load Balancer), as follows.
+
+```Ruby
+(path-to-path/test-ecs-formation/bluegreen) $ vim test-bluegreen.yml
+blue:
+  cluster: test-blue
+  service: test-service
+  autoscaling_group: test-blue-asg
+green:
+  cluster: test-green
+  service: test-service
+  autoscaling_group: test-green-asg
+elbv2:
+  target_groups:
+    - primary_group: test-internal-primary
+      standby_group: test-internal-default
+```
+
 ### Others
 #### Passing custom parameters
 
@@ -234,7 +270,7 @@ nginx:
 You can set value for these parameters by using `-p` option.
 
 ```bash
-ecs-formation task -p NGINX_VERSION=1.0 -p NGINX_PORT=80 plan your-web-task
+ecs-formation task -p NGINX_VERSION=1.0 -p NGINX_PORT=80 plan -t your-web-task
 ```
 
 Also, support default parameter value.
