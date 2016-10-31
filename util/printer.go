@@ -2,7 +2,8 @@ package util
 
 import (
 	"fmt"
-	"github.com/str1ngs/ansi/color"
+
+	"github.com/fatih/color"
 	"github.com/stormcat24/ecs-formation/logger"
 )
 
@@ -18,16 +19,30 @@ func Println(a ...interface{}) (int, error) {
 	}
 }
 
-func PrintlnCyan(a ...interface{}) (int, error) {
-	return Println(color.Cyan(fmt.Sprint(a...)))
+func Print(a ...interface{}) (int, error) {
+	if Output {
+		return fmt.Print(a...)
+	} else {
+		return 0, nil
+	}
 }
 
-func PrintlnGreen(a ...interface{}) (int, error) {
-	return Println(color.Green(fmt.Sprint(a...)))
+func PrintlnCyan(format string, a ...interface{}) {
+	if Output {
+		color.Cyan(format, a...)
+	}
 }
 
-func PrintlnYellow(a ...interface{}) (int, error) {
-	return Println(color.Yellow(fmt.Sprint(a...)))
+func PrintlnGreen(format string, a ...interface{}) {
+	if Output {
+		color.Green(format, a...)
+	}
+}
+
+func PrintlnYellow(format string, a ...interface{}) {
+	if Output {
+		color.Yellow(format, a...)
+	}
 }
 
 func Infoln(a ...interface{}) {

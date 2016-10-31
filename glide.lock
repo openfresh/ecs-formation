@@ -1,75 +1,130 @@
-hash: 6ce65bc8fe44d0b36d2dcfce800944a8f3a36002560a3426e5706f8ea2098a83
-updated: 2016-03-30T11:37:17.973528565+09:00
+hash: c95c0c2a426765de918ff757f8e690f450491be607c33efdc6d0134a93326370
+updated: 2016-10-31T18:11:15.070682056+09:00
 imports:
+- name: github.com/apex/log
+  version: 8eba30e442954605fd2e1a542912d5b5e16cab13
 - name: github.com/aws/aws-sdk-go
-  version: e7cf1e5986499eea7d4a87868f1eb578c8f2045a
+  version: 32cdc88aa5cd2ba4afa049da884aaf9a3d103ef4
   subpackages:
   - aws
-  - private/endpoints
-  - private/protocol/json/jsonutil
-  - private/protocol/jsonrpc
-  - private/protocol/query
-  - private/protocol/rest
-  - private/protocol/xml/xmlutil
-  - private/signer/v4
-  - private/waiter
+  - aws/awsutil
+  - aws/credentials
+  - aws/credentials/ec2rolecreds
+  - aws/session
   - service/autoscaling
+  - service/applicationautoscaling
   - service/ecs
   - service/elb
+  - service/elbv2
   - service/sns
-- name: github.com/codegangsta/cli
-  version: b5232bb2934f606f9f27a1305f1eea224e8e8b88
-- name: github.com/davecgh/go-spew
-  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  - aws/ec2metadata
+  - service/s3
+  - aws/awserr
+  - aws/client
+  - aws/client/metadata
+  - aws/request
+  - aws/corehandlers
+  - aws/credentials/stscreds
+  - aws/defaults
+  - private/endpoints
+  - aws/signer/v4
+  - private/protocol/jsonrpc
+  - private/protocol
+  - private/protocol/query
+  - private/waiter
+  - private/protocol/restxml
+  - service/sts
+  - aws/credentials/endpointcreds
+  - private/protocol/rest
+  - private/protocol/json/jsonutil
+  - private/protocol/query/queryutil
+  - private/protocol/xml/xmlutil
+- name: github.com/fatih/color
+  version: 87d4004f2ab62d0d255e0a38f1680aa534549fe3
+- name: github.com/fsnotify/fsnotify
+  version: fd9ec7deca8bf46ecd2a795baaacf2b3a9be1197
+- name: github.com/hashicorp/hcl
+  version: 8fa153c5b4e9d1ccecda7075821ffc7c1f6d912b
   subpackages:
-  - spew
-- name: github.com/go-ini/ini
-  version: ""
+  - hcl/ast
+  - hcl/parser
+  - hcl/token
+  - json/parser
+  - hcl/scanner
+  - hcl/strconv
+  - json/scanner
+  - json/token
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jmespath/go-jmespath
-  version: 53d419364047eb08a64c29471db23c60ea585b85
+  version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - name: github.com/joho/godotenv
   version: 4ed13390c0acd2ff4e371e64d8b97c8954138243
-- name: github.com/lsegal/gucumber
-  version: 44a4d7eb3b14a88cf82b073dfb7e06277afdc549
+- name: github.com/kr/fs
+  version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
+- name: github.com/magiconair/properties
+  version: 0723e352fa358f9322c938cc2dadda874e9151a9
+- name: github.com/mattn/go-colorable
+  version: 6c903ff4aa50920ca86087a280590b36b3152b9c
+- name: github.com/mattn/go-isatty
+  version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
 - name: github.com/mattn/go-shellwords
-  version: f4e566c536cf69158e808ec28ef4182a37fdc981
+  version: 525bedee691b5a8df547cb5cf9f86b7fb1883e24
+- name: github.com/mitchellh/mapstructure
+  version: f3009df150dadf309fdee4a54ed65c124afad715
 - name: github.com/naoina/go-stringutil
-  version: 360db0db4b01d34e12a2ec042c09e7d37fece761
-- name: github.com/pmezard/go-difflib
-  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
-  subpackages:
-  - difflib
-- name: github.com/shiena/ansicolor
-  version: a422bbe96644373c5753384a59d678f7d261ff10
+  version: 6b638e95a32d0c1131db0e7fe83775cbea4a0d0b
+- name: github.com/pelletier/go-buffruneio
+  version: df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d
+- name: github.com/pelletier/go-toml
+  version: 45932ad32dfdd20826f5671da37a5f3ce9f26a8d
+- name: github.com/pkg/errors
+  version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
+- name: github.com/pkg/sftp
+  version: 4d0e916071f68db74f8a73926335f809396d6b42
 - name: github.com/Sirupsen/logrus
-  version: 446d1c146faa8ed3f4218f056fcd165f6bcfda81
+  version: 3ec0642a7fb6488f65b06f9040adc67e3990296a
+- name: github.com/spf13/afero
+  version: 52e4a6cfac46163658bd4f123c49b6ee7dc75f78
+  subpackages:
+  - mem
+  - sftp
+- name: github.com/spf13/cast
+  version: 2580bc98dc0e62908119e4737030cc2fdfc45e4c
+- name: github.com/spf13/cobra
+  version: 37c3f8060359192150945916cbc2d72bce804b4d
+- name: github.com/spf13/jwalterweatherman
+  version: 33c24e77fb80341fe7130ee7c594256ff08ccc46
+- name: github.com/spf13/pflag
+  version: 5ccb023bc27df288a957c5e994cd44fd19619465
+- name: github.com/spf13/viper
+  version: 651d9d916abc3c3d6a91a12549495caba5edffd2
 - name: github.com/str1ngs/ansi
   version: 5dc1bc5ac1f5bcbf5bd4818dd27ef912beb4bb7c
   subpackages:
   - color
-- name: github.com/stretchr/objx
-  version: cbeaeb16a013161a98496fad62933b1d21786672
-- name: github.com/stretchr/testify
-  version: 6fe211e493929a8aac0469b93f28b1d0688a9a3a
 - name: golang.org/x/crypto
-  version: 9e7f5dc375abeb9619ea3c5c58502c428f457aa2
-  repo: https://golang.org/x/crypto
-- name: golang.org/x/net
-  version: 31df19d69da8728e9220def59b80ee577c3e48bf
+  version: b2fa06b6af4b7c9bfeb8569ab7b17f04550717bf
+  subpackages:
+  - ssh
+  - curve25519
+  - ed25519
+  - ed25519/internal/edwards25519
 - name: golang.org/x/sys
-  version: 833a04a10549a95dc34458c195cbad61bbb6cb4d
+  version: c200b10b5d5e122be351b67af224adc6128af5bf
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: 1b466db55e0ba5d56ef5315c728216b42f796491
-  repo: https://golang.org/x/text
-- name: golang.org/x/tools
-  version: 84e7bc0dd39bab24b696dde4d714641fa738f945
-- name: gopkg.in/airbrake/gobrake.v2
-  version: ffa39d09712dfb3d20dc9b5564bb62cf6d8125d0
-- name: gopkg.in/gemnasium/logrus-airbrake-hook.v2
-  version: 31e6fd4bd5a98d8ee7673d24bc54ec73c31810dd
-  repo: https://gopkg.in/gemnasium/logrus-airbrake-hook.v2
+  version: a8b38433e35b65ba247bb267317037dee1b70cea
+  subpackages:
+  - transform
+  - unicode/norm
 - name: gopkg.in/yaml.v2
-  version: 7ad95dd0798a40da1ccdff6dff35fd177b5edf40
-devImports: []
+  version: a5b47d31c556af34a302ce5d659e6fea44d90de0
+testImports:
+- name: github.com/stretchr/testify
+  version: 976c720a22c8eb4eb6a0b4348ad85ad12491a506
+  subpackages:
+  - assert
+  - require
+  - mock
