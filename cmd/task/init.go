@@ -71,7 +71,12 @@ func createTaskPlans(srv service.TaskService) []*types.TaskUpdatePlan {
 			util.PrintlnCyan("      links: %v", add.Links)
 			util.PrintlnCyan("      volumes: %v", add.Volumes)
 			util.PrintlnCyan("      volumes_from: %v", add.VolumesFrom)
-			util.PrintlnCyan("      memory: %v", add.Memory)
+			if add.Memory != nil {
+				util.PrintlnCyan("      memory: %v", *add.Memory)
+			}
+			if add.MemoryReservation != nil {
+				util.PrintlnCyan("      memory_reservation: %#v", *add.MemoryReservation)
+			}
 			util.PrintlnCyan("      cpu_units: %v", add.CPUUnits)
 			util.PrintlnCyan("      essential: %v", add.Essential)
 			util.PrintlnCyan("      entry_point: %v", add.EntryPoint)

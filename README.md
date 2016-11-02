@@ -73,7 +73,7 @@ nginx:
     PARAM2: value2
   links:
     - api
-  memory: 512
+  memory_reservation: 256
   cpu_units: 512
   essential: true
 

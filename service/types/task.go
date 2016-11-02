@@ -29,7 +29,8 @@ type ContainerDefinition struct {
 	Links                  []string          `yaml:"links"`
 	Volumes                []string          `yaml:"volumes"`
 	VolumesFrom            []string          `yaml:"volumes_from"`
-	Memory                 int64             `yaml:"memory"`
+	Memory                 *int64            `yaml:"memory"`
+	MemoryReservation      *int64            `yaml:"memory_reservation"`
 	CPUUnits               int64             `yaml:"cpu_units"`
 	Essential              bool              `yaml:"essential"`
 	EntryPoint             string            `yaml:"entry_point"`
