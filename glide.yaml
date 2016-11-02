@@ -3,7 +3,7 @@ import:
 - package: github.com/apex/log
   version: 8eba30e442954605fd2e1a542912d5b5e16cab13
 - package: github.com/aws/aws-sdk-go
-  version: 1.4.20
+  version: 1.5.0
   subpackages:
   - /aws
   - aws/awsutil

@@ -1,10 +1,10 @@
-hash: c95c0c2a426765de918ff757f8e690f450491be607c33efdc6d0134a93326370
-updated: 2016-10-31T18:11:15.070682056+09:00
+hash: e4f775f3f531b102439e17fdf2473e6ad5ec38f369929e307d6db4e6d1d9dbc8
+updated: 2016-11-03T00:24:07.147506472+09:00
 imports:
 - name: github.com/apex/log
   version: 8eba30e442954605fd2e1a542912d5b5e16cab13
 - name: github.com/aws/aws-sdk-go
-  version: 32cdc88aa5cd2ba4afa049da884aaf9a3d103ef4
+  version: 9b9549981ca74f9dbe55ea5dc839a89b37597940
   subpackages:
   - aws
   - aws/awsutil
@@ -44,7 +44,7 @@ imports:
 - name: github.com/fsnotify/fsnotify
   version: fd9ec7deca8bf46ecd2a795baaacf2b3a9be1197
 - name: github.com/hashicorp/hcl
-  version: 8fa153c5b4e9d1ccecda7075821ffc7c1f6d912b
+  version: 6e968a3fcdcbab092f5307fd0d85479d5af1e4dc
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -65,7 +65,7 @@ imports:
 - name: github.com/magiconair/properties
   version: 0723e352fa358f9322c938cc2dadda874e9151a9
 - name: github.com/mattn/go-colorable
-  version: 6c903ff4aa50920ca86087a280590b36b3152b9c
+  version: 6e26b354bd2b0fc420cb632b0d878abccdc6544c
 - name: github.com/mattn/go-isatty
   version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
 - name: github.com/mattn/go-shellwords
@@ -83,7 +83,7 @@ imports:
 - name: github.com/pkg/sftp
   version: 4d0e916071f68db74f8a73926335f809396d6b42
 - name: github.com/Sirupsen/logrus
-  version: 3ec0642a7fb6488f65b06f9040adc67e3990296a
+  version: 380f64d344b252a007a59baa61f31820f59cba89
 - name: github.com/spf13/afero
   version: 52e4a6cfac46163658bd4f123c49b6ee7dc75f78
   subpackages:
@@ -104,7 +104,7 @@ imports:
   subpackages:
   - color
 - name: golang.org/x/crypto
-  version: b2fa06b6af4b7c9bfeb8569ab7b17f04550717bf
+  version: 9477e0b78b9ac3d0b03822fd95422e2fe07627cd
   subpackages:
   - ssh
   - curve25519
