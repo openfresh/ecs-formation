@@ -135,39 +135,29 @@ test-service:
 Show update plan.
 
 ```bash
-(path-to-path/test-ecs-formation $ ecs-formation task plan
+(path-to-path/test-ecs-formation $ ecs-formation task plan --all
+(path-to-path/test-ecs-formation $ ecs-formation task plan -t test_definition
 ```
 
 Apply all definition.
 
 ```bash
-(path-to-path/test-ecs-formation $ ecs-formation task apply
-```
-
-Specify Task Definition.
-
-```bash
+(path-to-path/test-ecs-formation $ ecs-formation task apply --all
 (path-to-path/test-ecs-formation $ ecs-formation task apply -t test_definition
 ```
 
 #### Manage Services on Cluster
 
-Show update plan.
+Show update plan. Required cluster.
 
 ```bash
-(path-to-path/test-ecs-formation $ ecs-formation service plan
+(path-to-path/test-ecs-formation $ ecs-formation service plan -c test-cluster --all
 ```
 
 Apply all services.
 
 ```bash
-(path-to-path/test-ecs-formation $ ecs-formation service apply
-```
-
-Specify cluster.
-
-```bash
-(path-to-path/test-ecs-formation $ ecs-formation service apply -c test-cluster
+(path-to-path/test-ecs-formation $ ecs-formation service apply -c test-cluster --all
 ```
 
 Specify cluster and service.

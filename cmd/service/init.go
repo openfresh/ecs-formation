@@ -52,6 +52,15 @@ var ServiceCmd = &cobra.Command{
 		}
 		serviceName = sv
 
+		all, err := cmd.Flags().GetBool("all")
+		if err != nil {
+			return err
+		}
+
+		if serviceName == "" && all == false {
+			return errors.New("should specify '-s service_name' or '-all' option")
+		}
+
 		paramTokens, err := cmd.Flags().GetStringSlice("parameter")
 		if err != nil {
 			return err
