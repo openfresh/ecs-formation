@@ -1,6 +1,8 @@
 package task
 
 import (
+	"errors"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stormcat24/ecs-formation/client"
@@ -37,11 +39,21 @@ var TaskCmd = &cobra.Command{
 		}
 		taskDefinition = td
 
+		all, err := cmd.Flags().GetBool("all")
+		if err != nil {
+			return err
+		}
+
+		if taskDefinition == "" && all == false {
+			return errors.New("should specify '-t task_definition_name' or '-all' option")
+		}
+
 		paramTokens, err := cmd.Flags().GetStringSlice("parameter")
 		if err != nil {
 			return err
 		}
 		parameters = util.ParseKeyValues(paramTokens)
+
 		return nil
 	},
 }
