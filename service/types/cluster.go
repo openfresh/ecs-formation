@@ -27,9 +27,10 @@ type Service struct {
 }
 
 type LoadBalancer struct {
-	Name          string `yaml:"name"`
-	ContainerName string `yaml:"container_name"`
-	ContainerPort int64  `yaml:"container_port"`
+	Name           *string `yaml:"name"`
+	ContainerName  string  `yaml:"container_name"`
+	ContainerPort  int64   `yaml:"container_port"`
+	TargetGroupARN *string `yaml:"target_group_arn"`
 }
 
 type ServiceUpdatePlan struct {

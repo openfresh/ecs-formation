@@ -115,6 +115,22 @@ test-service:
       container_port: 80
 ```
 
+In case of ALB, you should specify `target_group_arn`.
+```bash
+(path-to-path/test-ecs-formation/service) $ vim test-cluster.yml
+test-service:
+  task_definition: test-definition
+  desired_count: 1
+  role: your-ecs-elb-role
+  load_balancers:
+    -
+      target_group_arn: test-target-group-arn
+      container_name: nginx
+      container_port: 80
+```
+
+
+
 #### Keep desired_count at updating service
 
 If you modify value of `desired_count` by AWS Management Console or aws-cli, you'll fear override value of `desired_count` by ecs-formation. This value should be flexibly changed in the operation.

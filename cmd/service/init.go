@@ -132,9 +132,14 @@ func createClusterPlans(srv service.ClusterService) ([]*types.ServiceUpdatePlan,
 				util.PrintlnYellow("        MaximumPercent = %d", cs.DeploymentConfiguration.MaximumPercent)
 			}
 			for _, lb := range cs.LoadBalancers {
-				util.PrintlnYellow("        ELB = %s:", *lb.LoadBalancerName)
-				util.PrintlnYellow("            ContainerName = %s", *lb.ContainerName)
-				util.PrintlnYellow("            ContainerName = %d", *lb.ContainerPort)
+				if lb.LoadBalancerName != nil {
+					util.PrintlnYellow("        ELB = %s:", *lb.LoadBalancerName)
+				}
+				if lb.TargetGroupArn != nil {
+					util.PrintlnYellow("        TargetGroupARN = %s:", *lb.TargetGroupArn)
+				}
+				util.PrintlnYellow("            ContainerName = %v", *lb.ContainerName)
+				util.PrintlnYellow("            ContainerPort = %v", *lb.ContainerPort)
 			}
 			util.PrintlnYellow("        STATUS = %s", *cs.Status)
 			util.Println()
@@ -153,7 +158,14 @@ func createClusterPlans(srv service.ClusterService) ([]*types.ServiceUpdatePlan,
 			util.PrintlnYellow("        MaximumPercent = %v", add.MaximumPercent)
 			util.PrintlnYellow("        Role = %v", add.Role)
 			for _, lb := range add.LoadBalancers {
-				util.PrintlnYellow("        ELB:%s", lb.Name)
+				if lb.Name != nil {
+					util.PrintlnYellow("        ELB:%v", *lb.Name)
+				}
+				if lb.TargetGroupARN != nil {
+					util.PrintlnYellow("            TargetGroupARN:%v", *lb.TargetGroupARN)
+				}
+				util.PrintlnYellow("            ContainerName:%v", lb.ContainerName)
+				util.PrintlnYellow("            ContainerPort:%v", lb.ContainerPort)
 			}
 			util.Println()
 		}
