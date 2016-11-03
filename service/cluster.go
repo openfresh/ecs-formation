@@ -492,17 +492,24 @@ func (s ConcreteClusterService) roundColorStatus(status string) string {
 	}
 }
 
-// TODO remove New
 func toLoadBalancersNew(values []types.LoadBalancer) []*awsecs.LoadBalancer {
 
 	loadBalancers := []*awsecs.LoadBalancer{}
 	for _, lb := range values {
-		loadBalancers = append(loadBalancers, &awsecs.LoadBalancer{
-			LoadBalancerName: &lb.Name,
-			ContainerName:    &lb.ContainerName,
-			ContainerPort:    &lb.ContainerPort,
-		})
+		addElb := awsecs.LoadBalancer{
+			ContainerName: &lb.ContainerName,
+			ContainerPort: &lb.ContainerPort,
+		}
+		if lb.Name != nil {
+			addElb.LoadBalancerName = lb.Name
+		}
+		if lb.TargetGroupARN != nil {
+			addElb.TargetGroupArn = lb.TargetGroupARN
+		}
+
+		loadBalancers = append(loadBalancers, &addElb)
 	}
+	fmt.Println(loadBalancers)
 
 	return loadBalancers
 }
