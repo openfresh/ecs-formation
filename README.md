@@ -6,14 +6,7 @@ ecs-formation
 [![issues](https://img.shields.io/github/issues/stormcat24/ecs-formation.svg?style=flat)](https://github.com/stormcat24/ecs-formation/issues?state=open)
 [![License: MIT](http://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 
-# Caution
-Rescratching ecs-formation now for v1.0.0.
-
 ecs-formation is a tool for defining several Docker continers and clusters on [Amazon EC2 Container Service(ECS)](https://aws.amazon.com/ecs/).
-
-# Attention!
-
-Now, `v0.2.7` is stable on master branch. `v1.x.x` is beta phase on [v1.0.0-dev](https://github.com/stormcat24/ecs-formation/tree/1.0.0-dev) branch.
 
 # Features
 
@@ -34,6 +27,15 @@ $ go get github.com/stormcat24/ecs-formation
 ```
 
 #### Define environment variables
+
+ecs-formation use [cobra](https://github.com/spf13/cobra). It supports yaml configuration.
+
+Prepare `~/.ecs-formation.yaml` for project configuration.
+
+```Ruby
+project_dir: ~/your_project_dir/
+aws_region: us-east-1
+```
 
 ecs-formation requires environment variables to run, as follows.
 
