@@ -45,7 +45,7 @@ var TaskCmd = &cobra.Command{
 		}
 
 		if taskDefinition == "" && all == false {
-			return errors.New("should specify '-t task_definition_name' or '-all' option")
+			return errors.New("should specify '-t task_definition_name' or '--all' option")
 		}
 
 		paramTokens, err := cmd.Flags().GetStringSlice("parameter")
