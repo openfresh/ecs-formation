@@ -1,9 +1,9 @@
 package: github.com/stormcat24/ecs-formation
 import:
 - package: github.com/apex/log
-  version: 8eba30e442954605fd2e1a542912d5b5e16cab13
+  version: f0aad537c25ee2786481d82844ce23b32d99b52a
 - package: github.com/aws/aws-sdk-go
-  version: 1.5.0
+  version: 1.6.15
   subpackages:
   - /aws
   - aws/awsutil
@@ -17,7 +17,7 @@ import:
   - service/elbv2
   - service/sns
 - package: github.com/spf13/cobra
-  version: 37c3f8060359192150945916cbc2d72bce804b4d
+  version: dc208f4211e7f6df7ec8cb62640f57d3e154910d
 - package: github.com/mattn/go-shellwords
 - package: github.com/fatih/color
   version: v1.0.0

@@ -1,10 +1,10 @@
-hash: e4f775f3f531b102439e17fdf2473e6ad5ec38f369929e307d6db4e6d1d9dbc8
-updated: 2016-11-03T00:24:07.147506472+09:00
+hash: 24279b54e48a152c94af51a8aa82ffde2454755ea26746ce3add5ef4912045b7
+updated: 2017-01-24T23:05:14.083085669+09:00
 imports:
 - name: github.com/apex/log
-  version: 8eba30e442954605fd2e1a542912d5b5e16cab13
+  version: f0aad537c25ee2786481d82844ce23b32d99b52a
 - name: github.com/aws/aws-sdk-go
-  version: 9b9549981ca74f9dbe55ea5dc839a89b37597940
+  version: 15bd33ce2edbdb46acdec779652ed39926682a9f
   subpackages:
   - aws
   - aws/awsutil
@@ -20,13 +20,13 @@ imports:
   - aws/ec2metadata
   - service/s3
   - aws/awserr
+  - aws/endpoints
   - aws/client
   - aws/client/metadata
   - aws/request
   - aws/corehandlers
   - aws/credentials/stscreds
   - aws/defaults
-  - private/endpoints
   - aws/signer/v4
   - private/protocol/jsonrpc
   - private/protocol
@@ -44,7 +44,7 @@ imports:
 - name: github.com/fsnotify/fsnotify
   version: fd9ec7deca8bf46ecd2a795baaacf2b3a9be1197
 - name: github.com/hashicorp/hcl
-  version: 6e968a3fcdcbab092f5307fd0d85479d5af1e4dc
+  version: 39fa3a62ba92cf550eb0f9cfb84757ef79b8aa30
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -59,63 +59,51 @@ imports:
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
 - name: github.com/joho/godotenv
-  version: 4ed13390c0acd2ff4e371e64d8b97c8954138243
-- name: github.com/kr/fs
-  version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
+  version: 726cc8b906e3d31c70a9671c90a13716a8d3f50d
 - name: github.com/magiconair/properties
-  version: 0723e352fa358f9322c938cc2dadda874e9151a9
+  version: b3b15ef068fd0b17ddf408a23669f20811d194d2
 - name: github.com/mattn/go-colorable
-  version: 6e26b354bd2b0fc420cb632b0d878abccdc6544c
+  version: d228849504861217f796da67fae4f6e347643f15
 - name: github.com/mattn/go-isatty
-  version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
+  version: 30a891c33c7cde7b02a981314b4228ec99380cca
 - name: github.com/mattn/go-shellwords
-  version: 525bedee691b5a8df547cb5cf9f86b7fb1883e24
+  version: 753a2322a99f87c0eff284980e77f53041555bc6
 - name: github.com/mitchellh/mapstructure
-  version: f3009df150dadf309fdee4a54ed65c124afad715
+  version: ed105d635dfa9ea7133f7c79f1eb36203fc3a156
 - name: github.com/naoina/go-stringutil
   version: 6b638e95a32d0c1131db0e7fe83775cbea4a0d0b
 - name: github.com/pelletier/go-buffruneio
   version: df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d
 - name: github.com/pelletier/go-toml
-  version: 45932ad32dfdd20826f5671da37a5f3ce9f26a8d
+  version: a1f048ba24490f9b0674a67e1ce995d685cddf4a
 - name: github.com/pkg/errors
   version: 248dadf4e9068a0b3e79f02ed0a610d935de5302
-- name: github.com/pkg/sftp
-  version: 4d0e916071f68db74f8a73926335f809396d6b42
 - name: github.com/Sirupsen/logrus
-  version: 380f64d344b252a007a59baa61f31820f59cba89
+  version: 61e43dc76f7ee59a82bdf3d71033dc12bea4c77d
 - name: github.com/spf13/afero
-  version: 52e4a6cfac46163658bd4f123c49b6ee7dc75f78
+  version: 72b31426848c6ef12a7a8e216708cb0d1530f074
   subpackages:
   - mem
-  - sftp
 - name: github.com/spf13/cast
-  version: 2580bc98dc0e62908119e4737030cc2fdfc45e4c
+  version: 56a7ecbeb18dde53c6db4bd96b541fd9741b8d44
 - name: github.com/spf13/cobra
-  version: 37c3f8060359192150945916cbc2d72bce804b4d
+  version: dc208f4211e7f6df7ec8cb62640f57d3e154910d
 - name: github.com/spf13/jwalterweatherman
-  version: 33c24e77fb80341fe7130ee7c594256ff08ccc46
+  version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
-  version: 5ccb023bc27df288a957c5e994cd44fd19619465
+  version: a232f6d9f87afaaa08bafaff5da685f974b83313
 - name: github.com/spf13/viper
-  version: 651d9d916abc3c3d6a91a12549495caba5edffd2
+  version: 5ed0fc31f7f453625df314d8e66b9791e8d13003
 - name: github.com/str1ngs/ansi
   version: 5dc1bc5ac1f5bcbf5bd4818dd27ef912beb4bb7c
   subpackages:
   - color
-- name: golang.org/x/crypto
-  version: 9477e0b78b9ac3d0b03822fd95422e2fe07627cd
-  subpackages:
-  - ssh
-  - curve25519
-  - ed25519
-  - ed25519/internal/edwards25519
 - name: golang.org/x/sys
-  version: c200b10b5d5e122be351b67af224adc6128af5bf
+  version: d75a52659825e75fff6158388dddc6a5b04f9ba5
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: a8b38433e35b65ba247bb267317037dee1b70cea
+  version: 11dbc599981ccdf4fb18802a28392a8bcf7a9395
   subpackages:
   - transform
   - unicode/norm
@@ -123,7 +111,7 @@ imports:
   version: a5b47d31c556af34a302ce5d659e6fea44d90de0
 testImports:
 - name: github.com/stretchr/testify
-  version: 976c720a22c8eb4eb6a0b4348ad85ad12491a506
+  version: 2402e8e7a02fc811447d11f881aa9746cdc57983
   subpackages:
   - assert
   - require
