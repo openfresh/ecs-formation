@@ -1,5 +1,5 @@
 {
-    "memo": "78b3bfdb02b13b5869ab229f1435878861a99674054314b0c567eed1eae20d9b",
+    "memo": "7a8ab0176c6d6480791513cd83350d1d77424196587174e5b319d7d36acc2468",
     "projects": [
         {
             "name": "github.com/Sirupsen/logrus",
@@ -25,6 +25,7 @@
                 "service/ecs",
                 "service/elb",
                 "service/elbv2",
+                "service/iam",
                 "service/s3"
             ]
         },

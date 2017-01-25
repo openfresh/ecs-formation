@@ -24,7 +24,7 @@ var (
 
 var ServiceCmd = &cobra.Command{
 	Use:   "service",
-	Short: "Manage Amazon ECS Service",
+	Short: "Manage ECS Service",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
 		pd, err := cmdutil.GetProjectDir()

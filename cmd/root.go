@@ -22,6 +22,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/stormcat24/ecs-formation/cmd/bluegreen"
+	"github.com/stormcat24/ecs-formation/cmd/iam"
 	"github.com/stormcat24/ecs-formation/cmd/service"
 	"github.com/stormcat24/ecs-formation/cmd/task"
 )
@@ -66,7 +67,7 @@ func init() {
 	RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	RootCmd.PersistentFlags().BoolP("all", "a", false, "Target all resources")
 
-	RootCmd.AddCommand(task.TaskCmd, service.ServiceCmd, bluegreen.BlueGreenCmd)
+	RootCmd.AddCommand(task.TaskCmd, service.ServiceCmd, bluegreen.BlueGreenCmd, iam.IamCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.

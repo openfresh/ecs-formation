@@ -43,7 +43,7 @@ type BlueGreenServiceJson struct {
 
 var BlueGreenCmd = &cobra.Command{
 	Use:   "bluegreen",
-	Short: "Manage Amazon ECS Service",
+	Short: "Manage blue green deployment",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 
 		pd, err := cmdutil.GetProjectDir()

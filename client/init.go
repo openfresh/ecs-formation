@@ -13,6 +13,7 @@ import (
 	"github.com/stormcat24/ecs-formation/client/ecs"
 	"github.com/stormcat24/ecs-formation/client/elb"
 	"github.com/stormcat24/ecs-formation/client/elbv2"
+	"github.com/stormcat24/ecs-formation/client/iam"
 	"github.com/stormcat24/ecs-formation/client/s3"
 )
 
@@ -27,6 +28,7 @@ type AWSClient struct {
 	ELB                    elb.Client
 	ELBV2                  elbv2.Client
 	ApplicationAutoscaling applicationautoscaling.Client
+	IAM                    iam.Client
 }
 
 func Init(region string, isMock bool) {
@@ -74,6 +76,10 @@ func Init(region string, isMock bool) {
 		Region: region,
 	})
 
+	iamCli := iam.NewClient(ses, &iam.Config{
+		IsMock: isMock,
+	})
+
 	AWSCli = AWSClient{
 		ECS:         ecsCli,
 		S3:          s3Cli,
@@ -81,5 +87,6 @@ func Init(region string, isMock bool) {
 		ELB:         elbCli,
 		ELBV2:       elbV2Cli,
 		ApplicationAutoscaling: applicationAutoscalingCli,
+		IAM: iamCli,
 	}
 }
