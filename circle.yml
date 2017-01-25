@@ -9,11 +9,8 @@ machine:
     - mkdir -p $CIRCLE_PROJECT_REPONAME
 
 dependencies:
-  cache_directories:
-    - "~/.glide"
-
   override:
-    - make deps-test
+    - make deps
 
 test:
   override:
@@ -25,3 +22,4 @@ deployment:
     commands:
       - make build
       - cp -R bin/ecs-formation $CIRCLE_ARTIFACTS/
+
