@@ -1,5 +1,5 @@
 {
-    "memo": "78b3bfdb02b13b5869ab229f1435878861a99674054314b0c567eed1eae20d9b",
+    "memo": "b8a531a0503b256be74b09d52be9e0169271f3ea045151fa99535a0b82d4df16",
     "projects": [
         {
             "name": "github.com/Sirupsen/logrus",
@@ -11,8 +11,8 @@
         },
         {
             "name": "github.com/aws/aws-sdk-go",
-            "version": "v1.6.16",
-            "revision": "d19ab4db0d0710880bef4634767f1a9382aee67c",
+            "version": "v1.6.18",
+            "revision": "3f8f870ec9939e32b3372abf74d24e468bcd285d",
             "packages": [
                 "aws",
                 "aws/awsutil",
@@ -174,8 +174,7 @@
         },
         {
             "name": "github.com/spf13/cobra",
-            "branch": "master",
-            "revision": "0f056af21f5f368e5b0646079d0094a2c64150f7",
+            "revision": "35136c09d8da66b901337c6e86fd8e88a1a255bd",
             "packages": [
                 "."
             ]
