@@ -1,37 +1,56 @@
 {
-    "memo": "78b3bfdb02b13b5869ab229f1435878861a99674054314b0c567eed1eae20d9b",
+    "memo": "441c1e246fb2fb4295fb1ea0e3d1d47b9b81849934d062fa37bd9d086e11324d",
     "projects": [
         {
             "name": "github.com/Sirupsen/logrus",
-            "version": "v0.11.0",
-            "revision": "d26492970760ca5d33129d2d799e34be5c4782eb",
+            "version": "v0.11.5",
+            "revision": "ba1b36c82c5e05c4f912a88eab0dcd91a171688f",
             "packages": [
                 "."
             ]
         },
         {
             "name": "github.com/aws/aws-sdk-go",
-            "version": "v1.6.16",
-            "revision": "d19ab4db0d0710880bef4634767f1a9382aee67c",
+            "version": "v1.8.6",
+            "revision": "5ab6def9a2f0445ff22a47b16660fbb1ff919b16",
             "packages": [
                 "aws",
+                "aws/awserr",
                 "aws/awsutil",
+                "aws/client",
+                "aws/client/metadata",
+                "aws/corehandlers",
                 "aws/credentials",
                 "aws/credentials/ec2rolecreds",
+                "aws/credentials/endpointcreds",
+                "aws/credentials/stscreds",
+                "aws/defaults",
                 "aws/ec2metadata",
+                "aws/endpoints",
+                "aws/request",
                 "aws/session",
+                "aws/signer/v4",
+                "private/protocol",
+                "private/protocol/json/jsonutil",
+                "private/protocol/jsonrpc",
+                "private/protocol/query",
+                "private/protocol/query/queryutil",
+                "private/protocol/rest",
+                "private/protocol/restxml",
+                "private/protocol/xml/xmlutil",
                 "service/applicationautoscaling",
                 "service/autoscaling",
                 "service/ecs",
                 "service/elb",
                 "service/elbv2",
-                "service/s3"
+                "service/s3",
+                "service/sts"
             ]
         },
         {
             "name": "github.com/fatih/color",
-            "version": "v1.2",
-            "revision": "34e4ee095d12986a2cef5ddb9aeb3b8cfcfea17c",
+            "version": "v1.4.1",
+            "revision": "9131ab34cf20d2f6d83fdc67168a5430d1c7dc23",
             "packages": [
                 "."
             ]
@@ -46,8 +65,8 @@
         },
         {
             "name": "github.com/go-ini/ini",
-            "version": "v1.24.0",
-            "revision": "e3c2d47c61e5333f9aa2974695dd94396eb69c75",
+            "version": "v1.27.0",
+            "revision": "e7fea39b01aea8d5671f6858f0532f56e8bff3a5",
             "packages": [
                 "."
             ]
@@ -55,9 +74,17 @@
         {
             "name": "github.com/hashicorp/hcl",
             "branch": "master",
-            "revision": "db4f0768927a665a06c32855186e1bc762bcc8f5",
+            "revision": "630949a3c5fa3c613328e1b8256052cbc2327c9b",
             "packages": [
-                "."
+                ".",
+                "hcl/ast",
+                "hcl/parser",
+                "hcl/scanner",
+                "hcl/strconv",
+                "hcl/token",
+                "json/parser",
+                "json/scanner",
+                "json/token"
             ]
         },
         {
@@ -78,40 +105,40 @@
         },
         {
             "name": "github.com/joho/godotenv",
-            "version": "v1",
-            "revision": "a01a834e1654b4c9ca5b3ad05159445cc9c7ad08",
+            "version": "v1.1",
+            "revision": "a5fda47e331bcd6aed83e573aa15bdadd475f956",
             "packages": [
                 "."
             ]
         },
         {
             "name": "github.com/magiconair/properties",
-            "version": "v1.7.0",
-            "revision": "c265cfa48dda6474e208715ca93e987829f572f8",
+            "version": "v1.7.2",
+            "revision": "f917359f079a3759162704eaa8caeec3d01d9f91",
             "packages": [
                 "."
             ]
         },
         {
             "name": "github.com/mattn/go-colorable",
-            "version": "v0.0.6",
-            "revision": "ed8eb9e318d7a84ce5915b495b7d35e0cfe7b5a8",
+            "version": "v0.0.7",
+            "revision": "d228849504861217f796da67fae4f6e347643f15",
             "packages": [
                 "."
             ]
         },
         {
             "name": "github.com/mattn/go-isatty",
-            "version": "v0.0.1",
-            "revision": "3a115632dcd687f9c8cd01679c83a06a0e21c1f3",
+            "version": "v0.0.2",
+            "revision": "fc9e8d8ef48496124e79ae0df75490096eccf6fe",
             "packages": [
                 "."
             ]
         },
         {
             "name": "github.com/mattn/go-shellwords",
-            "version": "v1.0.1",
-            "revision": "753a2322a99f87c0eff284980e77f53041555bc6",
+            "version": "v1.0.2",
+            "revision": "005a0944d84452842197c2108bd9168ced206f78",
             "packages": [
                 "."
             ]
@@ -119,7 +146,7 @@
         {
             "name": "github.com/mitchellh/mapstructure",
             "branch": "master",
-            "revision": "ed105d635dfa9ea7133f7c79f1eb36203fc3a156",
+            "revision": "53818660ed4955e899c0bcafa97299a388bd7c8e",
             "packages": [
                 "."
             ]
@@ -134,16 +161,16 @@
         },
         {
             "name": "github.com/pelletier/go-buffruneio",
-            "branch": "master",
-            "revision": "df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d",
+            "version": "v0.2.0",
+            "revision": "c37440a7cf42ac63b919c752ca73a85067e05992",
             "packages": [
                 "."
             ]
         },
         {
             "name": "github.com/pelletier/go-toml",
-            "version": "v0.4.0",
-            "revision": "d464759235b8fd59f8ab4c44807d7c36e1678add",
+            "version": "v0.5.0",
+            "revision": "13d49d4606eb801b8f01ae542b4afc4c6ee3d84a",
             "packages": [
                 "."
             ]
@@ -159,15 +186,16 @@
         {
             "name": "github.com/spf13/afero",
             "branch": "master",
-            "revision": "72b31426848c6ef12a7a8e216708cb0d1530f074",
+            "revision": "9be650865eab0c12963d8753212f4f9c66cdcf12",
             "packages": [
-                "."
+                ".",
+                "mem"
             ]
         },
         {
             "name": "github.com/spf13/cast",
-            "branch": "master",
-            "revision": "56a7ecbeb18dde53c6db4bd96b541fd9741b8d44",
+            "version": "v1.0.0",
+            "revision": "ce135a4ebeee6cfe9a26c93ee0d37825f26113c7",
             "packages": [
                 "."
             ]
@@ -175,7 +203,7 @@
         {
             "name": "github.com/spf13/cobra",
             "branch": "master",
-            "revision": "0f056af21f5f368e5b0646079d0094a2c64150f7",
+            "revision": "7aeaa2cce6ae7e18d2a6ee597b60ee137e999bd9",
             "packages": [
                 "."
             ]
@@ -191,7 +219,7 @@
         {
             "name": "github.com/spf13/pflag",
             "branch": "master",
-            "revision": "a232f6d9f87afaaa08bafaff5da685f974b83313",
+            "revision": "d16db1e50e33dff1b6cdf37596cef36742128670",
             "packages": [
                 "."
             ]
@@ -199,7 +227,7 @@
         {
             "name": "github.com/spf13/viper",
             "branch": "master",
-            "revision": "5ed0fc31f7f453625df314d8e66b9791e8d13003",
+            "revision": "84f94806c67f59dd7ae87bc5351f7a9c94a4558d",
             "packages": [
                 "."
             ]
@@ -215,7 +243,7 @@
         {
             "name": "golang.org/x/sys",
             "branch": "master",
-            "revision": "d75a52659825e75fff6158388dddc6a5b04f9ba5",
+            "revision": "9a7256cb28ed514b4e1e5f68959914c4c28a92e0",
             "packages": [
                 "unix"
             ]
@@ -223,16 +251,20 @@
         {
             "name": "golang.org/x/text",
             "branch": "master",
-            "revision": "11dbc599981ccdf4fb18802a28392a8bcf7a9395",
+            "revision": "f4b4367115ec2de254587813edaa901bc1c723a8",
             "packages": [
+                "internal/gen",
+                "internal/triegen",
+                "internal/ucd",
                 "transform",
+                "unicode/cldr",
                 "unicode/norm"
             ]
         },
         {
             "name": "gopkg.in/yaml.v2",
             "branch": "v2",
-            "revision": "a5b47d31c556af34a302ce5d659e6fea44d90de0",
+            "revision": "a3f3340b5840cee44f372bddb5880fcbc419b46a",
             "packages": [
                 "."
             ]
