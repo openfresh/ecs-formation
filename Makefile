@@ -9,7 +9,7 @@ TARGETS=$(shell go list ./... | awk '$$0 !~ /$(IGNORE)/{print $0}')
 ARCH=$(shell uname | tr '[:upper:]' '[:lower:]')
 
 deps:
-		go get github.com/golang/dep
+		go get -u github.com/golang/dep/...
 		go get github.com/golang/lint/golint
 		go get github.com/jstemmer/go-junit-report
 		dep ensure
