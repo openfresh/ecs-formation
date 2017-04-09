@@ -14,6 +14,7 @@ import (
 	awsecs "github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/fatih/color"
 	"github.com/stormcat24/ecs-formation/client"
+	"github.com/stormcat24/ecs-formation/client/applicationautoscaling"
 	"github.com/stormcat24/ecs-formation/client/ecs"
 	"github.com/stormcat24/ecs-formation/logger"
 	"github.com/stormcat24/ecs-formation/service/types"
@@ -28,21 +29,23 @@ type ClusterService interface {
 }
 
 type ConcreteClusterService struct {
-	ecsCli        ecs.Client
-	projectDir    string
-	clusters      []string
-	targetService string
-	params        map[string]string
+	ecsCli            ecs.Client
+	appAutoscalingCli applicationautoscaling.Client
+	projectDir        string
+	clusters          []string
+	targetService     string
+	params            map[string]string
 }
 
 func NewClusterService(projectDir string, clusters []string, targetService string, params map[string]string) (ClusterService, error) {
 
 	service := ConcreteClusterService{
-		ecsCli:        client.AWSCli.ECS,
-		projectDir:    projectDir,
-		clusters:      clusters,
-		targetService: targetService,
-		params:        params,
+		ecsCli:            client.AWSCli.ECS,
+		appAutoscalingCli: client.AWSCli.ApplicationAutoscaling,
+		projectDir:        projectDir,
+		clusters:          clusters,
+		targetService:     targetService,
+		params:            params,
 	}
 
 	return &service, nil
@@ -156,7 +159,7 @@ func (s ConcreteClusterService) createServiceUpdatePlan(cluster types.Cluster) (
 			return nil, err
 		}
 
-		currentServices := map[string]*awsecs.Service{}
+		currentStacks := map[string]*types.ServiceStack{}
 		if len(lsResult.ServiceArns) > 0 {
 
 			resDescribeService, errds := s.ecsCli.DescribeService(cluster.Name, lsResult.ServiceArns)
@@ -166,7 +169,15 @@ func (s ConcreteClusterService) createServiceUpdatePlan(cluster types.Cluster) (
 
 			for _, service := range resDescribeService.Services {
 				if s.targetService == "" || (s.targetService != "" && s.targetService == *service.ServiceName) {
-					currentServices[*service.ServiceName] = service
+					autoScaling, err := s.appAutoscalingCli.DescribeScalableTarget(cluster.Name, *service.ServiceName)
+					if err != nil {
+						return nil, err
+					}
+
+					currentStacks[*service.ServiceName] = &types.ServiceStack{
+						Service:     service,
+						AutoScaling: autoScaling,
+					}
 				}
 			}
 		}
@@ -182,7 +193,7 @@ func (s ConcreteClusterService) createServiceUpdatePlan(cluster types.Cluster) (
 		return &types.ServiceUpdatePlan{
 			Name:            cluster.Name,
 			InstanceARNs:    lciResult.ContainerInstanceArns,
-			CurrentServices: currentServices,
+			CurrentServices: currentStacks,
 			NewServices:     newServices,
 		}, nil
 	}
@@ -203,7 +214,8 @@ func (s ConcreteClusterService) ApplyServicePlans(plans []*types.ServiceUpdatePl
 func (s ConcreteClusterService) ApplyServicePlan(plan *types.ServiceUpdatePlan) error {
 
 	// currentにあってnewにない（削除）
-	for _, current := range plan.CurrentServices {
+	for _, currentStack := range plan.CurrentServices {
+		current := currentStack.Service
 		if _, ok := plan.NewServices[*current.ServiceName]; !ok {
 			logger.Main.Infof("Delating '%s' service on '%s' ...", *current.ServiceName, plan.Name)
 
@@ -255,10 +267,12 @@ func (s ConcreteClusterService) ApplyServicePlan(plan *types.ServiceUpdatePlan) 
 				LoadBalancers:  toLoadBalancersNew(add.LoadBalancers),
 				Role:           aws.String(add.Role),
 				TaskDefinition: aws.String(add.TaskDefinition),
-				DeploymentConfiguration: &awsecs.DeploymentConfiguration{
-					MinimumHealthyPercent: add.MinimumHealthyPercent,
-					MaximumPercent:        add.MaximumPercent,
-				},
+			}
+			if add.MinimumHealthyPercent.Valid && add.MaximumPercent.Valid {
+				p.DeploymentConfiguration = &awsecs.DeploymentConfiguration{
+					MinimumHealthyPercent: aws.Int64(add.MinimumHealthyPercent.Int64),
+					MaximumPercent:        aws.Int64(add.MaximumPercent.Int64),
+				}
 			}
 
 			csrv, err := s.ecsCli.CreateService(&p)
@@ -276,8 +290,9 @@ func (s ConcreteClusterService) ApplyServicePlan(plan *types.ServiceUpdatePlan) 
 
 	// update
 	for _, add := range plan.NewServices {
-		current, ok := plan.CurrentServices[add.Name]
+		currentStack, ok := plan.CurrentServices[add.Name]
 		if ok {
+			current := currentStack.Service
 			logger.Main.Infof("Updating '%s' service on '%s' ...", add.Name, plan.Name)
 
 			var nextDesiredCount int64
@@ -294,10 +309,12 @@ func (s ConcreteClusterService) ApplyServicePlan(plan *types.ServiceUpdatePlan) 
 				Service:        aws.String(add.Name),
 				DesiredCount:   aws.Int64(nextDesiredCount),
 				TaskDefinition: aws.String(add.TaskDefinition),
-				DeploymentConfiguration: &awsecs.DeploymentConfiguration{
-					MinimumHealthyPercent: add.MinimumHealthyPercent,
-					MaximumPercent:        add.MaximumPercent,
-				},
+			}
+			if add.MinimumHealthyPercent.Valid && add.MaximumPercent.Valid {
+				params.DeploymentConfiguration = &awsecs.DeploymentConfiguration{
+					MinimumHealthyPercent: aws.Int64(add.MinimumHealthyPercent.Int64),
+					MaximumPercent:        aws.Int64(add.MaximumPercent.Int64),
+				}
 			}
 
 			svc, err := s.ecsCli.UpdateService(&params)
@@ -306,6 +323,20 @@ func (s ConcreteClusterService) ApplyServicePlan(plan *types.ServiceUpdatePlan) 
 			}
 			logger.Main.Infof("Created service '%v', task-definition is '%v'.", *svc.ServiceArn, *svc.TaskDefinition)
 			logger.Main.Infof("Launching task definition '%s' ...", *svc.TaskDefinition)
+
+			if add.AutoScaling != nil {
+				asgTarget := add.AutoScaling.Target
+				if err := s.appAutoscalingCli.RegisterScalableTarget(plan.Name, add.Name, asgTarget.MinCapacity, asgTarget.MaxCapacity, asgTarget.Role); err != nil {
+					return err
+				}
+				logger.Main.Infof("Update autoscaling MinCapacity:%v MaxCapacity:%v", asgTarget.MinCapacity, asgTarget.MaxCapacity)
+			} else if currentStack.AutoScaling != nil {
+				resourceID := *currentStack.AutoScaling.ResourceId
+				if err := s.appAutoscalingCli.DeregisterScalableTarget(resourceID); err != nil {
+					return err
+				}
+				logger.Main.Infof("Deregistered autoscaling ResourceID:%s", resourceID)
+			}
 
 			var targetServiceId string
 			if len(svc.Deployments) > 1 {
@@ -500,11 +531,11 @@ func toLoadBalancersNew(values []types.LoadBalancer) []*awsecs.LoadBalancer {
 			ContainerName: &lb.ContainerName,
 			ContainerPort: &lb.ContainerPort,
 		}
-		if lb.Name != nil {
-			addElb.LoadBalancerName = lb.Name
+		if lb.Name.Valid {
+			addElb.LoadBalancerName = aws.String(lb.Name.String)
 		}
-		if lb.TargetGroupARN != nil {
-			addElb.TargetGroupArn = lb.TargetGroupARN
+		if lb.TargetGroupARN.Valid {
+			addElb.TargetGroupArn = aws.String(lb.TargetGroupARN.String)
 		}
 
 		loadBalancers = append(loadBalancers, &addElb)

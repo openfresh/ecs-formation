@@ -117,7 +117,8 @@ func createClusterPlans(srv service.ClusterService) ([]*types.ServiceUpdatePlan,
 			util.PrintlnYellow("         No services are deployed.")
 		}
 
-		for _, cs := range plan.CurrentServices {
+		for _, cst := range plan.CurrentServices {
+			cs := cst.Service
 			util.PrintlnYellow("        ####[%s]####\n", *cs.ServiceName)
 			util.PrintlnYellow("        ServiceARN = %s", *cs.ServiceArn)
 			util.PrintlnYellow("        TaskDefinition = %s", *cs.TaskDefinition)
@@ -128,8 +129,8 @@ func createClusterPlans(srv service.ClusterService) ([]*types.ServiceUpdatePlan,
 				util.PrintlnYellow("        Role = %d", *cs.RoleArn)
 			}
 			if cs.DeploymentConfiguration != nil {
-				util.PrintlnYellow("        MinimumHealthyPercent = %d", cs.DeploymentConfiguration.MinimumHealthyPercent)
-				util.PrintlnYellow("        MaximumPercent = %d", cs.DeploymentConfiguration.MaximumPercent)
+				util.PrintlnYellow("        MinimumHealthyPercent = %d", *cs.DeploymentConfiguration.MinimumHealthyPercent)
+				util.PrintlnYellow("        MaximumPercent = %d", *cs.DeploymentConfiguration.MaximumPercent)
 			}
 			for _, lb := range cs.LoadBalancers {
 				if lb.LoadBalancerName != nil {
@@ -142,6 +143,16 @@ func createClusterPlans(srv service.ClusterService) ([]*types.ServiceUpdatePlan,
 				util.PrintlnYellow("            ContainerPort = %v", *lb.ContainerPort)
 			}
 			util.PrintlnYellow("        STATUS = %s", *cs.Status)
+
+			if cst.AutoScaling != nil {
+				asg := cst.AutoScaling
+				util.PrintlnYellow("        AutoScaling:")
+				util.PrintlnYellow("            ResourceId = %s", *asg.ResourceId)
+				util.PrintlnYellow("            MinCapacity = %v", *asg.MinCapacity)
+				util.PrintlnYellow("            MaxCapacity = %v", *asg.MaxCapacity)
+				util.PrintlnYellow("            RoleARN = %s", *asg.RoleARN)
+			}
+
 			util.Println()
 		}
 
@@ -154,18 +165,29 @@ func createClusterPlans(srv service.ClusterService) ([]*types.ServiceUpdatePlan,
 			util.PrintlnYellow("        TaskDefinition = %s", add.TaskDefinition)
 			util.PrintlnYellow("        DesiredCount = %d", add.DesiredCount)
 			util.PrintlnYellow("        KeepDesiredCount = %t", add.KeepDesiredCount)
-			util.PrintlnYellow("        MinimumHealthyPercent = %v", add.MinimumHealthyPercent)
-			util.PrintlnYellow("        MaximumPercent = %v", add.MaximumPercent)
+			if add.MinimumHealthyPercent.Valid {
+				util.PrintlnYellow("        MinimumHealthyPercent = %d", add.MinimumHealthyPercent.Int64)
+			}
+			if add.MaximumPercent.Valid {
+				util.PrintlnYellow("        MaximumPercent = %d", add.MaximumPercent.Int64)
+			}
 			util.PrintlnYellow("        Role = %v", add.Role)
 			for _, lb := range add.LoadBalancers {
-				if lb.Name != nil {
-					util.PrintlnYellow("        ELB:%v", *lb.Name)
+				if lb.Name.Valid {
+					util.PrintlnYellow("        ELB:%v", lb.Name.String)
 				}
-				if lb.TargetGroupARN != nil {
-					util.PrintlnYellow("            TargetGroupARN:%v", *lb.TargetGroupARN)
+				if lb.TargetGroupARN.Valid {
+					util.PrintlnYellow("            TargetGroupARN:%v", lb.TargetGroupARN.String)
 				}
 				util.PrintlnYellow("            ContainerName:%v", lb.ContainerName)
 				util.PrintlnYellow("            ContainerPort:%v", lb.ContainerPort)
+			}
+			if add.AutoScaling != nil && add.AutoScaling.Target != nil {
+				asg := add.AutoScaling.Target
+				util.PrintlnYellow("        AutoScaling:")
+				util.PrintlnYellow("            MinCapacity = %v", asg.MinCapacity)
+				util.PrintlnYellow("            MaxCapacity = %v", asg.MaxCapacity)
+				util.PrintlnYellow("            RoleARN = %s", asg.Role)
 			}
 			util.Println()
 		}

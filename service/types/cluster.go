@@ -1,6 +1,10 @@
 package types
 
-import "github.com/aws/aws-sdk-go/service/ecs"
+import (
+	"github.com/aws/aws-sdk-go/service/applicationautoscaling"
+	"github.com/aws/aws-sdk-go/service/ecs"
+	"gopkg.in/guregu/null.v3"
+)
 
 type TaskWatchStatus int
 
@@ -21,21 +25,37 @@ type Service struct {
 	DesiredCount          int64          `yaml:"desired_count"`
 	KeepDesiredCount      bool           `yaml:"keep_desired_count"`
 	LoadBalancers         []LoadBalancer `yaml:"load_balancers"`
-	MinimumHealthyPercent *int64         `yaml:"minimum_healthy_percent"`
-	MaximumPercent        *int64         `yaml:"maximum_percent"`
+	MinimumHealthyPercent null.Int       `yaml:"minimum_healthy_percent"`
+	MaximumPercent        null.Int       `yaml:"maximum_percent"`
 	Role                  string         `yaml:"role"`
+	AutoScaling           *AutoScaling   `yaml:"autoscaling"`
 }
 
 type LoadBalancer struct {
-	Name           *string `yaml:"name"`
-	ContainerName  string  `yaml:"container_name"`
-	ContainerPort  int64   `yaml:"container_port"`
-	TargetGroupARN *string `yaml:"target_group_arn"`
+	Name           null.String `yaml:"name"`
+	ContainerName  string      `yaml:"container_name"`
+	ContainerPort  int64       `yaml:"container_port"`
+	TargetGroupARN null.String `yaml:"target_group_arn"`
+}
+
+type ServiceStack struct {
+	Service     *ecs.Service
+	AutoScaling *applicationautoscaling.ScalableTarget
 }
 
 type ServiceUpdatePlan struct {
 	Name            string
 	InstanceARNs    []*string
-	CurrentServices map[string]*ecs.Service
+	CurrentServices map[string]*ServiceStack
 	NewServices     map[string]*Service
+}
+
+type AutoScaling struct {
+	Target *ServiceScalableTarget `yaml:"target"`
+}
+
+type ServiceScalableTarget struct {
+	MinCapacity uint   `yaml:"min_capacity"`
+	MaxCapacity uint   `yaml:"max_capacity"`
+	Role        string `yaml:"role"`
 }
