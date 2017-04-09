@@ -39,8 +39,8 @@ func (_mr *_MockClientRecorder) DeleteScalingPolicy(arg0 interface{}) *gomock.Ca
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "DeleteScalingPolicy", arg0)
 }
 
-func (_m *MockClient) DeregisterScalableTarget(params *applicationautoscaling.DeregisterScalableTargetInput) error {
-	ret := _m.ctrl.Call(_m, "DeregisterScalableTarget", params)
+func (_m *MockClient) DeregisterScalableTarget(resourceID string) error {
+	ret := _m.ctrl.Call(_m, "DeregisterScalableTarget", resourceID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
@@ -49,15 +49,15 @@ func (_mr *_MockClientRecorder) DeregisterScalableTarget(arg0 interface{}) *gomo
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "DeregisterScalableTarget", arg0)
 }
 
-func (_m *MockClient) DescribeScalableTargets(params *applicationautoscaling.DescribeScalableTargetsInput) ([]*applicationautoscaling.ScalableTarget, error) {
-	ret := _m.ctrl.Call(_m, "DescribeScalableTargets", params)
-	ret0, _ := ret[0].([]*applicationautoscaling.ScalableTarget)
+func (_m *MockClient) DescribeScalableTarget(cluster string, service string) (*applicationautoscaling.ScalableTarget, error) {
+	ret := _m.ctrl.Call(_m, "DescribeScalableTarget", cluster, service)
+	ret0, _ := ret[0].(*applicationautoscaling.ScalableTarget)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-func (_mr *_MockClientRecorder) DescribeScalableTargets(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "DescribeScalableTargets", arg0)
+func (_mr *_MockClientRecorder) DescribeScalableTarget(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "DescribeScalableTarget", arg0, arg1)
 }
 
 func (_m *MockClient) DescribeScalingActivities(params *applicationautoscaling.DescribeScalingActivitiesInput) ([]*applicationautoscaling.ScalingActivity, error) {
@@ -93,12 +93,12 @@ func (_mr *_MockClientRecorder) PutScalingPolicy(arg0 interface{}) *gomock.Call 
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "PutScalingPolicy", arg0)
 }
 
-func (_m *MockClient) RegisterScalableTarget(params *applicationautoscaling.RegisterScalableTargetInput) error {
-	ret := _m.ctrl.Call(_m, "RegisterScalableTarget", params)
+func (_m *MockClient) RegisterScalableTarget(cluster string, service string, min uint, max uint, role string) error {
+	ret := _m.ctrl.Call(_m, "RegisterScalableTarget", cluster, service, min, max, role)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-func (_mr *_MockClientRecorder) RegisterScalableTarget(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "RegisterScalableTarget", arg0)
+func (_mr *_MockClientRecorder) RegisterScalableTarget(arg0, arg1, arg2, arg3, arg4 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "RegisterScalableTarget", arg0, arg1, arg2, arg3, arg4)
 }

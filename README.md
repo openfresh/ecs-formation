@@ -115,6 +115,12 @@ test-service:
       name: test-elb
       container_name: nginx
       container_port: 80
+  autoscaling:
+    target:
+      min_capacity: 0
+      max_capacity: 1
+      role: arn:aws:iam::your_account_id:role/ecsAutoscaleRole
+
 ```
 
 In case of ALB, you should specify `target_group_arn`.

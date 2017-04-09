@@ -122,7 +122,8 @@ func createBlueGreenPlans(bgsrv service.BlueGreenService, csrv service.ClusterSe
 		util.PrintlnCyan(fmt.Sprintf("        Cluster = %s", bgplan.Blue.NewService.Cluster))
 		util.PrintlnCyan(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgplan.Blue.AutoScalingGroup.AutoScalingGroupARN))
 		util.PrintlnCyan("        Current services as follows:")
-		for _, bcs := range bgplan.Blue.ClusterUpdatePlan.CurrentServices {
+		for _, bcss := range bgplan.Blue.ClusterUpdatePlan.CurrentServices {
+			bcs := bcss.Service
 			util.PrintlnCyan(fmt.Sprintf("            %s:", *bcs.ServiceName))
 			util.PrintlnCyan(fmt.Sprintf("                ServiceARN = %s", *bcs.ServiceArn))
 			util.PrintlnCyan(fmt.Sprintf("                TaskDefinition = %s", *bcs.TaskDefinition))
@@ -142,7 +143,8 @@ func createBlueGreenPlans(bgsrv service.BlueGreenService, csrv service.ClusterSe
 		util.PrintlnGreen(fmt.Sprintf("        Cluster = %s", bgplan.Green.NewService.Cluster))
 		util.PrintlnGreen(fmt.Sprintf("        AutoScalingGroupARN = %s", *bgplan.Green.AutoScalingGroup.AutoScalingGroupARN))
 		util.PrintlnGreen("        Current services as follows:")
-		for _, gcs := range bgplan.Green.ClusterUpdatePlan.CurrentServices {
+		for _, gcss := range bgplan.Green.ClusterUpdatePlan.CurrentServices {
+			gcs := gcss.Service
 			util.PrintlnGreen(fmt.Sprintf("            %s:", *gcs.ServiceName))
 			util.PrintlnGreen(fmt.Sprintf("                ServiceARN = %s", *gcs.ServiceArn))
 			util.PrintlnGreen(fmt.Sprintf("                TaskDefinition = %s", *gcs.TaskDefinition))
