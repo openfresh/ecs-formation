@@ -153,6 +153,24 @@ func createClusterPlans(srv service.ClusterService) ([]*types.ServiceUpdatePlan,
 				util.PrintlnYellow("            RoleARN = %s", *asg.RoleARN)
 			}
 
+			if len(cs.PlacementStrategy) > 0 {
+				util.PrintlnYellow("        PlacementStrategy:")
+			}
+			for _, ps := range cs.PlacementStrategy {
+				util.PrintlnYellow("          -")
+				util.PrintlnYellow("            Type = %s", *ps.Type)
+				util.PrintlnYellow("            Field = %s", *ps.Field)
+			}
+
+			if len(cs.PlacementConstraints) > 0 {
+				util.PrintlnYellow("        PlacementConstraints:")
+			}
+			for _, pc := range cs.PlacementConstraints {
+				util.PrintlnYellow("          -")
+				util.PrintlnYellow("            Type = %s", *pc.Type)
+				util.PrintlnYellow("            Field = %s", *pc.Expression)
+			}
+
 			util.Println()
 		}
 
@@ -182,12 +200,31 @@ func createClusterPlans(srv service.ClusterService) ([]*types.ServiceUpdatePlan,
 				util.PrintlnYellow("            ContainerName:%v", lb.ContainerName)
 				util.PrintlnYellow("            ContainerPort:%v", lb.ContainerPort)
 			}
+
 			if add.AutoScaling != nil && add.AutoScaling.Target != nil {
 				asg := add.AutoScaling.Target
 				util.PrintlnYellow("        AutoScaling:")
 				util.PrintlnYellow("            MinCapacity = %v", asg.MinCapacity)
 				util.PrintlnYellow("            MaxCapacity = %v", asg.MaxCapacity)
 				util.PrintlnYellow("            RoleARN = %s", asg.Role)
+			}
+
+			if len(add.PlacementStrategy) > 0 {
+				for _, ps := range add.PlacementStrategy {
+					util.PrintlnYellow("        PlacementStrategy:")
+					util.PrintlnYellow("          -")
+					util.PrintlnYellow("            Type = %v", ps.Type)
+					util.PrintlnYellow("            Field = %v", ps.Field)
+				}
+			}
+
+			if len(add.PlacementConstraints) > 0 {
+				for _, pc := range add.PlacementConstraints {
+					util.PrintlnYellow("        PlacementConstraints:")
+					util.PrintlnYellow("          -")
+					util.PrintlnYellow("            Type = %v", pc.Type)
+					util.PrintlnYellow("            Expression = %v", pc.Expression)
+				}
 			}
 			util.Println()
 		}
