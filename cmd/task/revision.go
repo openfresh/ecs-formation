@@ -2,8 +2,8 @@ package task
 
 import (
 	"github.com/fatih/color"
+	"github.com/openfresh/ecs-formation/service"
 	"github.com/spf13/cobra"
-	"github.com/stormcat24/ecs-formation/service"
 )
 
 var revisionCmd = &cobra.Command{

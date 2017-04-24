@@ -1,9 +1,9 @@
 package bluegreen
 
 import (
+	"github.com/openfresh/ecs-formation/logger"
+	"github.com/openfresh/ecs-formation/service"
 	"github.com/spf13/cobra"
-	"github.com/stormcat24/ecs-formation/logger"
-	"github.com/stormcat24/ecs-formation/service"
 )
 
 var applyCmd = &cobra.Command{

@@ -1,9 +1,9 @@
 ecs-formation
 ==========
 
-[![Circle CI](https://circleci.com/gh/stormcat24/ecs-formation.svg?style=shield&circle-token=baf60b45ce2de8c5d11b3e6d77a3a23ebf2d5991)](https://circleci.com/gh/stormcat24/ecs-formation)
+[![Circle CI](https://circleci.com/gh/openfresh/ecs-formation.svg?style=shield&circle-token=baf60b45ce2de8c5d11b3e6d77a3a23ebf2d5991)](https://circleci.com/gh/openfresh/ecs-formation)
 [![Language](http://img.shields.io/badge/language-go-brightgreen.svg?style=flat)](https://golang.org/)
-[![issues](https://img.shields.io/github/issues/stormcat24/ecs-formation.svg?style=flat)](https://github.com/stormcat24/ecs-formation/issues?state=open)
+[![issues](https://img.shields.io/github/issues/openfresh/ecs-formation.svg?style=flat)](https://github.com/openfresh/ecs-formation/issues?state=open)
 [![License: MIT](http://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
 
 ecs-formation is a tool for defining several Docker continers and clusters on [Amazon EC2 Container Service(ECS)](https://aws.amazon.com/ecs/).
@@ -23,7 +23,7 @@ ecs-formation is a tool for defining several Docker continers and clusters on [A
 ecs-formation is written by Go. Please run `go get`.
 
 ```bash
-$ go get github.com/stormcat24/ecs-formation
+$ go get github.com/openfresh/ecs-formation
 ```
 
 #### Define environment variables
@@ -280,7 +280,7 @@ You can use custom parameters. Define parameters in yaml file(task, service, blu
 
 ```Ruby
 nginx:
-    image: stormcat24/nginx:${NGINX_VERSION}
+    image: openfresh/nginx:${NGINX_VERSION}
     ports:
         - 80:${NGINX_PORT}
 ```
@@ -295,7 +295,7 @@ Also, support default parameter value.
 
 ```Ruby
 nginx:
-    image: stormcat24/nginx:${NGINX_VERSION|latest}
+    image: openfresh/nginx:${NGINX_VERSION|latest}
     ports:
         - 80:${NGINX_PORT|80}
 ```
@@ -306,7 +306,7 @@ You can use `env_file` like docker-compose. https://docs.docker.com/compose/comp
 
 ```Ruby
 nginx:
-    image: stormcat24/nginx:${NGINX_VERSION}
+    image: openfresh/nginx:${NGINX_VERSION}
     ports:
         - 80:${NGINX_PORT}
     env_file:
@@ -318,4 +318,4 @@ License
 ===
 See [LICENSE](LICENSE).
 
-Copyright © Akinori Yamada([@stormcat24](https://twitter.com/stormcat24)). All Rights Reserved.
+Copyright © FRESH!. All Rights Reserved.

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/stormcat24/ecs-formation/logger"
+	"github.com/openfresh/ecs-formation/logger"
 )
 
 func IsRateExceeded(err error) bool {

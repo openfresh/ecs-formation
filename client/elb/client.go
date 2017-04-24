@@ -4,7 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/elb"
 
-	"github.com/stormcat24/ecs-formation/client/util"
+	"github.com/openfresh/ecs-formation/client/util"
 )
 
 type Client interface {

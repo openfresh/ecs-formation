@@ -19,11 +19,11 @@ import (
 	"os"
 
 	"github.com/fatih/color"
+	"github.com/openfresh/ecs-formation/cmd/bluegreen"
+	"github.com/openfresh/ecs-formation/cmd/service"
+	"github.com/openfresh/ecs-formation/cmd/task"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/stormcat24/ecs-formation/cmd/bluegreen"
-	"github.com/stormcat24/ecs-formation/cmd/service"
-	"github.com/stormcat24/ecs-formation/cmd/task"
 )
 
 var cfgFile string

@@ -3,7 +3,7 @@ package task
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/stormcat24/ecs-formation/service"
+	"github.com/openfresh/ecs-formation/service"
 )
 
 var planCmd = &cobra.Command{
