@@ -8,12 +8,12 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/stormcat24/ecs-formation/client/applicationautoscaling"
-	"github.com/stormcat24/ecs-formation/client/autoscaling"
-	"github.com/stormcat24/ecs-formation/client/ecs"
-	"github.com/stormcat24/ecs-formation/client/elb"
-	"github.com/stormcat24/ecs-formation/client/elbv2"
-	"github.com/stormcat24/ecs-formation/client/s3"
+	"github.com/openfresh/ecs-formation/client/applicationautoscaling"
+	"github.com/openfresh/ecs-formation/client/autoscaling"
+	"github.com/openfresh/ecs-formation/client/ecs"
+	"github.com/openfresh/ecs-formation/client/elb"
+	"github.com/openfresh/ecs-formation/client/elbv2"
+	"github.com/openfresh/ecs-formation/client/s3"
 )
 
 var (

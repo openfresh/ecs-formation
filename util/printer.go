@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
-	"github.com/stormcat24/ecs-formation/logger"
+	"github.com/openfresh/ecs-formation/logger"
 )
 
 var (

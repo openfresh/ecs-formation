@@ -11,7 +11,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/joho/godotenv"
-	"github.com/stormcat24/ecs-formation/client/s3"
+	"github.com/openfresh/ecs-formation/client/s3"
 	"gopkg.in/yaml.v2"
 )
 

@@ -10,12 +10,12 @@ import (
 
 	awsecs "github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/fatih/color"
-	"github.com/stormcat24/ecs-formation/client"
-	"github.com/stormcat24/ecs-formation/client/ecs"
-	"github.com/stormcat24/ecs-formation/client/s3"
-	"github.com/stormcat24/ecs-formation/logger"
-	"github.com/stormcat24/ecs-formation/service/types"
-	"github.com/stormcat24/ecs-formation/util"
+	"github.com/openfresh/ecs-formation/client"
+	"github.com/openfresh/ecs-formation/client/ecs"
+	"github.com/openfresh/ecs-formation/client/s3"
+	"github.com/openfresh/ecs-formation/logger"
+	"github.com/openfresh/ecs-formation/service/types"
+	"github.com/openfresh/ecs-formation/util"
 )
 
 type TaskService interface {

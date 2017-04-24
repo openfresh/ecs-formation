@@ -57,7 +57,7 @@ func TestMergeYamlWithParameters(t *testing.T) {
 
 	yaml := `
 	nginx:
-		image: stormcat24/nginx:${NGINX_VERSION}
+		image: openfresh/nginx:${NGINX_VERSION}
 		ports:
 			- 80:${NGINX_PORT}
 		environment:
@@ -66,7 +66,7 @@ func TestMergeYamlWithParameters(t *testing.T) {
 
 	expect := `
 	nginx:
-		image: stormcat24/nginx:latest
+		image: openfresh/nginx:latest
 		ports:
 			- 80:80
 		environment:
@@ -90,7 +90,7 @@ func TestMergeYamlWithDefaultParameters(t *testing.T) {
 
 	yaml := `
 	nginx:
-		image: stormcat24/nginx:${NGINX_VERSION|default-_4.9}
+		image: openfresh/nginx:${NGINX_VERSION|default-_4.9}
 		ports:
 			- 80:${NGINX_PORT|80}
 		environment:
@@ -99,7 +99,7 @@ func TestMergeYamlWithDefaultParameters(t *testing.T) {
 
 	expect := `
 	nginx:
-		image: stormcat24/nginx:default-_4.9
+		image: openfresh/nginx:default-_4.9
 		ports:
 			- 80:8080
 		environment:

@@ -1,7 +1,0 @@
-{
-    "dependencies": {
-        "gopkg.in/yaml.v2": {
-            "branch": "v2"
-        }
-    }
-}

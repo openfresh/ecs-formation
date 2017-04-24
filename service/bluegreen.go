@@ -12,9 +12,9 @@ import (
 	"gopkg.in/yaml.v2"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/stormcat24/ecs-formation/client"
-	"github.com/stormcat24/ecs-formation/service/types"
-	"github.com/stormcat24/ecs-formation/util"
+	"github.com/openfresh/ecs-formation/client"
+	"github.com/openfresh/ecs-formation/service/types"
+	"github.com/openfresh/ecs-formation/util"
 )
 
 type BlueGreenService interface {

@@ -7,9 +7,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/fatih/color"
-	"github.com/stormcat24/ecs-formation/client"
-	"github.com/stormcat24/ecs-formation/logger"
-	"github.com/stormcat24/ecs-formation/service/types"
+	"github.com/openfresh/ecs-formation/client"
+	"github.com/openfresh/ecs-formation/logger"
+	"github.com/openfresh/ecs-formation/service/types"
 )
 
 type ELBSwitcher interface {

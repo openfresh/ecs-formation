@@ -1,10 +1,10 @@
 package task
 
 import (
+	"github.com/openfresh/ecs-formation/logger"
+	"github.com/openfresh/ecs-formation/service"
+	"github.com/openfresh/ecs-formation/util"
 	"github.com/spf13/cobra"
-	"github.com/stormcat24/ecs-formation/logger"
-	"github.com/stormcat24/ecs-formation/service"
-	"github.com/stormcat24/ecs-formation/util"
 	"github.com/str1ngs/ansi/color"
 )
 

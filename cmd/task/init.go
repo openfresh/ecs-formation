@@ -3,13 +3,13 @@ package task
 import (
 	"errors"
 
+	"github.com/openfresh/ecs-formation/client"
+	cmdutil "github.com/openfresh/ecs-formation/cmd/util"
+	"github.com/openfresh/ecs-formation/service"
+	"github.com/openfresh/ecs-formation/service/types"
+	"github.com/openfresh/ecs-formation/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/stormcat24/ecs-formation/client"
-	cmdutil "github.com/stormcat24/ecs-formation/cmd/util"
-	"github.com/stormcat24/ecs-formation/service"
-	"github.com/stormcat24/ecs-formation/service/types"
-	"github.com/stormcat24/ecs-formation/util"
 )
 
 var (
