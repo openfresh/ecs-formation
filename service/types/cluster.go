@@ -21,14 +21,16 @@ type Cluster struct {
 
 type Service struct {
 	Name                  string
-	TaskDefinition        string         `yaml:"task_definition"`
-	DesiredCount          int64          `yaml:"desired_count"`
-	KeepDesiredCount      bool           `yaml:"keep_desired_count"`
-	LoadBalancers         []LoadBalancer `yaml:"load_balancers"`
-	MinimumHealthyPercent null.Int       `yaml:"minimum_healthy_percent"`
-	MaximumPercent        null.Int       `yaml:"maximum_percent"`
-	Role                  string         `yaml:"role"`
-	AutoScaling           *AutoScaling   `yaml:"autoscaling"`
+	TaskDefinition        string                `yaml:"task_definition"`
+	DesiredCount          int64                 `yaml:"desired_count"`
+	KeepDesiredCount      bool                  `yaml:"keep_desired_count"`
+	LoadBalancers         []LoadBalancer        `yaml:"load_balancers"`
+	MinimumHealthyPercent null.Int              `yaml:"minimum_healthy_percent"`
+	MaximumPercent        null.Int              `yaml:"maximum_percent"`
+	Role                  string                `yaml:"role"`
+	AutoScaling           *AutoScaling          `yaml:"autoscaling"`
+	PlacementConstraints  []PlacementConstraint `yaml:"placement_constraints"`
+	PlacementStrategy     []PlacementStrategy   `yaml:"placement_strategy"`
 }
 
 type LoadBalancer struct {
@@ -58,4 +60,14 @@ type ServiceScalableTarget struct {
 	MinCapacity uint   `yaml:"min_capacity"`
 	MaxCapacity uint   `yaml:"max_capacity"`
 	Role        string `yaml:"role"`
+}
+
+type PlacementConstraint struct {
+	Expression string `yaml:"expression"`
+	Type       string `yaml:"type"`
+}
+
+type PlacementStrategy struct {
+	Field string `yaml:"field"`
+	Type  string `yaml:"type"`
 }

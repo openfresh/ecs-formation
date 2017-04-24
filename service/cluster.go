@@ -147,56 +147,57 @@ func (s ConcreteClusterService) createServiceUpdatePlan(cluster types.Cluster) (
 	if len(lciResult.ContainerInstanceArns) == 0 {
 		logger.Main.Warnf("ECS instances not found in cluster '%s' not found", cluster.Name)
 		return nil, nil
-	} else {
-		target := output.Clusters[0]
+	}
 
-		if *target.Status != "ACTIVE" {
-			return nil, fmt.Errorf("Cluster '%s' is not ACTIVE.", cluster.Name)
-		}
+	target := output.Clusters[0]
 
-		lsResult, err := s.ecsCli.ListServices(cluster.Name)
+	if *target.Status != "ACTIVE" {
+		return nil, fmt.Errorf("Cluster '%s' is not ACTIVE.", cluster.Name)
+	}
+
+	lsResult, err := s.ecsCli.ListServices(cluster.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	currentStacks := map[string]*types.ServiceStack{}
+	if len(lsResult.ServiceArns) > 0 {
+
+		resDescribeService, err := s.ecsCli.DescribeService(cluster.Name, lsResult.ServiceArns)
 		if err != nil {
 			return nil, err
 		}
 
-		currentStacks := map[string]*types.ServiceStack{}
-		if len(lsResult.ServiceArns) > 0 {
+		for _, service := range resDescribeService.Services {
+			if s.targetService == "" || (s.targetService != "" && s.targetService == *service.ServiceName) {
 
-			resDescribeService, errds := s.ecsCli.DescribeService(cluster.Name, lsResult.ServiceArns)
-			if errds != nil {
-				return nil, errds
-			}
+				autoScaling, err := s.appAutoscalingCli.DescribeScalableTarget(cluster.Name, *service.ServiceName)
+				if err != nil {
+					return nil, err
+				}
 
-			for _, service := range resDescribeService.Services {
-				if s.targetService == "" || (s.targetService != "" && s.targetService == *service.ServiceName) {
-					autoScaling, err := s.appAutoscalingCli.DescribeScalableTarget(cluster.Name, *service.ServiceName)
-					if err != nil {
-						return nil, err
-					}
-
-					currentStacks[*service.ServiceName] = &types.ServiceStack{
-						Service:     service,
-						AutoScaling: autoScaling,
-					}
+				currentStacks[*service.ServiceName] = &types.ServiceStack{
+					Service:     service,
+					AutoScaling: autoScaling,
 				}
 			}
 		}
-
-		newServices := map[string]*types.Service{}
-		for name, newService := range cluster.Services {
-			if s.targetService == "" || (s.targetService != "" && s.targetService == newService.Name) {
-				s := newService
-				newServices[name] = &s
-			}
-		}
-
-		return &types.ServiceUpdatePlan{
-			Name:            cluster.Name,
-			InstanceARNs:    lciResult.ContainerInstanceArns,
-			CurrentServices: currentStacks,
-			NewServices:     newServices,
-		}, nil
 	}
+
+	newServices := map[string]*types.Service{}
+	for name, newService := range cluster.Services {
+		if s.targetService == "" || (s.targetService != "" && s.targetService == newService.Name) {
+			s := newService
+			newServices[name] = &s
+		}
+	}
+
+	return &types.ServiceUpdatePlan{
+		Name:            cluster.Name,
+		InstanceARNs:    lciResult.ContainerInstanceArns,
+		CurrentServices: currentStacks,
+		NewServices:     newServices,
+	}, nil
 }
 
 func (s ConcreteClusterService) ApplyServicePlans(plans []*types.ServiceUpdatePlan) error {
@@ -274,6 +275,8 @@ func (s ConcreteClusterService) ApplyServicePlan(plan *types.ServiceUpdatePlan) 
 					MaximumPercent:        aws.Int64(add.MaximumPercent.Int64),
 				}
 			}
+			p.PlacementConstraints = types.ToPlacementConstraints(add.PlacementConstraints)
+			p.PlacementStrategy = types.ToPlacementStrategy(add.PlacementStrategy)
 
 			csrv, err := s.ecsCli.CreateService(&p)
 			if err != nil {
@@ -540,7 +543,6 @@ func toLoadBalancersNew(values []types.LoadBalancer) []*awsecs.LoadBalancer {
 
 		loadBalancers = append(loadBalancers, &addElb)
 	}
-	fmt.Println(loadBalancers)
 
 	return loadBalancers
 }
