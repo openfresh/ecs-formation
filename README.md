@@ -13,6 +13,9 @@ ecs-formation is a tool for defining several Docker continers and clusters on [A
 * Define services on ECS cluster, and Task Definitions.
 * Supports YAML definition like docker-compose. Be able to run ecs-formation if copy docker-compose.yml(formerly fig.yml).
 * Manage ECS Services and Task Definitions by AWS API.
+* Support ELB(Classic Load Balancer) and ALB(Application Load Balancer)
+* [Service Auto Scaling](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/service-auto-scaling.html)
+* [Task Placement Policy](http://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-placement.html)
 
 # Usage
 
@@ -151,6 +154,24 @@ test-service:
   task_definition: test-definition
   desired_count: 1
   keep_desired_count: true
+```
+
+#### Task Placement Policy
+
+Supports `placement_constraints` and `placement_strategy`. If you update these options, it's necessary to rebuild service once.    
+
+```bash
+(path-to-path/test-ecs-formation/service) $ vim test-cluster.yml
+test-service:   
+  task_definition: test-definition
+  desired_count: 1
+  keep_desired_count: true
+  placement_constraints:
+    - type: memberOf
+      expression: "attribute:ecs.instance-type =~ t2.*"
+  placement_strategy:
+    - type: spread
+      field: "attribute:ecs.availability-zone"
 ```
 
 
