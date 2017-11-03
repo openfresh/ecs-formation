@@ -38,7 +38,7 @@ jobs:
           command: docker images
       - run:
           name: release latest
-          command: docker push openfresh/plasma:latest
+          command: docker push openfresh/ecs-formation:latest
       - persist_to_workspace:
           root: .
           paths:
