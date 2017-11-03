@@ -33,3 +33,4 @@ coverage.out
 coverage.html
 test.out
 test.xml
+artifacts/

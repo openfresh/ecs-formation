@@ -1,25 +1,39 @@
-general:
-  build_dir: ../.go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-
-machine:
-  post:
-    - rm -rf ".go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
-    - mkdir -p ".go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME"
-    - mv $CIRCLE_PROJECT_REPONAME ".go_workspace/src/github.com/$CIRCLE_PROJECT_USERNAME/"
-    - mkdir -p $CIRCLE_PROJECT_REPONAME
-
-dependencies:
-  override:
-    - make deps
-
-test:
-  override:
-    - make test
-
-deployment:
+version: 2
+jobs:
   build:
-    branch: /^.+$/
-    commands:
-      - make build
-      - cp -R bin/ecs-formation $CIRCLE_ARTIFACTS/
+    docker:
+      - image: circleci/golang:1.9
+    working_directory: /go/src/github.com/openfresh/ecs-formation
+    steps:
+      - checkout
+      - run: make deps 
+      - run: make test 
+      - persist_to_workspace:
+          root: .
+          paths:
+            - "*"
+
+  release:
+    docker:
+      - image: circleci/golang:1.9
+    working_directory: /go/src/github.com/openfresh/ecs-formation
+    steps:
+      - attach_workspace:
+          at: .
+      - run: make build-all
+      - run: ./release.sh
+  
+workflows:
+  version: 2
+  build_and_release:
+    jobs:
+      - build
+      - release:
+          requires:
+            - build 
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v.*/
 
